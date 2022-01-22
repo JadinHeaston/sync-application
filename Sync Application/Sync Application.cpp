@@ -48,7 +48,7 @@ std::wstring secondGivenDirectoryPath;
 bool verboseDebug = false; //Defines if verbose debugging is enabled.
 std::ofstream verboseDebugOutput; //Hold potential future file handle if verbose debugging is enabled.
 std::wstring debugFilePath = L"";
-std::wstring debugFileName = L"debug.txt";
+std::wstring debugFileName = L"debug.log";
 int debugFileCount = 1;
 
 
@@ -317,8 +317,8 @@ int main(int argc, char* argv[])
         std::rotate(directoryOneDB.rbegin(), directoryOneDB.rbegin() + 2, directoryOneDB.rend());
         std::rotate(directoryTwoDB.rbegin(), directoryTwoDB.rbegin() + 2, directoryTwoDB.rend());
 
-        std::wstring firstDirectoryDB = L"DB1.txt";
-        std::wstring secondDirectoryDB = L"DB2.txt";
+        std::wstring firstDirectoryDB = L"DB1.log";
+        std::wstring secondDirectoryDB = L"DB2.log";
         //If files are placed in the exe's running location, ensure that these debug files contain what file paths belong to what instead of just "DB1" and "DB2" ***
 
         //Creating files themselves.
@@ -327,13 +327,13 @@ int main(int argc, char* argv[])
 
         //Creating hash action file
         //Contains a list of file paths of files that need to be hashed.
-        std::wstring hashActionFileCreationPath = L"hashActionFile.txt";
+        std::wstring hashActionFileCreationPath = L"hashActionFile.log";
         std::ofstream hashActionFile(hashActionFileCreationPath, std::ios::out | std::ios::binary);
 
         //Creating file operations action file.
         //Contains a list of operations, and paths to do so, of files.
         //Such as "Copy this file here". "delete this file".
-        std::wstring fileOpActionFileCreationPath = L"fileOpActionFile.txt";
+        std::wstring fileOpActionFileCreationPath = L"fileOpActionFile.log";
         std::ofstream fileOpActionFile(fileOpActionFileCreationPath, std::ios::out | std::ios::binary);
 
 
