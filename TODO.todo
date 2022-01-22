@@ -1,0 +1,37 @@
+☐ Alternative operation modes:
+    ✔ Echo @done (1/22/2022, 8:43:37 AM)
+        Completely mirror one directory to another.
+    ☐ Synchronize
+        Sync the newest versions.
+    ☐ Contribute
+        No deletion on destination. Only additions/updates.
+☐ Network file navigation
+    ☐ FTP
+    ☐ SFTP
+    ☐ WebDAV
+    ☐ SMB
+    ☐ NFS
+☐ Cross-platform support
+☐ Allow the usage of pre-determined files.
+    ☐ Allow individual files to be created and exported.
+    ☐ Allow individual files to be given and used.
+☐ User Interface Option?
+☐ Allow using a config file, and supplying which entry to use.
+☐ Write documentation
+    ☐ Also, create the text for the "-h/--help" arguments.
+Other features:
+    ☐ Add deletion warning to program, to warn users when/where files COULD be effected.
+        ☐ Also allow a flag arg to disable this warning.
+    ☐ Add a flag arg to show console output.
+        ☐ This should probably pause the output at the end of running. - Maybe an arg mutation for this?
+    
+
+
+
+
+
+
+
+
+
+
