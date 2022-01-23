@@ -57,7 +57,7 @@ void writeUnicodeToFile(std::ofstream& outputFile, std::wstring inputWstring); /
 std::wstring readUnicodeFile(std::wifstream& givenWideFile); //CURRENTLY UNUSED.
 std::wstring charToWString(char* givenCharArray); //Used during beginning argument search to integrate provided char switches to fit in internally used wide strings.
 std::wstring stringToWString(const std::string& s); //Does as said. Found here: https://forums.codeguru.com/showthread.php?193852-How-to-convert-string-to-wstring
-void createDirectoryMapDB(std::vector<std::wstring> &givenVectorDB, std::wstring givenStartPath); //Creates database of given directory. Providing file names with their size, date mod, and date created values.
+void createDirectoryMapDB(std::vector<std::wstring>& givenVectorDB, std::wstring givenStartPath); //Creates database of given directory. Providing file names with their size, date mod, and date created values.
 size_t countFiles(std::wstring pathToDir, bool recursiveLookup); //CURRENTLY UNUSED.
 size_t countDir(std::wstring pathToDir, bool recursiveLookup); //CURRENTLY UNUSED.
 size_t nthOccurrence(std::wstring& givenString, std::wstring delimitingCharacter, size_t nth); //Provides character location of nthOccurrence of a given character in a given string.
@@ -77,6 +77,9 @@ int main(int argc, char* argv[])
 {
     //START TIMER.
     std::chrono::time_point start = std::chrono::steady_clock::now();
+
+    //Holds sync operation mode.
+    std::wstring operationMode;
 
     //Creating vectors to hold directory maps.
     std::vector<std::wstring> directoryOneDB;
@@ -131,70 +134,84 @@ int main(int argc, char* argv[])
 
     for (int i = 0; i < argc; i++) // Cycle through all arguments.
     {
-
-        if (strncmp(argv[i], "-s", 2) == 0) //Source path switch.
+        //Check if the argument contains a single or double slash
+        //Check for double slash
+        if (strncmp(argv[i], "--", 2) == 0)
         {
-            firstGivenDirectoryPath = formatFilePath(charToWString(argv[i + 1]));
-
-            if (firstGivenDirectoryPath.back() == L'\\')
-                firstGivenDirectoryPath.pop_back(); //Remove the slash.
-
-            if (!std::filesystem::is_directory(firstGivenDirectoryPath)) //Verify path is real and valid.
+            if ((strncmp(argv[i], "--check-content", 32) == 0) || (strncmp(argv[i], "--check-contents", 32) == 0)) //Enable file hashing.
+                checkContents = true; //Set hashing to true.
+            else if ((strncmp(argv[i], "--output-files", 32) == 0)) //Enable file output.
+                outputFiles = true;
+            else if (strncmp(argv[i], "--no-recursive", 32) == 0) //Disable recursive operation.
+                recursiveSearch = false;
+            else if (strncmp(argv[i], "--output-verbose-debug", 32) == 0) //Output debug file in running directory.
             {
-                std::wcout << "-s path provided was NOT found. (" << firstGivenDirectoryPath << ")" << std::endl;
-                system("PAUSE");
-                return 0;
+                verboseDebug = true; //Set global verbose debug variable to true.
+
+                std::wstring debugFilePath = formatFilePath(charToWString(argv[i + 1])); //Get next argument.
+
+                //***** NEEDS COMMENTING
+                if (debugFilePath.find(L"/"))
+                {
+                    debugFileName = debugFilePath.substr(debugFilePath.find_last_of(L"/") + 1, std::wstring::npos);
+
+                    debugFilePath = debugFilePath.substr(0, debugFilePath.find_last_of(L"/") + 1); //Remove filename from path.
+                }
+                else
+                {
+                    debugFileName = debugFilePath;
+                    debugFilePath = L"";
+                }
+
+                verboseDebugOutput.open(debugFilePath + debugFileName, std::ios::out | std::ios::binary | std::ios::app); //Open the file.
+                if (!verboseDebugOutput.is_open())
+                {
+                    std::wcout << L"Debug file path not usable: " + debugFilePath + debugFileName << std::endl;
+                    system("PAUSE");
+                    return 0;
+                }
+                verboseDebugOutput.close();
             }
         }
-        else if (strncmp(argv[i], "-d", 2) == 0) //Destination path switch.
+        else //Must be single slash.
         {
-            secondGivenDirectoryPath = formatFilePath(charToWString(argv[i + 1]));
-
-            if (secondGivenDirectoryPath.back() == L'\\')
-                secondGivenDirectoryPath.pop_back(); //Remove the slash
-
-            if (!std::filesystem::is_directory(secondGivenDirectoryPath)) //Verify path is real and valid.
+            //Get all letter characters in the argument.
+            if (strncmp(argv[i], "-s", 2) == 0) //Source path switch.
             {
-                std::wcout << "-d path provided was NOT found. (" << secondGivenDirectoryPath << ")" << std::endl;
-                std::cout << "Would you like to create this directory?" << std::endl;
-                system("PAUSE");
-                return 0;
+                firstGivenDirectoryPath = formatFilePath(charToWString(argv[i + 1]));
+
+                if (firstGivenDirectoryPath.back() == L'\\')
+                    firstGivenDirectoryPath.pop_back(); //Remove the slash.
+
+                if (!std::filesystem::is_directory(firstGivenDirectoryPath)) //Verify path is real and valid.
+                {
+                    std::wcout << "-s path provided was NOT found. (" << firstGivenDirectoryPath << ")" << std::endl;
+                    system("PAUSE");
+                    return 0;
+                }
+            }
+            else if (strncmp(argv[i], "-d", 2) == 0) //Destination path switch.
+            {
+                secondGivenDirectoryPath = formatFilePath(charToWString(argv[i + 1]));
+
+                if (secondGivenDirectoryPath.back() == L'\\')
+                    secondGivenDirectoryPath.pop_back(); //Remove the slash
+
+                if (!std::filesystem::is_directory(secondGivenDirectoryPath)) //Verify path is real and valid.
+                {
+                    std::wcout << "-d path provided was NOT found. (" << secondGivenDirectoryPath << ")" << std::endl;
+                    std::cout << "Would you like to create this directory?" << std::endl;
+                    system("PAUSE");
+                    return 0;
+                }
+            }
+            else if (strncmp(argv[i], "-o", 2) == 0) //Operation mode switch.
+            {
+                operationMode = formatFilePath(charToWString(argv[i + 1]));
             }
         }
-        else if ((strncmp(argv[i], "--check-content", 32) == 0) || (strncmp(argv[i], "--check-contents", 32) == 0)) //Enable file hashing.
-            checkContents = true; //Set hashing to true.
-        else if ((strncmp(argv[i], "--output-files", 32) == 0)) //Enable file output.
-            outputFiles = true;
-        else if (strncmp(argv[i], "--no-recursive", 32) == 0) //Disable recursive operation.
-            recursiveSearch = false;
-        else if (strncmp(argv[i], "--output-verbose-debug", 32) == 0) //Output debug file in running directory.
-        {
-            verboseDebug = true; //Set global verbose debug variable to true.
 
-            std::wstring debugFilePath = formatFilePath(charToWString(argv[i + 1])); //Get next argument.
 
-            //***** NEEDS COMMENTING
-            if (debugFilePath.find(L"/"))
-            {
-                debugFileName = debugFilePath.substr(debugFilePath.find_last_of(L"/") + 1, std::wstring::npos);
-
-                debugFilePath = debugFilePath.substr(0, debugFilePath.find_last_of(L"/") + 1); //Remove filename from path.
-            }
-            else
-            {
-                debugFileName = debugFilePath;
-                debugFilePath = L"";
-            }
-
-            verboseDebugOutput.open(debugFilePath + debugFileName, std::ios::out | std::ios::binary | std::ios::app); //Open the file.
-            if (!verboseDebugOutput.is_open())
-            {
-                std::wcout << L"Debug file path not usable: " + debugFilePath + debugFileName << std::endl;
-                system("PAUSE");
-                return 0;
-            }
-            verboseDebugOutput.close();
-        }
 
         //std::cout << argv[i] << std::endl;
     }
@@ -218,10 +235,22 @@ int main(int argc, char* argv[])
 
 
 
-
-    //Determines whether files are synced with newest, echo'd, only copied to destination. etc.
-    //Eventually tied to input args. Echo is used for now.
-    std::wstring operationMode = L"echo";
+    if (operationMode != L"")
+    {
+        //Check that it is value.
+        if (operationMode != L"echo" && (operationMode != L"synchronize" && operationMode != L"sync") && (operationMode != L"contribute" && operationMode != L"cont"))
+        {
+            if (verboseDebug) writeDebugThreadPool.push_task(writeToDebug, std::chrono::system_clock::now(), true, L"Error-----");
+            std::wcout << L"Invalid Operation Mode: " << operationMode << std::endl;
+            return 0;
+        }
+    }
+    else
+    {
+        std::wcout << L"No operation mode provided. (-o)" << std::endl;
+        system("PAUSE");
+        return 0;
+    }
 
     //Displaying file locations.
     std::wcout << L"first dir: " << firstGivenDirectoryPath << std::endl;
@@ -378,8 +407,8 @@ int main(int argc, char* argv[])
     {
         writeDebugThreadPool.push_task(writeToDebug, std::chrono::system_clock::now(), true, L"----- *COMPLETED* OUTPUTING INTERNAL FILES -----");
         writeDebugThreadPool.push_task(writeToDebug, std::chrono::system_clock::now(), true, L"----- STATISTICS -----");
-        
-        
+
+
         //Total time.
         writeDebugThreadPool.push_task(writeToDebug, std::chrono::system_clock::now(), true, L"Total Time Taken: " + std::to_wstring(std::chrono::duration_cast<std::chrono::milliseconds>(end - start).count()) + L"ms");
 
@@ -421,7 +450,7 @@ int main(int argc, char* argv[])
         if (verboseDebug) writeDebugThreadPool.push_task(writeToDebug, std::chrono::system_clock::now(), false, L"-------------------------------------------------- APPLICATION INSTANCE FINISHED --------------------------------------------------");
         writeDebugThreadPool.wait_for_tasks(); //Wait for it to finish.
     }
-       
+
 
     //ENDING OF PROGRAM
     std::cout << "Program finished." << std::endl;
@@ -547,7 +576,7 @@ size_t nthOccurrence(std::wstring& givenString, std::wstring delimitingCharacter
         stringPosition = givenString.find(delimitingCharacter, stringPosition);
         if (stringPosition == std::wstring::npos)
             return -1;
-        
+
         count++; //Iterate count.
     }
     return stringPosition;
@@ -563,11 +592,11 @@ std::wstring formatFilePath(std::wstring givenString)
     //else
     //{
         //Formating givenFile to have the slashes ALL be \ instead of mixed with / and \.
-        for (int i = 0; i < (int)givenString.length(); ++i)
-        {
-            if (givenString[i] == '\\')
-                givenString[i] = '/';
-        }
+    for (int i = 0; i < (int)givenString.length(); ++i)
+    {
+        if (givenString[i] == '\\')
+            givenString[i] = '/';
+    }
     //}
 
 
@@ -652,7 +681,7 @@ std::string convertMD5ToHex(unsigned char* givenDigest)
         sprintf(hexBuffer, "%02x", givenDigest[i]);
         outputHexString.append(hexBuffer);
     }
-    
+
     return outputHexString; //Output hash
 }
 
@@ -663,7 +692,7 @@ void sortDirectoryDatabases(std::vector<std::wstring>& givenVectorDB)
 }
 
 //Creates a list of all files and directories within a given directory. Places each entry in a delimited format into the given wstring vector.
-void createDirectoryMapDB(std::vector<std::wstring> &givenVectorDB, std::wstring givenStartPath)
+void createDirectoryMapDB(std::vector<std::wstring>& givenVectorDB, std::wstring givenStartPath)
 {
     //Making the given path an actual usable path. idk why
     std::filesystem::path dirPath(givenStartPath);
@@ -685,7 +714,7 @@ void createDirectoryMapDB(std::vector<std::wstring> &givenVectorDB, std::wstring
             //{
             //Setting current file equal to the full path of the file.
             current_file = std::filesystem::absolute(dir->path().native());
-                
+
             //Putting path into array.
             testStream << formatFilePath(current_file) << delimitingCharacter;
 
@@ -774,12 +803,12 @@ void performHashActionFile(std::vector<std::wstring>& hashActions, std::vector<s
         directoryOneVectorLocation = currentReadLine.substr(nthOccurrence(currentReadLine, delimitingCharacter, 1) + 1, nthOccurrence(currentReadLine, delimitingCharacter, 2)); //Between first and second delimiter.
         directoryTwoVectorLocation = currentReadLine.substr(nthOccurrence(currentReadLine, delimitingCharacter, 2) + 1, currentReadLine.length() - 1); //Going up until newline.
 
-        
-        hashingThreadPool.push_task(MThashGivenFile,  directoryOneFile, std::ref(firstGivenVectorDB), directoryOneVectorLocation); //Creating task, assigning it to main pool. Directory One file.
+
+        hashingThreadPool.push_task(MThashGivenFile, directoryOneFile, std::ref(firstGivenVectorDB), directoryOneVectorLocation); //Creating task, assigning it to main pool. Directory One file.
         hashingThreadPool.push_task(MThashGivenFile, directoryTwoFile, std::ref(secondGivenVectorDB), directoryTwoVectorLocation); //Creating task, assigning it to main pool. Directory Two file.
     }
     std::cout << "Tasks assigned. Waiting for hash tasks to finish..." << std::endl;
-    
+
     //*****
     //START TIMER.
     std::chrono::time_point start = std::chrono::steady_clock::now();
@@ -834,18 +863,18 @@ void performFileOpActionFile(std::vector<std::wstring>& fileOpAction)
             if (verboseDebug) writeDebugThreadPool.push_task(writeToDebug, std::chrono::system_clock::now(), true, L"DELETING: " + destination);
             fileOperationThreadPool.push_task(removeObject, destination, true); //Creating deletion task, assigning it to main pool.
         }
-            
+
         else if (requestedAction == L"COPY")
         {
             source = currentReadLine.substr(nthOccurrence(currentReadLine, delimitingCharacter, 1) + 1, nthOccurrence(currentReadLine, delimitingCharacter, 2) - nthOccurrence(currentReadLine, delimitingCharacter, 1) - 1); //Reading source. Between first and second delimiter.  
-            destination = currentReadLine.substr(nthOccurrence(currentReadLine, delimitingCharacter, 2) + 1, - 1); //Reading destination. Second delimiter to end of string, removing the "\n" characters at the end.
+            destination = currentReadLine.substr(nthOccurrence(currentReadLine, delimitingCharacter, 2) + 1, -1); //Reading destination. Second delimiter to end of string, removing the "\n" characters at the end.
             if (verboseDebug) writeDebugThreadPool.push_task(writeToDebug, std::chrono::system_clock::now(), true, L"COPYING: " + source + L" - " + destination);
             fileOperationThreadPool.push_task(copyFile, source, destination); //Creating copying task, assigning it to main pool. Directory One file.
         }
         else if (requestedAction == L"MOVE") //Future use for other sync methods. *****
         {
             source = currentReadLine.substr(nthOccurrence(currentReadLine, delimitingCharacter, 1) + 1, nthOccurrence(currentReadLine, delimitingCharacter, 2) - nthOccurrence(currentReadLine, delimitingCharacter, 1) - 1); //Reading source. Between first and second delimiter.  
-            destination = currentReadLine.substr(nthOccurrence(currentReadLine, delimitingCharacter, 2) + 1, - 1); //Reading destination. Second delimiter to end of string, removing the "\n" characters at the end.
+            destination = currentReadLine.substr(nthOccurrence(currentReadLine, delimitingCharacter, 2) + 1, -1); //Reading destination. Second delimiter to end of string, removing the "\n" characters at the end.
             if (verboseDebug) writeDebugThreadPool.push_task(writeToDebug, std::chrono::system_clock::now(), true, L"MOVE: " + source + L" - " + destination); //Log.
             //***** THIS NEEDS WORK. THE OBJECT WILL LIKELY BE REMOVED BEFORE COPYING IS COMPLETED.
             fileOperationThreadPool.push_task(copyFile, source, destination); //Creating copying task, assigning it to main pool. Directory One file.
@@ -882,7 +911,7 @@ void removeObject(std::wstring destinationFilePath, bool recursiveRemoval)
     //An error was occuring sometimes when deleting destination empty directories, but adding this error part make it just work.
     if (ec.value() == 5) //If error value is 5, it is access denied.
         writeDebugThreadPool.push_task(writeToDebug, std::chrono::system_clock::now(), true, L"ERROR. ACCESS DENIED: " + destinationFilePath); //Log.
-    
+
 }
 
 //Copying file.
@@ -908,7 +937,7 @@ void copyFile(std::wstring givenSourcePath, std::wstring givenDestinationPath)
     {
         std::error_code ec; //Create error handler.
         std::filesystem::copy(givenSourcePath, givenDestinationPath, std::filesystem::copy_options::overwrite_existing, ec); //Copying the file. - If a directory is being looked at, it would have already been made above. This will do nothing.
-        
+
         if (ec.value() == 5) //If error value is 5, it is access denied.
             writeDebugThreadPool.push_task(writeToDebug, std::chrono::system_clock::now(), true, L"ERROR. ACCESS DENIED: " + givenSourcePath + L" - " + givenDestinationPath); //Log.
     }
@@ -928,7 +957,7 @@ void echoCompareDirectories(std::vector<std::wstring>& firstGivenVectorDB, std::
     std::unordered_map<std::wstring, size_t> DB2Map;
 
     size_t DB2Line; //DB1Map searching in DB2Map provides the line of DB2Match.
-    
+
     //Holds 
     std::wstring iter1;
     std::wstring iter2;
@@ -949,7 +978,7 @@ void echoCompareDirectories(std::vector<std::wstring>& firstGivenVectorDB, std::
     //Iterating through second directory vector.
     for (size_t iteratorTwo = 0; iteratorTwo < secondDBSize; ++iteratorTwo) //Needs to start at "1" if headers are added before this.
         DB2Map.insert(std::make_pair(secondGivenVectorDB[iteratorTwo].substr(secondGivenPath.length() + 1, nthOccurrence(secondGivenVectorDB[iteratorTwo], delimitingCharacter, 1) - secondGivenPath.length() - 1), iteratorTwo));
-   
+
     //Iterate through firstDB.
     for (size_t iterator = 0; iterator < firstDBSize; ++iterator)
     {
@@ -1034,7 +1063,7 @@ void compareHashes(std::vector<std::wstring>& firstGivenVectorDB, std::vector<st
     size_t firstDBSize = firstGivenVectorDB.size(); //Pre-allocate size of vector.
 
     //Holds hashes that are compared against eachother.
-    std::wstring DB1Hash; 
+    std::wstring DB1Hash;
     std::wstring DB2Hash;
 
     std::wstring DB1Match; //Holds match check value.
