@@ -48,6 +48,7 @@ Main tasks:
                 Potentially a mutation to the argument could let you choose, in case your exclusions are simple.
     ☐ Revamp argument handling @low
         ☐ Change how single and double dashes are handled.
+        ☐ The --no-recursive switch needs to take an input, and work properly.
         ✔ Add deletion warning to program, to warn users when/where files COULD be effected. @done (1/23/2022, 3:04:06 PM)
             ✔ Also allow a flag arg to disable this warning. @done (1/23/2022, 3:04:05 PM)
         ✔ Add a flag arg to hide console output. Show it by default @done (1/23/2022, 2:16:35 PM)
