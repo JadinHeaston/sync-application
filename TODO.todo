@@ -56,7 +56,10 @@ Main tasks:
         ☐ Add a flag that allows the user to force that deletions and overwrites do not take place.
             This may not be necessary. Just know what you are doing and have a proper backup until you feel comfortable.
 Other features:
-    
+
+General Bugs/Fixes:
+    ☐ Look into how the program acts when one directory is nested within another.
+        This may just need to be prevented.
     
 
 
