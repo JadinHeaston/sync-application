@@ -27,10 +27,10 @@ You can also compile your own binaries by downloading the source files, opening 
 
 # Options
 "Sync Application.exe" [OPTIONS] -o <OPERATION_MODE> -s <DIRECTORY_PATH> -d <DIRECTORY_PATH>
-###### List of Arguments
+## List of Arguments
 (An asterisk indicates a required input)
 
-**NOTE**: *Paths should NOT end with a back slash ("\") as quotation marks could be escaped. Usage of forward slashes ("/") is encouraged and what is used internally to avoid conflicts.*
+**NOTE**: *Paths should NOT end with a back slash ("\\") as quotation marks could be escaped. Usage of forward slashes ("/") is encouraged and what is used internally to avoid conflicts.*
 ```
 --check-content(s)
 * --directory-one <DIRECTORY_PATH>
@@ -48,5 +48,5 @@ You can also compile your own binaries by downloading the source files, opening 
 Please reach out if you run into any bugs or issues.
 I can not promise that I will implement anything, or respond, but I am more likely to if I am aware of the problem to begin with.
 
-###### [Website](https://www.jadinheaston.com/)
+## [Website](https://www.jadinheaston.com/)
 Eventually, all information regarding this project will also be available on my website.
