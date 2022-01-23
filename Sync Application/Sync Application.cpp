@@ -310,6 +310,8 @@ int main(int argc, char* argv[])
             std::cout << "Permission to continue granted. Moving forward with program." << std::endl;
     }
 
+    //TESTING COMMIT CHANGE
+
     if (!showConsole) //If the console should be displayed, then show it.
         ::ShowWindow(::GetConsoleWindow(), SW_HIDE);
 
