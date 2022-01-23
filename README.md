@@ -29,6 +29,7 @@ You can also compile your own binaries by downloading the source files, opening 
 "Sync Application.exe" [OPTIONS] -o <OPERATION_MODE> -s <DIRECTORY_PATH> -d <DIRECTORY_PATH>
 ###### List of Arguments
 (An asterisk indicates a required input)
+
 **NOTE**: *Paths should NOT end with a back slash ("\") as quotation marks could be escaped. Usage of forward slashes ("/") is encouraged and what is used internally to avoid conflicts.*
 ```
 --check-content(s)
