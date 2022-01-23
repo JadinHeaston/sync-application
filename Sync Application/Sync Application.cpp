@@ -264,8 +264,7 @@ int main(int argc, char* argv[])
     if (showWarning)
     {
         //Displaying warning information.
-        std::wcout << L"------------------------- WARNING -------------------------" << std::endl;
-        std::wcout << L" Please verify that this is accurate to avoid unwanted permenant data loss. The following will take place:" << std::endl;
+        std::wcout << L"-------------------------------------------------- WARNING --------------------------------------------------" << std::endl;
         if (operationMode == L"echo")
         {
             std::wcout << L"The \"ECHO\"operation will take place. This will cause the second directory to look *IDENTICAL* to the first." << std::endl;
@@ -294,14 +293,15 @@ int main(int argc, char* argv[])
             std::wcout << L"Second Directory: " << secondGivenDirectoryPath << std::endl;
         }
 
+        std::wcout << std::endl;
         std::wcout << L"(This warning can be disabled by adding the \"--no-warning\" argument)" << std::endl;
         std::wcout << L"File operations are permenant (ESPECIALLY DELETIONS). Do you wish to proceed, knowing what files are potentially at risk? (Y/N)" << std::endl;
 
-        char userInput; //Holds user input character.
-        std::cin >> userInput; //Awaiting user input...
+        char userInput[1]; //Holds user input character.
+        std::cin >> userInput[0]; //Awaiting user input...
 
         //Verify if the user is okay with continuing.
-        if (toupper(userInput) != 'Y') //The input is NOT a "Y".
+        if (toupper(userInput[0]) != 'Y') //The input is NOT a "Y".
         {
             std::cout << "Termination Program. No changes have been made." << std::endl;
             return 0;
