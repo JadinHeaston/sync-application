@@ -3,6 +3,9 @@
 
 //Three asterisks *** Indicate something done for debugging only. These will likely be removed later, or moved to output to some kind of debug file.
 //Five asterisks are generally used to bring attention to an area. Maybe to indicate that something is currently being worked on, or is troublesome.
+#include <Windows.h> //Allows me to show/hide the console window.
+
+
 
 //LIBRARIES
 #include <iostream> //Yeah.
@@ -18,11 +21,15 @@
 #include "thread_pool.hpp" //Thread pool stuff.
 
 
-//GLOBAL VARIABLES
-//Is the file search recursive?
+
+//ARGUMENT DEFAULTS:
 bool checkContents = false; ////Recieved from arg: --check-content | Defaults to false.
 bool outputFiles = false; //Recieved from arg: --output-files | Defaults to false.
 bool recursiveSearch = true; //Recieved from arg: --no-recursive | defaults to true.
+bool showConsole = true; //Recieved from arg: --hide-console | defaults to false | Defines whether things are output to the console or not.
+bool verboseDebug = false; //Defines if verbose debugging is enabled.
+bool showWarning = true; //Recieved from arg: --no-warning | defaults to true | Defines whether things are output to the console or not.
+bool dataLossProtection = false; //Recieved from arg: --data-protection | defaults to false;
 
 //Sets global delimiter used for reading and writing DB files. Tilde typically works well. (CONSIDER USING MULTIPLE CHARACTER DELIMITER FOR SAFETY)
 std::wstring delimitingCharacter = L"▼";
@@ -45,11 +52,13 @@ thread_pool writeDebugThreadPool(1); //Dedicated to writing to the debug file.
 std::wstring firstGivenDirectoryPath;
 std::wstring secondGivenDirectoryPath;
 
-bool verboseDebug = false; //Defines if verbose debugging is enabled.
+//Verbose debugging variables
 std::ofstream verboseDebugOutput; //Hold potential future file handle if verbose debugging is enabled.
 std::wstring debugFilePath = L"";
 std::wstring debugFileName = L"debug.log";
 int debugFileCount = 1;
+
+
 
 
 //FUNCTION PROTOTYPES
@@ -75,11 +84,11 @@ void writeToDebug(std::chrono::system_clock::time_point givenTime, bool writeTim
 
 int main(int argc, char* argv[])
 {
-    //START TIMER.
-    std::chrono::time_point start = std::chrono::steady_clock::now();
+    ::ShowWindow(::GetConsoleWindow(), SW_SHOW); //Hiding console immediately.
 
-    //Holds sync operation mode.
-    std::wstring operationMode;
+    std::chrono::time_point start = std::chrono::steady_clock::now(); //START TIMER.
+
+    std::wstring operationMode; //Holds sync operation mode. - May want to make this a global variable later.
 
     //Creating vectors to hold directory maps.
     std::vector<std::wstring> directoryOneDB;
@@ -127,40 +136,36 @@ int main(int argc, char* argv[])
         }
     }
 
-    //Evaluate if the argument is using a single slash or a double slash.
-    //A single slash indicates at least one single letter 
-
-
-
     for (int i = 0; i < argc; i++) // Cycle through all arguments.
     {
         //Check if the argument contains a single or double slash
-        //Check for double slash
-        if (strncmp(argv[i], "--", 2) == 0)
+        if (strncmp(argv[i], "--", 2) == 0) //Check for double slash
         {
             if ((strncmp(argv[i], "--check-content", 32) == 0) || (strncmp(argv[i], "--check-contents", 32) == 0)) //Enable file hashing.
                 checkContents = true; //Set hashing to true.
-            else if ((strncmp(argv[i], "--output-files", 32) == 0)) //Enable file output.
-                outputFiles = true;
             else if (strncmp(argv[i], "--no-recursive", 32) == 0) //Disable recursive operation.
                 recursiveSearch = false;
+            else if ((strncmp(argv[i], "--output-files", 32) == 0)) //Enable file output.
+                outputFiles = true;
             else if (strncmp(argv[i], "--output-verbose-debug", 32) == 0) //Output debug file in running directory.
             {
                 verboseDebug = true; //Set global verbose debug variable to true.
 
                 std::wstring debugFilePath = formatFilePath(charToWString(argv[i + 1])); //Get next argument.
 
-                //***** NEEDS COMMENTING
-                if (debugFilePath.find(L"/"))
+                if (debugFilePath.find(L"/")) //Search for a slash to determine if the given text is a full path or a name. If a slash is found, it is a path.
                 {
-                    debugFileName = debugFilePath.substr(debugFilePath.find_last_of(L"/") + 1, std::wstring::npos);
-
-                    debugFilePath = debugFilePath.substr(0, debugFilePath.find_last_of(L"/") + 1); //Remove filename from path.
+                    //Checking that a file name exists. Continuing with default name appended to the given path if it doesn't.
+                    if (debugFilePath.substr(debugFilePath.find_last_of(L"/") + 1, std::wstring::npos) != L"")
+                    {
+                        debugFileName = debugFilePath.substr(debugFilePath.find_last_of(L"/") + 1, std::wstring::npos);
+                        debugFilePath = debugFilePath.substr(0, debugFilePath.find_last_of(L"/") + 1); //Remove filename from path.
+                    }
                 }
-                else
+                else //If there is no slash, then a name was given.
                 {
-                    debugFileName = debugFilePath;
-                    debugFilePath = L"";
+                    debugFileName = debugFilePath; //Set the given item to be the name.
+                    debugFilePath = L""; //Set the path to nothing. The name will be appended to this and cause the file to be created in the same location as the running application.
                 }
 
                 verboseDebugOutput.open(debugFilePath + debugFileName, std::ios::out | std::ios::binary | std::ios::app); //Open the file.
@@ -171,6 +176,10 @@ int main(int argc, char* argv[])
                     return 0;
                 }
                 verboseDebugOutput.close();
+            }
+            else if (strncmp(argv[i], "--hide-console", 32) == 0) //Defines if anything is output to the console.
+            {
+                showConsole = false;
             }
         }
         else //Must be single slash.
@@ -211,13 +220,12 @@ int main(int argc, char* argv[])
             }
         }
 
-
-
-        //std::cout << argv[i] << std::endl;
+        //std::cout << argv[i] << std::endl; //*** Display all arguments given.
     }
     //ARGS FINISHED.
 
-        //If debugging is enabled, write the "new application line"
+
+    //If debugging is enabled, write the "new application line"
     if (verboseDebug) writeDebugThreadPool.push_task(writeToDebug, std::chrono::system_clock::now(), false, L"-------------------------------------------------- NEW APPLICATION INSTANCE --------------------------------------------------"); //Stating new application instance.
 
     //MAX_PATH bypass.
@@ -233,10 +241,10 @@ int main(int argc, char* argv[])
     if (secondGivenDirectoryPath.back() == L'/')
         secondGivenDirectoryPath.pop_back(); //Remove the slash.
 
-
-
     if (operationMode != L"")
     {
+        std::transform(operationMode.begin(), operationMode.end(), operationMode.begin(), towlower); //Convert to lowercase for easy comparison.
+            
         //Check that it is value.
         if (operationMode != L"echo" && (operationMode != L"synchronize" && operationMode != L"sync") && (operationMode != L"contribute" && operationMode != L"cont"))
         {
@@ -252,9 +260,64 @@ int main(int argc, char* argv[])
         return 0;
     }
 
+    //Show warning before continuing.
+    if (showWarning)
+    {
+        //Displaying warning information.
+        std::wcout << L"------------------------- WARNING -------------------------" << std::endl;
+        std::wcout << L" Please verify that this is accurate to avoid unwanted permenant data loss. The following will take place:" << std::endl;
+        if (operationMode == L"echo")
+        {
+            std::wcout << L"The \"ECHO\"operation will take place. This will cause the second directory to look *IDENTICAL* to the first." << std::endl;
+            std::wcout << L"When a file is found within both directories, the program will compare the size and last modified time. When a difference is found, the first directories file will overwrite the seconds. (Hashes are only used when files, size, and modification time are all the same and the --check-contents argument is provided.)" << std::endl;
+            std::wcout << L"This option is best used when you are backing up data and want a second directory to match the directory you make changes in." << std::endl;
+            std::wcout << L"Deletions and file overwrites are possible within the second directory." << std::endl;
+            std::wcout << L"First Directory: " << firstGivenDirectoryPath << std::endl;
+            std::wcout << L"Second Directory: " << secondGivenDirectoryPath << std::endl;
+        }
+        else if (operationMode == L"synchronize" || operationMode == L"sync")
+        {
+            std::wcout << L"The \"SYNCHRONIZE\"operation will take place. This will cause the first and second directories to look identical to each other, with the newest files being kept." << std::endl;
+            std::wcout << L"When a file is found within both directories, the one with the newest modification time is used and copied to replace the older version." << std::endl;
+            std::wcout << L"This option is best used when changes can be made within both directories and you want them both to be synced with the newest versions from both." << std::endl;
+            std::wcout << L"Deletions and file overwrites are possible within both directories." << std::endl;
+            std::wcout << L"First Directory: " << firstGivenDirectoryPath << std::endl;
+            std::wcout << L"Second Directory: " << secondGivenDirectoryPath << std::endl;
+        }
+        else if (operationMode != L"contribute" && operationMode != L"cont")
+        {
+            std::wcout << L"The \"CONTRIBUTE\"operation will take place. This will cause the first directory to contribute any new files or changes to the second directory." << std::endl;
+            std::wcout << L"When a file is found within both directories, the program will compare the size and last modified time. When a difference is found, the first directories file will overwrite the second directories file. If the file is not present within the second directory, it is copied over to it. (Hashes are only used when files, size, and modification time are all the same and the --check-contents argument is provided.)" << std::endl;
+            std::wcout << "This option is best used when you are regularly archiving files and want to keep everything." << std::endl;
+            std::wcout << L"No deletions are ever made. File overwrites are possible within the second directory." << std::endl;
+            std::wcout << L"First Directory: " << firstGivenDirectoryPath << std::endl;
+            std::wcout << L"Second Directory: " << secondGivenDirectoryPath << std::endl;
+        }
+
+        std::wcout << L"(This warning can be disabled by adding the \"--no-warning\" argument)" << std::endl;
+        std::wcout << L"File operations are permenant (ESPECIALLY DELETIONS). Do you wish to proceed, knowing what files are potentially at risk? (Y/N)" << std::endl;
+
+        char userInput; //Holds user input character.
+        std::cin >> userInput; //Awaiting user input...
+
+        //Verify if the user is okay with continuing.
+        if (toupper(userInput) != 'Y') //The input is NOT a "Y".
+        {
+            std::cout << "Termination Program. No changes have been made." << std::endl;
+            return 0;
+        }
+        else //The user gave the okay.
+            std::cout << "Permission to continue granted. Moving forward with program." << std::endl;
+    }
+
+    if (!showConsole) //If the console should be displayed, then show it.
+        ::ShowWindow(::GetConsoleWindow(), SW_HIDE);
+
+    
+
     //Displaying file locations.
-    std::wcout << L"first dir: " << firstGivenDirectoryPath << std::endl;
-    std::wcout << L"second dir: " << secondGivenDirectoryPath << std::endl;
+    if (showConsole) std::wcout << L"First Directory: " << firstGivenDirectoryPath << std::endl;
+    if (showConsole) std::wcout << L"Second Directory: " << secondGivenDirectoryPath << std::endl;
 
 
     if (verboseDebug) //Debug beginning program information.
@@ -271,7 +334,7 @@ int main(int argc, char* argv[])
 
 
     if (verboseDebug) writeDebugThreadPool.push_task(writeToDebug, std::chrono::system_clock::now(), true, L"----- DIRECTORY CRAWLING -----");
-    std::cout << "Creating directory maps..." << std::endl; //***
+    if (showConsole) std::cout << "Creating directory maps..." << std::endl; //***
 
     //Creating initial directory map.
     threadPool.push_task(createDirectoryMapDB, std::ref(directoryOneDB), std::ref(firstGivenDirectoryPath));
@@ -279,11 +342,11 @@ int main(int argc, char* argv[])
     threadPool.wait_for_tasks();
 
     if (verboseDebug) writeDebugThreadPool.push_task(writeToDebug, std::chrono::system_clock::now(), true, L"----- *COMPLETED* DIRECTORY CRAWLING -----");
-    std::cout << "Directory maps created..." << std::endl; //***
+    if (showConsole) std::cout << "Directory maps created..." << std::endl; //***
 
 
     if (verboseDebug) writeDebugThreadPool.push_task(writeToDebug, std::chrono::system_clock::now(), true, L"----- SORTING DIRECTORY LISTS -----");
-    std::cout << "Sorting lists..." << std::endl; //***
+    if (showConsole) std::cout << "Sorting lists..." << std::endl; //***
 
     //Semi-Sorting directories. This may be changed to be a natural sorting later. (to make it more human-readable)
     threadPool.push_task(sortDirectoryDatabases, std::ref(directoryOneDB));
@@ -291,7 +354,7 @@ int main(int argc, char* argv[])
     threadPool.wait_for_tasks();
 
     if (verboseDebug) writeDebugThreadPool.push_task(writeToDebug, std::chrono::system_clock::now(), true, L"----- *COMPLETED* SORTING DIRECTORY LISTS -----");
-    std::cout << "Sorting finished..." << std::endl; //***
+    if (showConsole) std::cout << "Sorting finished..." << std::endl; //***
 
 
 
@@ -299,25 +362,18 @@ int main(int argc, char* argv[])
     if (operationMode == L"echo")
     {
         if (verboseDebug) writeDebugThreadPool.push_task(writeToDebug, std::chrono::system_clock::now(), true, L"----- DIRECTORY COMPARISON - " + operationMode + L" -----");
-        std::cout << "Beginning directory comparison function." << std::endl; //***
+        if (showConsole) std::cout << "Beginning directory comparison function." << std::endl; //***
         echoCompareDirectories(directoryOneDB, directoryTwoDB, hashActions, fileOpActions, firstGivenDirectoryPath, secondGivenDirectoryPath); //Handles a LOT of stuff. Includes the process of hashing files before ending.
         if (verboseDebug) writeDebugThreadPool.push_task(writeToDebug, std::chrono::system_clock::now(), true, L"----- *COMPLETED* DIRECTORY COMPARISON - " + operationMode + L" -----");
-        std::cout << "Directory comparing finished..." << std::endl; //***
+        if (showConsole) std::cout << "Directory comparing finished..." << std::endl; //***
     }
-    else
-    {
-        if (verboseDebug) writeDebugThreadPool.push_task(writeToDebug, std::chrono::system_clock::now(), true, L"FAILURE - No operation mode provided. Program exiting. - " + operationMode);
-        std::cout << "No operation mode provided." << std::endl;
-        return 0;
-    }
-
 
 
     if (verboseDebug) writeDebugThreadPool.push_task(writeToDebug, std::chrono::system_clock::now(), true, L"----- FILE OPERATIONS -----");
-    std::cout << "Beginning File Operations..." << std::endl;
+    if (showConsole) std::cout << "Beginning File Operations..." << std::endl;
     performFileOpActionFile(fileOpActions); //Regardless of the type of operation, a file operation check should occur.
     if (verboseDebug) writeDebugThreadPool.push_task(writeToDebug, std::chrono::system_clock::now(), true, L"----- *COMPLETED* FILE OPERATIOSN -----");
-    std::cout << "File Operations finished!..." << std::endl;
+    if (showConsole) std::cout << "File Operations finished!..." << std::endl;
 
 
 
@@ -329,7 +385,7 @@ int main(int argc, char* argv[])
         //Holds output of hashAction reading, allows for manipulation.
         std::wstring currentReadLine;
 
-        std::cout << "Shifting arrays to show headers..." << std::endl; //***
+        if (showConsole) std::cout << "Shifting arrays to show headers..." << std::endl; //***
 
         //Add headers to both directory files.
         std::wstring columnsLine = L"PATH" + delimitingCharacter + L"FILE_SIZE" + delimitingCharacter + L"DATE_MODIFIED" + delimitingCharacter + L"DATE_CREATED" + delimitingCharacter + L"MD5_HASH" + delimitingCharacter + L"MATCHED_CHECK" + delimitingCharacter + L"LINE_FOUND" + newLine;
@@ -425,26 +481,28 @@ int main(int argc, char* argv[])
     }
 
     //Console displaying final stats.
-    std::cout << "FINISHED! - " << std::chrono::duration_cast<std::chrono::milliseconds>(end - start).count() << std::endl; //Display clock results.
+    if (showConsole)
+    {
+        std::cout << "FINISHED! - " << std::chrono::duration_cast<std::chrono::milliseconds>(end - start).count() << std::endl; //Display clock results.
 
 
-    std::cout << "Directory One size: " << directoryOneDB.size() << std::endl;
-    std::cout << "Directory One capacity: " << directoryOneDB.capacity() << std::endl;
+        std::cout << "Directory One size: " << directoryOneDB.size() << std::endl;
+        std::cout << "Directory One capacity: " << directoryOneDB.capacity() << std::endl;
 
-    std::cout << "Directory Two size: " << directoryTwoDB.size() << std::endl;
-    std::cout << "Directory Two capacity: " << directoryTwoDB.capacity() << std::endl;
+        std::cout << "Directory Two size: " << directoryTwoDB.size() << std::endl;
+        std::cout << "Directory Two capacity: " << directoryTwoDB.capacity() << std::endl;
 
-    std::cout << "Hash Action size: " << hashActions.size() << std::endl;
-    std::cout << "Hash Action capacity: " << hashActions.capacity() << std::endl;
+        std::cout << "Hash Action size: " << hashActions.size() << std::endl;
+        std::cout << "Hash Action capacity: " << hashActions.capacity() << std::endl;
 
-    std::cout << "File Operation size: " << fileOpActions.size() << std::endl;
-    std::cout << "File Operation capacity: " << fileOpActions.capacity() << std::endl;
-
+        std::cout << "File Operation size: " << fileOpActions.size() << std::endl;
+        std::cout << "File Operation capacity: " << fileOpActions.capacity() << std::endl;
+    }
     if (writeDebugThreadPool.get_tasks_queued() != 0) //Check if debug thread pool is finished writing.
     {
         if (verboseDebug) writeDebugThreadPool.push_task(writeToDebug, std::chrono::system_clock::now(), true, L"Waiting for debug to finish writing...");
 
-        std::cout << "Waiting for debug to finish writing..." << std::endl;
+        if (showConsole) std::cout << "Waiting for debug to finish writing..." << std::endl;
         writeDebugThreadPool.wait_for_tasks(); //Wait for it to finish.
 
         if (verboseDebug) writeDebugThreadPool.push_task(writeToDebug, std::chrono::system_clock::now(), false, L"-------------------------------------------------- APPLICATION INSTANCE FINISHED --------------------------------------------------");
@@ -453,8 +511,8 @@ int main(int argc, char* argv[])
 
 
     //ENDING OF PROGRAM
-    std::cout << "Program finished." << std::endl;
-    system("PAUSE");
+    if (showConsole) std::cout << "Program finished." << std::endl;
+    if (showConsole) system("PAUSE");
 
     return 0;
 
@@ -793,7 +851,7 @@ void performHashActionFile(std::vector<std::wstring>& hashActions, std::vector<s
     std::wstring directoryOneVectorLocation;
     std::wstring directoryTwoVectorLocation;
 
-    std::cout << "Assigning hash thread tasks." << std::endl;
+    if (showConsole) std::cout << "Assigning hash thread tasks." << std::endl;
     for (int iterator = 0; iterator < hashActionSize; ++iterator) //Iterating through hashAction file.
     {
         //Grab item...
@@ -807,7 +865,7 @@ void performHashActionFile(std::vector<std::wstring>& hashActions, std::vector<s
         hashingThreadPool.push_task(MThashGivenFile, directoryOneFile, std::ref(firstGivenVectorDB), directoryOneVectorLocation); //Creating task, assigning it to main pool. Directory One file.
         hashingThreadPool.push_task(MThashGivenFile, directoryTwoFile, std::ref(secondGivenVectorDB), directoryTwoVectorLocation); //Creating task, assigning it to main pool. Directory Two file.
     }
-    std::cout << "Tasks assigned. Waiting for hash tasks to finish..." << std::endl;
+    if (showConsole) std::cout << "Tasks assigned. Waiting for hash tasks to finish..." << std::endl;
 
     //*****
     //START TIMER.
@@ -847,7 +905,7 @@ void performFileOpActionFile(std::vector<std::wstring>& fileOpAction)
     std::wstring source, destination; //Source is between the first and second delimiter | Destonation between the second and end of wstring.
 
 
-    std::cout << "Assigning file operation thread tasks." << std::endl;
+    if (showConsole) std::cout << "Assigning file operation thread tasks." << std::endl;
     for (int iterator = 0; iterator < fileOpSize; ++iterator) //Iterating through hashAction file.
     {
         currentReadLine = fileOpAction[iterator]; //Reading line.
@@ -887,7 +945,7 @@ void performFileOpActionFile(std::vector<std::wstring>& fileOpAction)
     }
 
 
-    std::cout << "Tasks assigned. Waiting for file operations to finish..." << std::endl;
+    if (showConsole) std::cout << "Tasks assigned. Waiting for file operations to finish..." << std::endl;
     fileOperationThreadPool.wait_for_tasks(); //Waiting for tasks to finish.
 }
 
@@ -1033,7 +1091,7 @@ void echoCompareDirectories(std::vector<std::wstring>& firstGivenVectorDB, std::
     DB2Map.clear();
 
 
-    std::cout << "Checking for second directory items that did not get matched..." << std::endl; //***
+    if (showConsole) std::cout << "Checking for second directory items that did not get matched..." << std::endl; //***
 
     //Iterating through secondary directory list and checking against matched list.
     for (size_t iterator = 0; iterator < secondDBSize; ++iterator) //Needs to start at "1" if headers are added before this.
@@ -1046,12 +1104,12 @@ void echoCompareDirectories(std::vector<std::wstring>& firstGivenVectorDB, std::
     //If matching files need to be hashed, do so.
     if (checkContents)
     {
-        std::cout << "Beginning hash process. " << hashActions.size() * 2 << " Files to be hashed..." << std::endl; //***
+        if (showConsole) std::cout << "Beginning hash process. " << hashActions.size() * 2 << " Files to be hashed..." << std::endl; //***
         performHashActionFile(hashActions, firstGivenVectorDB, secondGivenVectorDB, firstGivenPath, secondGivenPath);
-        std::cout << "Hashing finished!" << std::endl; //***
-        std::cout << "Comparing file hashes..." << std::endl; ///***
+        if (showConsole) std::cout << "Hashing finished!" << std::endl; //***
+        if (showConsole) std::cout << "Comparing file hashes..." << std::endl; ///***
         compareHashes(firstGivenVectorDB, secondGivenVectorDB, fileOpAction, firstGivenPath, secondGivenPath);
-        std::cout << "Hash comparison finished!" << std::endl; //***
+        if (showConsole) std::cout << "Hash comparison finished!" << std::endl; //***
     }
 
 
