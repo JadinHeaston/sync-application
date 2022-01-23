@@ -1,29 +1,41 @@
-☐ Alternative operation modes:
-    ✔ Echo @done (1/22/2022, 8:43:37 AM)
-        Completely mirror one directory to another.
-    ☐ Synchronize
-        Sync the newest versions.
-    ☐ Contribute
-        No deletion on destination. Only additions/updates.
-☐ Network file navigation
-    ☐ FTP
-    ☐ SFTP
-    ☐ WebDAV
-    ☐ SMB
-    ☐ NFS
-☐ Cross-platform support
-☐ Allow the usage of pre-determined files.
-    ☐ Allow individual files to be created and exported.
-    ☐ Allow individual files to be given and used.
-☐ User Interface Option?
-☐ Allow using a config file, and supplying which entry to use.
-☐ Write documentation
-    ☐ Also, create the text for the "-h/--help" arguments.
+Main tasks:
+    ☐ Alternative operation modes:
+        ✔ Echo @done (1/22/2022, 8:43:37 AM)
+            Completely mirror one directory to another.
+        ☐ Synchronize
+            Sync the newest versions.
+        ☐ Contribute
+            No deletion on destination. Only additions/updates.
+    ☐ Network file navigation
+        ☐ FTP
+        ☐ SFTP
+        ☐ WebDAV
+        ☐ SMB
+        ☐ NFS
+    ☐ Cross-platform support
+    ☐ Allow the usage of pre-determined files.
+        ☐ Allow individual files to be created and exported.
+        ☐ Allow individual files to be given and used.
+    ☐ User Interface Option?
+    ☐ Allow using a config file, and supplying which entry to use.
+    ☐ Write documentation
+        ☐ Also, create the text for the "-h/--help" arguments.
+    ☐ Allow excluding and including of additional folders, files.
+        ☐ Including
+            Including additional folders may be tough with the current method of comparing directories. - Brainstorming needs to be done.
+        ☐ Excluding
+        ☐ Mask implementation
+            Maybe just use regex?
+    ☐ Revamp argument handling @today
+        ☐ Change how single and double dashes are handled.
+        ✔ Add deletion warning to program, to warn users when/where files COULD be effected. @done (1/23/2022, 3:04:06 PM)
+            ✔ Also allow a flag arg to disable this warning. @done (1/23/2022, 3:04:05 PM)
+        ✔ Add a flag arg to hide console output. Show it by default @done (1/23/2022, 2:16:35 PM)
+            ✔ This should probably pause the output at the end of running. - Maybe an arg mutation for this? - No mutation. If the console is shown, pause at the end. @done (1/23/2022, 2:16:35 PM)
+        ☐ Add a flag that allows the user to force that deletions and overwrites do not take place.
+            This may not be necessary. Just know what you are doing and have a proper backup until you feel comfortable.
 Other features:
-    ☐ Add deletion warning to program, to warn users when/where files COULD be effected.
-        ☐ Also allow a flag arg to disable this warning.
-    ☐ Add a flag arg to show console output.
-        ☐ This should probably pause the output at the end of running. - Maybe an arg mutation for this?
+    
     
 
 
