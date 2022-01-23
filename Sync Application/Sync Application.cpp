@@ -306,7 +306,7 @@ int main(int argc, char* argv[])
             std::cout << "Termination Program. No changes have been made." << std::endl;
             return 0;
         }
-        else //The user gave the okay.
+        else //The user gave the okay. Continue.
             std::cout << "Permission to continue granted. Moving forward with program." << std::endl;
     }
 
