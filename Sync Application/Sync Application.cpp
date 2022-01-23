@@ -143,8 +143,45 @@ int main(int argc, char* argv[])
         {
             if ((strncmp(argv[i], "--check-content", 32) == 0) || (strncmp(argv[i], "--check-contents", 32) == 0)) //Enable file hashing.
                 checkContents = true; //Set hashing to true.
-            else if (strncmp(argv[i], "--no-recursive", 32) == 0) //Disable recursive operation.
+            if (strncmp(argv[i], "--directory-one", 2) == 0) //Directory one path switch.
+            {
+                firstGivenDirectoryPath = formatFilePath(charToWString(argv[i + 1]));
+
+                if (firstGivenDirectoryPath.back() == L'\\')
+                    firstGivenDirectoryPath.pop_back(); //Remove the slash.
+
+                if (!std::filesystem::is_directory(firstGivenDirectoryPath)) //Verify path is real and valid.
+                {
+                    std::wcout << "-s path provided was NOT found. (" << firstGivenDirectoryPath << ")" << std::endl;
+                    system("PAUSE");
+                    return 0;
+                }
+            }
+            else if (strncmp(argv[i], "--directory-two", 2) == 0) //Destination two path switch.
+            {
+                secondGivenDirectoryPath = formatFilePath(charToWString(argv[i + 1]));
+
+                if (secondGivenDirectoryPath.back() == L'\\')
+                    secondGivenDirectoryPath.pop_back(); //Remove the slash
+
+                if (!std::filesystem::is_directory(secondGivenDirectoryPath)) //Verify path is real and valid.
+                {
+                    std::wcout << "-d path provided was NOT found. (" << secondGivenDirectoryPath << ")" << std::endl;
+                    std::cout << "Would you like to create this directory?" << std::endl;
+                    system("PAUSE");
+                    return 0;
+                }
+            }
+            else if (strncmp(argv[i], "--hide-console", 32) == 0) //Defines if anything is output to the console.
+            {
+                showConsole = false;
+            }
+            else if (strncmp(argv[i], "--no-recursive", 32) == 0) //Disable recursive operation. //*****
                 recursiveSearch = false;
+            else if (strncmp(argv[i], "-operation-mode", 2) == 0) //Operation mode switch.
+            {
+                operationMode = formatFilePath(charToWString(argv[i + 1]));
+            }
             else if ((strncmp(argv[i], "--output-files", 32) == 0)) //Enable file output.
                 outputFiles = true;
             else if (strncmp(argv[i], "--output-verbose-debug", 32) == 0) //Output debug file in running directory.
@@ -177,46 +214,19 @@ int main(int argc, char* argv[])
                 }
                 verboseDebugOutput.close();
             }
-            else if (strncmp(argv[i], "--hide-console", 32) == 0) //Defines if anything is output to the console.
-            {
-                showConsole = false;
-            }
         }
-        else //Must be single slash.
+        else //Must be single dash.
         {
             //Get all letter characters in the argument.
-            if (strncmp(argv[i], "-s", 2) == 0) //Source path switch.
+            if (strncmp(argv[1], "-h", 3) == 0 || strcmp(argv[1], "--help") == 0) //Checking second argument for if it is "-h"
             {
-                firstGivenDirectoryPath = formatFilePath(charToWString(argv[i + 1]));
+                //Display help
+                std::cout << "Defaults:" << std::endl;
+                std::cout << "--check-content - F | --output-files - F | --output-verbose-debug <FILEPATH> - NULL | --no-recursive - T" << std::endl;
+                std::cout << "HELP PROVIDED. GET FUCKED" << std::endl;
 
-                if (firstGivenDirectoryPath.back() == L'\\')
-                    firstGivenDirectoryPath.pop_back(); //Remove the slash.
-
-                if (!std::filesystem::is_directory(firstGivenDirectoryPath)) //Verify path is real and valid.
-                {
-                    std::wcout << "-s path provided was NOT found. (" << firstGivenDirectoryPath << ")" << std::endl;
-                    system("PAUSE");
-                    return 0;
-                }
-            }
-            else if (strncmp(argv[i], "-d", 2) == 0) //Destination path switch.
-            {
-                secondGivenDirectoryPath = formatFilePath(charToWString(argv[i + 1]));
-
-                if (secondGivenDirectoryPath.back() == L'\\')
-                    secondGivenDirectoryPath.pop_back(); //Remove the slash
-
-                if (!std::filesystem::is_directory(secondGivenDirectoryPath)) //Verify path is real and valid.
-                {
-                    std::wcout << "-d path provided was NOT found. (" << secondGivenDirectoryPath << ")" << std::endl;
-                    std::cout << "Would you like to create this directory?" << std::endl;
-                    system("PAUSE");
-                    return 0;
-                }
-            }
-            else if (strncmp(argv[i], "-o", 2) == 0) //Operation mode switch.
-            {
-                operationMode = formatFilePath(charToWString(argv[i + 1]));
+                system("PAUSE");
+                return 0;
             }
         }
 
