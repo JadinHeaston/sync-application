@@ -79,6 +79,8 @@ void performFileOpActionFile(std::vector<std::wstring>& fileOpAction); //Goes th
 void performHashActionFile(std::vector<std::wstring>& hashActions, std::vector<std::wstring>& firstGivenVectorDB, std::vector<std::wstring>& secondGivenVectorDB, std::wstring firstGivenPath, std::wstring secondGivenPath); //
 void compareHashes(std::vector<std::wstring>& firstGivenVectorDB, std::vector<std::wstring>& secondGivenVectorDB, std::vector<std::wstring>& fileOpAction, std::wstring firstGivenPath, std::wstring secondGivenPath); //
 void echoCompareDirectories(std::vector<std::wstring>& firstGivenVectorDB, std::vector<std::wstring>& secondGivenVectorDB, std::vector<std::wstring>& hashActions, std::vector<std::wstring>& fileOpAction, std::wstring firstGivenPath, std::wstring secondGivenPath);
+void syncCompareDirectories(std::vector<std::wstring>& firstGivenVectorDB, std::vector<std::wstring>& secondGivenVectorDB, std::vector<std::wstring>& hashActions, std::vector<std::wstring>& fileOpAction, std::wstring firstGivenPath, std::wstring secondGivenPath);
+void contCompareDirectories(std::vector<std::wstring>& firstGivenVectorDB, std::vector<std::wstring>& secondGivenVectorDB, std::vector<std::wstring>& hashActions, std::vector<std::wstring>& fileOpAction, std::wstring firstGivenPath, std::wstring secondGivenPath);
 void removeObject(std::wstring destinationFilePath, bool recursiveRemoval); //Removes given object.
 void copyFile(std::wstring source, std::wstring destination); //Copies file.
 void writeToDebug(std::chrono::system_clock::time_point givenTime, bool writeTime, std::wstring textToWrite); //Writes to the debug file.
@@ -164,7 +166,7 @@ int main(int argc, char* argv[])
 
                 if (!std::filesystem::is_directory(firstGivenDirectoryPath)) //Verify path is real and valid.
                 {
-                    std::wcout << "-s path provided was NOT found. (" << firstGivenDirectoryPath << ")" << std::endl;
+                    std::wcout << "--directory-one path provided was NOT found. (" << firstGivenDirectoryPath << ")" << std::endl;
                     system("PAUSE");
                     return 0;
                 }
@@ -271,7 +273,7 @@ int main(int argc, char* argv[])
     {
         std::transform(operationMode.begin(), operationMode.end(), operationMode.begin(), towlower); //Convert to lowercase for easy comparison.
             
-        //Check that it is value.
+        //Check that it is a legitimate value.
         if (operationMode != L"echo" && (operationMode != L"synchronize" && operationMode != L"sync") && (operationMode != L"contribute" && operationMode != L"cont"))
         {
             if (verboseDebug) writeDebugThreadPool.push_task(writeToDebug, std::chrono::system_clock::now(), true, L"Error-----");
@@ -281,7 +283,8 @@ int main(int argc, char* argv[])
     }
     else
     {
-        std::wcout << L"No operation mode provided. (-o)" << std::endl;
+        std::cout << "No operation mode provided. (--operation-mode)" << std::endl;
+        std::cout << "Use --help for more information." << std::endl;
         system("PAUSE");
         return 0;
     }
@@ -309,7 +312,7 @@ int main(int argc, char* argv[])
             std::wcout << L"First Directory: " << firstGivenDirectoryPath << std::endl;
             std::wcout << L"Second Directory: " << secondGivenDirectoryPath << std::endl;
         }
-        else if (operationMode != L"contribute" && operationMode != L"cont")
+        else if (operationMode == L"contribute" || operationMode == L"cont")
         {
             std::wcout << L"The \"CONTRIBUTE\"operation will take place. This will cause the first directory to contribute any new files or changes to the second directory." << std::endl;
             std::wcout << L"When a file is found within both directories, the program will compare the size and last modified time. When a difference is found, the first directories file will overwrite the second directories file. If the file is not present within the second directory, it is copied over to it. (Hashes are only used when files, size, and modification time are all the same and the --check-contents argument is provided.)" << std::endl;
@@ -393,8 +396,24 @@ int main(int argc, char* argv[])
         if (verboseDebug) writeDebugThreadPool.push_task(writeToDebug, std::chrono::system_clock::now(), true, L"----- *COMPLETED* DIRECTORY COMPARISON - " + operationMode + L" -----");
         if (showConsole) std::cout << "Directory comparing finished..." << std::endl; //***
     }
-
-
+    else if (operationMode == L"synchronize" || operationMode == L"sync")
+    {
+        if (verboseDebug) writeDebugThreadPool.push_task(writeToDebug, std::chrono::system_clock::now(), true, L"----- DIRECTORY COMPARISON - " + operationMode + L" -----");
+        if (showConsole) std::cout << "Beginning directory comparison function for synchronization mode." << std::endl; //***
+        syncCompareDirectories(directoryOneDB, directoryTwoDB, hashActions, fileOpActions, firstGivenDirectoryPath, secondGivenDirectoryPath); //Includes the process of hashing files and comparing again before ending.
+        if (verboseDebug) writeDebugThreadPool.push_task(writeToDebug, std::chrono::system_clock::now(), true, L"----- *COMPLETED* DIRECTORY COMPARISON - " + operationMode + L" -----");
+        if (showConsole) std::cout << "Directory comparing finished..." << std::endl; //***
+    }
+    else if (operationMode == L"contribute" || operationMode == L"cont")
+    {
+        if (verboseDebug) writeDebugThreadPool.push_task(writeToDebug, std::chrono::system_clock::now(), true, L"----- DIRECTORY COMPARISON - " + operationMode + L" -----");
+        if (showConsole) std::cout << "Beginning directory comparison function for synchronization mode." << std::endl; //***
+        contCompareDirectories(directoryOneDB, directoryTwoDB, hashActions, fileOpActions, firstGivenDirectoryPath, secondGivenDirectoryPath); //Includes the process of hashing files and comparing again before ending.
+        if (verboseDebug) writeDebugThreadPool.push_task(writeToDebug, std::chrono::system_clock::now(), true, L"----- *COMPLETED* DIRECTORY COMPARISON - " + operationMode + L" -----");
+        if (showConsole) std::cout << "Directory comparing finished..." << std::endl; //***
+    }
+    
+    //Performing file operations.
     if (verboseDebug) writeDebugThreadPool.push_task(writeToDebug, std::chrono::system_clock::now(), true, L"----- FILE OPERATIONS -----");
     if (showConsole) std::cout << "Beginning File Operations..." << std::endl;
     performFileOpActionFile(fileOpActions); //Regardless of the type of operation, a file operation check should occur.

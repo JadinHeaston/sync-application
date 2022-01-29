@@ -4,8 +4,12 @@ Main tasks:
             Completely mirror one directory to another.
         ☐ Synchronize
             Sync the newest versions.
+            When the size and time last modified attributes are the same, then a hash is performed. What do we do when the hash differs?
+                We have no way of knowing which is the "newest".
+                Alert the user. Provide an easy to way for the user to "select" which one is newest.
+                    Maybe allow the usage of an external diff tool?
         ☐ Contribute
-            No deletion on destination. Only additions/updates.
+            No deletion on destination. Only additions/updates. 
     ☐ Network file navigation
         ☐ FTP
         ☐ SFTP
@@ -13,11 +17,14 @@ Main tasks:
         ☐ SMB
         ☐ NFS
     ☐ Cross-platform support
+        I believe most (if not all) of the code is written in a cross-platform supportive manner. - I ensured that all external libraries support it, and use traditional standard C++ coding standards whenever available.
+        I need to learn how to compile for different platforms.
     ☐ Allow the usage of pre-determined files.
         ☐ Allow individual files to be created and exported.
         ☐ Allow individual files to be given and used.
     ☐ User Interface Option?
-    ☐ Allow using a config file, and supplying which entry to use.
+    ☐ Allow using a config file
+        ☐ Allow the supplying of which entry in the file to use, to simplifying management of multiple entries.
     ☐ Write documentation
         ☐ Also, create the text for the "-h/--help" arguments.
             ✔ -h writing. @done (1/29/2022, 2:05:14 PM)
