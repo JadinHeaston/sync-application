@@ -20,6 +20,8 @@ Main tasks:
     ☐ Allow using a config file, and supplying which entry to use.
     ☐ Write documentation
         ☐ Also, create the text for the "-h/--help" arguments.
+            ✔ -h writing. @done (1/29/2022, 2:05:14 PM)
+            ☐ --help writing. - Maybe just copy the readme.md?
     ☐ Allow excluding and including of additional folders, files.
         ☐ Including
             Including additional folders may be tough with the current method of comparing directories. - Brainstorming needs to be done.
@@ -27,7 +29,7 @@ Main tasks:
         ☐ Mask implementation
             Maybe just use regex?
     ☐ Revamp argument handling @today
-        ☐ Change how single and double dashes are handled.
+        ✔ Change how single and double dashes are handled. @done (1/29/2022, 1:57:49 PM)
         ✔ Add deletion warning to program, to warn users when/where files COULD be effected. @done (1/23/2022, 3:04:06 PM)
             ✔ Also allow a flag arg to disable this warning. @done (1/23/2022, 3:04:05 PM)
         ✔ Add a flag arg to hide console output. Show it by default @done (1/23/2022, 2:16:35 PM)

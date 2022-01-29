@@ -58,7 +58,8 @@ std::wstring debugFilePath = L"";
 std::wstring debugFileName = L"debug.log";
 int debugFileCount = 1;
 
-
+//Holds an array of single letter arguments that need to be applied.
+std::unordered_map<char, int> singleCharArguments;
 
 
 //FUNCTION PROTOTYPES
@@ -141,6 +142,17 @@ int main(int argc, char* argv[])
         //Check if the argument contains a single or double slash
         if (strncmp(argv[i], "--", 2) == 0) //Check for double slash
         {
+            if (strcmp(argv[1], "--help") == 0) //Checking second argument for if it is "-h" or "-help".
+            {
+                //Display help
+                std::cout << "Defaults:" << std::endl;
+                std::cout << "--check-content - F | --output-files - F | --output-verbose-debug <FILEPATH> - NULL | --no-recursive - T" << std::endl;
+                std::cout << "HELP PROVIDED. GET FUCKED" << std::endl;
+
+                system("PAUSE");
+                return 0;
+            }
+
             if ((strncmp(argv[i], "--check-content", 32) == 0) || (strncmp(argv[i], "--check-contents", 32) == 0)) //Enable file hashing.
                 checkContents = true; //Set hashing to true.
             if (strncmp(argv[i], "--directory-one", 2) == 0) //Directory one path switch.
@@ -166,22 +178,21 @@ int main(int argc, char* argv[])
 
                 if (!std::filesystem::is_directory(secondGivenDirectoryPath)) //Verify path is real and valid.
                 {
-                    std::wcout << "-d path provided was NOT found. (" << secondGivenDirectoryPath << ")" << std::endl;
+                    std::wcout << "the '--second-directory' path provided was NOT found. (" << secondGivenDirectoryPath << ")" << std::endl;
                     std::cout << "Would you like to create this directory?" << std::endl;
+                    //*****
                     system("PAUSE");
                     return 0;
                 }
             }
             else if (strncmp(argv[i], "--hide-console", 32) == 0) //Defines if anything is output to the console.
-            {
                 showConsole = false;
-            }
-            else if (strncmp(argv[i], "--no-recursive", 32) == 0) //Disable recursive operation. //*****
+            else if (strncmp(argv[i], "--no-recursive", 32) == 0) //Disable recursive operation.
                 recursiveSearch = false;
+            else if (strncmp(argv[i], "--no-warning", 32) == 0) //Disable deletion warning.
+                showWarning = false;
             else if (strncmp(argv[i], "-operation-mode", 2) == 0) //Operation mode switch.
-            {
                 operationMode = formatFilePath(charToWString(argv[i + 1]));
-            }
             else if ((strncmp(argv[i], "--output-files", 32) == 0)) //Enable file output.
                 outputFiles = true;
             else if (strncmp(argv[i], "--output-verbose-debug", 32) == 0) //Output debug file in running directory.
@@ -217,20 +228,25 @@ int main(int argc, char* argv[])
         }
         else //Must be single dash.
         {
-            //Get all letter characters in the argument.
-            if (strncmp(argv[1], "-h", 3) == 0 || strcmp(argv[1], "--help") == 0) //Checking second argument for if it is "-h"
-            {
-                //Display help
-                std::cout << "Defaults:" << std::endl;
-                std::cout << "--check-content - F | --output-files - F | --output-verbose-debug <FILEPATH> - NULL | --no-recursive - T" << std::endl;
-                std::cout << "HELP PROVIDED. GET FUCKED" << std::endl;
-
-                system("PAUSE");
-                return 0;
-            }
+            for (int iterator = 1; iterator < sizeof(argv[i]); ++iterator) //Iterating through all characters, after the slash. (Starting at 1 to skip the initial dash)
+                singleCharArguments[argv[i][iterator]] = 1;
         }
 
         //std::cout << argv[i] << std::endl; //*** Display all arguments given.
+    }
+
+    //Iterating through argument array and applying arguments.
+    for (size_t iterator = 0; iterator < sizeof(singleCharArguments); ++iterator)
+    {
+        if (singleCharArguments['h']) //Short help message.
+        {
+            //Display help message.
+            std::cout << "The three required arguments are: --directory-one <DIRECTORY_PATH>' as the source, --directory-two <DIRECTORY_PATH>' as the destination, and '--operation-mode <OPERATION_MODE>' to specifiy the operation mode." << std::endl;
+            std::cout << "The operation mode can either be 'contribute' that only copies files from directory one to directory two, 'echo' that makes directory two look like directory one, or 'synchronize' that will use the newest version from either directory to keep both up to date and in sync." << std::endl;
+            std::cout << "Detailed help can befound by using '--help' or utilizing the readme.md file: https://github.com/JadinHeaston/sync-application" << std::endl;
+            system("PAUSE");
+            return 0;
+        }
     }
     //ARGS FINISHED.
 
