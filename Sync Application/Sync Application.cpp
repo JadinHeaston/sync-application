@@ -119,25 +119,6 @@ int main(int argc, char* argv[])
         system("PAUSE");
         return 0;
     }
-    else if (argc == 2) //Checking for help message.
-    {
-        if (strncmp(argv[1], "-h", 3) == 0 || strcmp(argv[1], "--help") == 0) //Checking second argument for if it is "-h" or "-help".
-        {
-            //Display help
-            std::cout << "Defaults:" << std::endl;
-            std::cout << "--check-content - F | --output-files - F | --output-verbose-debug <FILEPATH> - NULL | --no-recursive - T" << std::endl;
-            std::cout << "HELP PROVIDED. GET FUCKED" << std::endl;
-
-            system("PAUSE");
-            return 0;
-        }
-        else //No arguments provided. Notify. Close program.
-        {
-            std::cout << "Use the \"-h\" or \"--help\" switch to show the available options.\n(-s and -d are required for operation)" << std::endl;
-            system("PAUSE");
-            return 0;
-        }
-    }
 
     for (int i = 0; i < argc; i++) // Cycle through all arguments.
     {
