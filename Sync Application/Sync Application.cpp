@@ -31,6 +31,8 @@ bool verboseDebug = false; //Defines if verbose debugging is enabled.
 bool showWarning = true; //Recieved from arg: --no-warning | defaults to true | Defines whether things are output to the console or not.
 bool dataLossProtection = false; //Recieved from arg: --data-protection | defaults to false;
 
+std::wstring operationMode; //Holds operation mode to perform.
+
 //Sets global delimiter used for reading and writing DB files. Tilde typically works well. (CONSIDER USING MULTIPLE CHARACTER DELIMITER FOR SAFETY)
 std::wstring delimitingCharacter = L"▼";
 //Simple newline dude.
@@ -90,8 +92,6 @@ int main(int argc, char* argv[])
     ::ShowWindow(::GetConsoleWindow(), SW_SHOW); //Hiding console immediately.
 
     std::chrono::time_point start = std::chrono::steady_clock::now(); //START TIMER.
-
-    std::wstring operationMode; //Holds sync operation mode. - May want to make this a global variable later.
 
     //Creating vectors to hold directory maps.
     std::vector<std::wstring> directoryOneDB;
@@ -1054,8 +1054,107 @@ void echoCompareDirectories(std::vector<std::wstring>& firstGivenVectorDB, std::
     std::wstring workingSizeTwo;
     std::wstring workingDateMod;
     std::wstring workingDateModTwo;
-    std::wstring workingDateCreated;
-    std::wstring workingDateCreatedTwo;
+    std::wstring workingHash;
+    std::wstring workingHashTwo;
+
+    //Iterating through directory two vector and inserting the file path and line location into the unordered map.
+    //Key: path | Value: line location
+    for (size_t iteratorTwo = 0; iteratorTwo < secondDBSize; ++iteratorTwo)
+        DB2Map.insert(std::make_pair(secondGivenVectorDB[iteratorTwo].substr(secondGivenPath.length() + 1, nthOccurrence(secondGivenVectorDB[iteratorTwo], delimitingCharacter, 1) - secondGivenPath.length() - 1), iteratorTwo));
+
+    //Iterate through firstDB.
+    for (size_t iterator = 0; iterator < firstDBSize; ++iterator)
+    {
+        workingPath = firstGivenVectorDB[iterator].substr(firstGivenPath.length() + 1, nthOccurrence(firstGivenVectorDB[iterator], delimitingCharacter, 1) - firstGivenPath.length() - 1); //Get path of object.
+
+        if (DB2Map.count(workingPath)) //Search for match in DB2. This value can only return 0 or 1 as unordered maps cannot hold duplicate keys.
+        {
+            DB2Line = DB2Map[workingPath]; //Save the value.
+
+            iter1 = std::to_wstring(iterator); //Convert the line of DB1 to a wstring, to allow saving.
+            iter2 = std::to_wstring(DB2Line); //Convert newly found DB2 line to wstring for saving.
+            firstGivenVectorDB[iterator].insert(firstGivenVectorDB[iterator].length() - 1, L"MATCHED" + delimitingCharacter + iter2); //Add match marker and line.
+            secondGivenVectorDB[DB2Line].insert(secondGivenVectorDB[DB2Line].length() - 1, L"MATCHED" + delimitingCharacter + iter1); //Add match marker and line.
+
+            if (!std::filesystem::is_directory(firstGivenVectorDB[iterator].substr(0, nthOccurrence(firstGivenVectorDB[iterator], delimitingCharacter, 1)))) //If the path not a directory, skip the iteration.
+                continue;
+
+            workingDateMod = firstGivenVectorDB[iterator].substr(nthOccurrence(firstGivenVectorDB[iterator], delimitingCharacter, 2) + 1, nthOccurrence(firstGivenVectorDB[iterator], delimitingCharacter, 3) - nthOccurrence(firstGivenVectorDB[iterator], delimitingCharacter, 2) - 1); //Third column
+            workingDateModTwo = secondGivenVectorDB[DB2Line].substr(nthOccurrence(secondGivenVectorDB[DB2Line], delimitingCharacter, 2) + 1, nthOccurrence(secondGivenVectorDB[DB2Line], delimitingCharacter, 3) - nthOccurrence(secondGivenVectorDB[DB2Line], delimitingCharacter, 2) - 1); //Third column
+            if (workingDateMod == workingDateModTwo) //If the file paths match, check the last modified times.
+            {
+                workingSize = firstGivenVectorDB[iterator].substr(nthOccurrence(firstGivenVectorDB[iterator], delimitingCharacter, 1) + 1, nthOccurrence(firstGivenVectorDB[iterator], delimitingCharacter, 2) - nthOccurrence(firstGivenVectorDB[iterator], delimitingCharacter, 1) - 1); //Second column
+                workingSizeTwo = secondGivenVectorDB[DB2Line].substr(nthOccurrence(secondGivenVectorDB[DB2Line], delimitingCharacter, 1) + 1, nthOccurrence(secondGivenVectorDB[DB2Line], delimitingCharacter, 2) - nthOccurrence(secondGivenVectorDB[DB2Line], delimitingCharacter, 1) - 1); //Second column
+                if (workingSize == workingSizeTwo) //Check if the file sizes match.
+                    if (checkContents) hashActions.push_back(workingPath + delimitingCharacter + iter1 + delimitingCharacter + iter2 + newLine); //If everything matches, these files need hashed and compared.
+                else
+                    fileOpAction.push_back(L"COPY - Different file sizes" + delimitingCharacter + firstGivenPath + L"/" + workingPath + delimitingCharacter + secondGivenPath + L"/" + workingPath + newLine); //Copy directory one file to directory two.
+            }
+            else //A matching file has been found, with differing last modified times.
+                fileOpAction.push_back(L"COPY - Different last modified time" + delimitingCharacter + firstGivenPath + L"/" + workingPath + delimitingCharacter + secondGivenPath + L"/" + workingPath + newLine); //Copy directory one file to directory two.
+        }
+        else
+        {
+            if (std::filesystem::is_directory(firstGivenVectorDB[iterator].substr(0, nthOccurrence(firstGivenVectorDB[iterator], delimitingCharacter, 1))) && std::filesystem::is_empty(firstGivenVectorDB[iterator].substr(0, nthOccurrence(firstGivenVectorDB[iterator], delimitingCharacter, 1))))
+                fileOpAction.push_back(L"COPY - Empty directory present on source" + delimitingCharacter + firstGivenPath + L"/" + workingPath + delimitingCharacter + secondGivenPath + L"/" + workingPath + newLine); //Copy directory one file to directory two.
+            else
+                fileOpAction.push_back(L"COPY - No destination found" + delimitingCharacter + firstGivenPath + L"/" + workingPath + delimitingCharacter + secondGivenPath + L"/" + workingPath + newLine); //Copy directory one file to directory two.
+        }
+    }
+
+    DB2Map.clear();
+
+
+    if (showConsole) std::cout << "Checking for directory two items that did not get matched..." << std::endl; //***
+
+    //Iterating through directory two list and checking against directory one list, comparing the matched values.
+    for (size_t iterator = 0; iterator < secondDBSize; ++iterator)
+    {
+        if (secondGivenVectorDB[iterator].substr(nthOccurrence(secondGivenVectorDB[iterator], delimitingCharacter, 5) + 1, 7) != L"MATCHED")
+            fileOpAction.push_back(L"DELETE - No source found" + delimitingCharacter + secondGivenVectorDB[iterator].substr(0, nthOccurrence(secondGivenVectorDB[iterator], delimitingCharacter, 1)) + newLine); //Delete directory two file. No directory one file found that matches.
+    }
+
+
+    //If matching files need to be hashed, do so.
+    if (checkContents)
+    {
+        if (showConsole) std::cout << "Beginning hash process. " << hashActions.size() * 2 << " Files to be hashed..." << std::endl;
+        performHashActionFile(hashActions, firstGivenVectorDB, secondGivenVectorDB, firstGivenPath, secondGivenPath);
+        if (showConsole) std::cout << "Hashing finished!" << std::endl;
+        if (showConsole) std::cout << "Comparing file hashes..." << std::endl;
+        compareHashes(firstGivenVectorDB, secondGivenVectorDB, fileOpAction, firstGivenPath, secondGivenPath);
+        if (showConsole) std::cout << "Hash comparison finished!" << std::endl; //
+    }
+
+
+}
+
+//Uses unordered maps to compare directory lists and find matches.
+void syncCompareDirectories(std::vector<std::wstring>& firstGivenVectorDB, std::vector<std::wstring>& secondGivenVectorDB, std::vector<std::wstring>& hashActions, std::vector<std::wstring>& fileOpAction, std::wstring firstGivenPath, std::wstring secondGivenPath)
+{
+    //Storing ending iterator (vector size). Every "for loop" call will ask the vector for it's size otherwise. - https://articles.emptycrate.com/2008/10/26/c_loop_optimization.html
+    size_t firstDBSize = firstGivenVectorDB.size();
+    size_t secondDBSize = secondGivenVectorDB.size();
+
+
+    //Creating unordered maps.
+    //std::unordered_map<size_t, std::wstring> DB1Map;
+    std::unordered_map<std::wstring, size_t> DB2Map;
+
+    size_t DB2Line; //DB1Map searching in DB2Map provides the line of DB2Match.
+
+    //Holds 
+    std::wstring iter1;
+    std::wstring iter2;
+
+
+    //Column variables to avoid streamline calls on vectors.
+    std::wstring workingPath;
+    std::wstring workingPathTwo;
+    std::wstring workingSize;
+    std::wstring workingSizeTwo;
+    std::wstring workingDateMod;
+    std::wstring workingDateModTwo;
     std::wstring workingHash;
     std::wstring workingHashTwo;
 
@@ -1077,68 +1176,66 @@ void echoCompareDirectories(std::vector<std::wstring>& firstGivenVectorDB, std::
             firstGivenVectorDB[iterator].insert(firstGivenVectorDB[iterator].length() - 1, L"MATCHED" + delimitingCharacter + iter2); //Add match marker and line.
             secondGivenVectorDB[DB2Line].insert(secondGivenVectorDB[DB2Line].length() - 1, L"MATCHED" + delimitingCharacter + iter1); //Add match marker and line.
 
+            if (std::filesystem::is_directory(firstGivenVectorDB[iterator].substr(0, nthOccurrence(firstGivenVectorDB[iterator], delimitingCharacter, 1)))) //If the path is a directory, then skip the iteration.
+                continue;
 
-            if (!std::filesystem::is_directory(firstGivenVectorDB[iterator].substr(0, nthOccurrence(firstGivenVectorDB[iterator], delimitingCharacter, 1))))
+            workingDateMod = firstGivenVectorDB[iterator].substr(nthOccurrence(firstGivenVectorDB[iterator], delimitingCharacter, 2) + 1, nthOccurrence(firstGivenVectorDB[iterator], delimitingCharacter, 3) - nthOccurrence(firstGivenVectorDB[iterator], delimitingCharacter, 2) - 1); //Third column
+            workingDateModTwo = secondGivenVectorDB[DB2Line].substr(nthOccurrence(secondGivenVectorDB[DB2Line], delimitingCharacter, 2) + 1, nthOccurrence(secondGivenVectorDB[DB2Line], delimitingCharacter, 3) - nthOccurrence(secondGivenVectorDB[DB2Line], delimitingCharacter, 2) - 1); //Third column
+            if (workingDateMod == workingDateModTwo) //Check if the last modified times are equal.
             {
-                workingDateMod = firstGivenVectorDB[iterator].substr(nthOccurrence(firstGivenVectorDB[iterator], delimitingCharacter, 2) + 1, nthOccurrence(firstGivenVectorDB[iterator], delimitingCharacter, 3) - nthOccurrence(firstGivenVectorDB[iterator], delimitingCharacter, 2) - 1); //Third column
-                workingDateModTwo = secondGivenVectorDB[DB2Line].substr(nthOccurrence(secondGivenVectorDB[DB2Line], delimitingCharacter, 2) + 1, nthOccurrence(secondGivenVectorDB[DB2Line], delimitingCharacter, 3) - nthOccurrence(secondGivenVectorDB[DB2Line], delimitingCharacter, 2) - 1); //Third column
-                if (workingDateMod == workingDateModTwo) //If the file paths match, check the last modified times.
+                workingSize = firstGivenVectorDB[iterator].substr(nthOccurrence(firstGivenVectorDB[iterator], delimitingCharacter, 1) + 1, nthOccurrence(firstGivenVectorDB[iterator], delimitingCharacter, 2) - nthOccurrence(firstGivenVectorDB[iterator], delimitingCharacter, 1) - 1); //Second column
+                workingSizeTwo = secondGivenVectorDB[DB2Line].substr(nthOccurrence(secondGivenVectorDB[DB2Line], delimitingCharacter, 1) + 1, nthOccurrence(secondGivenVectorDB[DB2Line], delimitingCharacter, 2) - nthOccurrence(secondGivenVectorDB[DB2Line], delimitingCharacter, 1) - 1); //Second column
+                if (workingSize == workingSizeTwo) //Check if the file sizes match.
+                    if (checkContents) hashActions.push_back(workingPath + delimitingCharacter + iter1 + delimitingCharacter + iter2 + newLine); //If everything matches, these files need hashed and compared.
+                else //If the file sizes are different, we don't know which is newer.
                 {
-                    workingSize = firstGivenVectorDB[iterator].substr(nthOccurrence(firstGivenVectorDB[iterator], delimitingCharacter, 1) + 1, nthOccurrence(firstGivenVectorDB[iterator], delimitingCharacter, 2) - nthOccurrence(firstGivenVectorDB[iterator], delimitingCharacter, 1) - 1); //Second column
-                    workingSizeTwo = secondGivenVectorDB[DB2Line].substr(nthOccurrence(secondGivenVectorDB[DB2Line], delimitingCharacter, 1) + 1, nthOccurrence(secondGivenVectorDB[DB2Line], delimitingCharacter, 2) - nthOccurrence(secondGivenVectorDB[DB2Line], delimitingCharacter, 1) - 1); //Second column
-                    if (workingSize == workingSizeTwo) //If last modified times match, check that the file sizes match.
-                    {
-                        if (checkContents)
-                            hashActions.push_back(workingPath + delimitingCharacter + iter1 + delimitingCharacter + iter2 + newLine); //If everything matches, these files need hashed and compared.
-                    }
-                    else
-                    {
-                        fileOpAction.push_back(L"COPY - Different file sizes" + delimitingCharacter + firstGivenPath + L"/" + workingPath + delimitingCharacter + secondGivenPath + L"/" + workingPath + newLine); //Copy first directory file to second directory.
-                        //fileOpAction.push_back(L"COPY - Different file sizes" + delimitingCharacter + firstGivenVectorDB[iterator].substr(0, nthOccurrence(firstGivenVectorDB[iterator], delimitingCharacter, 1)) + delimitingCharacter + secondGivenPath + L"\\" + workingPath + newLine); //Copy first directory file to second directory.
-                    }
-                }
-                else //A matching file has been found, with differing last modified times.
-                {
-                    fileOpAction.push_back(L"COPY - Different last modified time" + delimitingCharacter + firstGivenPath + L"/" + workingPath + delimitingCharacter + secondGivenPath + L"/" + workingPath + newLine); //Copy first directory file to second directory.
-                    //fileOpAction.push_back(L"COPY - Different last modified time" + delimitingCharacter + firstGivenVectorDB[iterator].substr(0, nthOccurrence(firstGivenVectorDB[iterator], delimitingCharacter, 1)) + delimitingCharacter + secondGivenPath + L"\\" + workingPath + newLine); //Copy first directory file to second directory.
+                    //*****
                 }
             }
+            else if (workingDateMod > workingDateModTwo) //If the directory one file is newer than the directory two file.
+                fileOpAction.push_back(L"COPY - Different last modified time" + delimitingCharacter + firstGivenPath + L"/" + workingPath + delimitingCharacter + secondGivenPath + L"/" + workingPath + newLine); //Copy directory one file to directory two.
+            else //The directory two file must be the newer file. Copy it to directory one.
+                fileOpAction.push_back(L"COPY - Different last modified time" + delimitingCharacter + secondGivenPath + L"/" + workingPath + delimitingCharacter + firstGivenPath + L"/" + workingPath + newLine); //Copy directory two file to directory one.
+
         }
-        else
+        else //No matching file from directory one found in directory two. Copy the file over to directory two.
         {
             if (std::filesystem::is_directory(firstGivenVectorDB[iterator].substr(0, nthOccurrence(firstGivenVectorDB[iterator], delimitingCharacter, 1))) && std::filesystem::is_empty(firstGivenVectorDB[iterator].substr(0, nthOccurrence(firstGivenVectorDB[iterator], delimitingCharacter, 1))))
-                fileOpAction.push_back(L"COPY - Empty directory present on source" + delimitingCharacter + firstGivenPath + L"/" + workingPath + delimitingCharacter + secondGivenPath + L"/" + workingPath + newLine); //Copy first directory file to second directory.
+                fileOpAction.push_back(L"COPY - Empty directory present on directory one and not directory two" + delimitingCharacter + firstGivenPath + L"/" + workingPath + delimitingCharacter + secondGivenPath + L"/" + workingPath + newLine); //Copy first directory file to second directory.
             else
-                fileOpAction.push_back(L"COPY - No destination found" + delimitingCharacter + firstGivenPath + L"/" + workingPath + delimitingCharacter + secondGivenPath + L"/" + workingPath + newLine); //Copy first directory file to second directory.
+                fileOpAction.push_back(L"COPY - No match from directory one found in directory two" + delimitingCharacter + firstGivenPath + L"/" + workingPath + delimitingCharacter + secondGivenPath + L"/" + workingPath + newLine); //Copy first directory file to second directory.
         }
     }
 
-    //DB1Map.clear();
-    DB2Map.clear();
+    DB2Map.clear(); //Clear the map to save some memory.
 
 
-    if (showConsole) std::cout << "Checking for second directory items that did not get matched..." << std::endl; //***
+    if (showConsole) std::cout << "Checking for directory two items that did not get matched..." << std::endl;
 
-    //Iterating through secondary directory list and checking against matched list.
+    //Iterating through directory two list and checking against matched list.
     for (size_t iterator = 0; iterator < secondDBSize; ++iterator) //Needs to start at "1" if headers are added before this.
     {
         if (secondGivenVectorDB[iterator].substr(nthOccurrence(secondGivenVectorDB[iterator], delimitingCharacter, 5) + 1, 7) != L"MATCHED")
-            fileOpAction.push_back(L"DELETE - No source found" + delimitingCharacter + secondGivenVectorDB[iterator].substr(0, nthOccurrence(secondGivenVectorDB[iterator], delimitingCharacter, 1)) + newLine); //Delete second directory file. No source file found that matches.
+        {
+            if (std::filesystem::is_directory(secondGivenVectorDB[iterator].substr(0, nthOccurrence(secondGivenVectorDB[iterator], delimitingCharacter, 1))) && std::filesystem::is_empty(secondGivenVectorDB[iterator].substr(0, nthOccurrence(secondGivenVectorDB[iterator], delimitingCharacter, 1))))
+                fileOpAction.push_back(L"COPY - Empty directory present on directory two and not directory one" + delimitingCharacter + firstGivenPath + L"/" + workingPath + delimitingCharacter + secondGivenPath + L"/" + workingPath + newLine); //Copy empty directory found in directory two that is not present in directory one.
+            else
+                fileOpAction.push_back(L"COPY - No match from directory two found in directory one" + delimitingCharacter + secondGivenVectorDB[iterator].substr(0, nthOccurrence(secondGivenVectorDB[iterator], delimitingCharacter, 1)) + delimitingCharacter + firstGivenPath + L"/" + workingPath + newLine); //Copy file from directory two that is not present in the directory one.
+        }
+            
     }
 
 
     //If matching files need to be hashed, do so.
     if (checkContents)
     {
-        if (showConsole) std::cout << "Beginning hash process. " << hashActions.size() * 2 << " Files to be hashed..." << std::endl; //***
+        if (showConsole) std::cout << "Beginning hash process. " << hashActions.size() * 2 << " Files to be hashed..." << std::endl;
         performHashActionFile(hashActions, firstGivenVectorDB, secondGivenVectorDB, firstGivenPath, secondGivenPath);
-        if (showConsole) std::cout << "Hashing finished!" << std::endl; //***
-        if (showConsole) std::cout << "Comparing file hashes..." << std::endl; ///***
+        if (showConsole) std::cout << "Hashing finished!" << std::endl;
+        if (showConsole) std::cout << "Comparing file hashes..." << std::endl;
         compareHashes(firstGivenVectorDB, secondGivenVectorDB, fileOpAction, firstGivenPath, secondGivenPath);
-        if (showConsole) std::cout << "Hash comparison finished!" << std::endl; //***
+        if (showConsole) std::cout << "Hash comparison finished!" << std::endl;
     }
-
-
 }
 
 //Iterates through vectors and compares hashes. Creates file operation entries when differences are found.
@@ -1173,11 +1270,17 @@ void compareHashes(std::vector<std::wstring>& firstGivenVectorDB, std::vector<st
         {
             if (DB1Hash != DB2Hash) //Hashes do NOT match. 
             {
-                std::wstring currentDB1FilePath = firstGivenVectorDB[iterator].substr(firstGivenPath.length() + 1, nthOccurrence(firstGivenVectorDB[iterator], delimitingCharacter, 1) - firstGivenPath.length() - 1); //Getting path of file.
-                fileOpAction.push_back(L"COPY - Different hashes" + delimitingCharacter + firstGivenPath + L"/" + currentDB1FilePath + delimitingCharacter + secondGivenPath + L"/" + currentDB1FilePath + newLine); //Copy first directory file to second directory.
+                if (operationMode == L"echo" || operationMode == L"contribute" || operationMode == L"cont")
+                {
+                    std::wstring currentDB1FilePath = firstGivenVectorDB[iterator].substr(firstGivenPath.length() + 1, nthOccurrence(firstGivenVectorDB[iterator], delimitingCharacter, 1) - firstGivenPath.length() - 1); //Getting path of file.
+                    fileOpAction.push_back(L"COPY - Different hashes" + delimitingCharacter + firstGivenPath + L"/" + currentDB1FilePath + delimitingCharacter + secondGivenPath + L"/" + currentDB1FilePath + newLine); //Copy first directory file to second directory.
+                }
+                else if (operationMode == L"synchronize" || operationMode == L"sync")
+                {
+                    //Alert user that hashes differ, and we do not know which to keep //*****
+                }
             }
         }
-
     }
 
 }

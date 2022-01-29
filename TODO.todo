@@ -46,7 +46,6 @@ Main tasks:
         ☐ Also, create the text for the "-h/--help" arguments.
             ✔ -h writing. @done (1/29/2022, 2:05:14 PM)
             ☐ --help writing. - Maybe just copy the readme.md?
-    ☐ Allow excluding and including of additional folders, files.
     ☐ Allow excluding and including of additional folders, files. @high
         ☐ Mask implementation
             Maybe just use regex?
@@ -56,16 +55,14 @@ Main tasks:
             Should this be done by providing a text file or receiving several inputs.
                 Potentially a mutation to the argument could let you choose, in case your exclusions are simple.
     ☐ Revamp argument handling @low
-        ☐ Change how single and double dashes are handled.
-        ☐ The --no-recursive switch needs to take an input, and work properly.
+        ✔ Change how single and double dashes are handled. @done (1/29/2022, 4:16:42 PM)
+        ✔ The --no-recursive switch needs to take an input, and work properly. @done (1/29/2022, 4:16:59 PM)
         ✔ Add deletion warning to program, to warn users when/where files COULD be effected. @done (1/23/2022, 3:04:06 PM)
             ✔ Also allow a flag arg to disable this warning. @done (1/23/2022, 3:04:05 PM)
         ✔ Add a flag arg to hide console output. Show it by default @done (1/23/2022, 2:16:35 PM)
             ✔ This should probably pause the output at the end of running. - Maybe an arg mutation for this? - No mutation. If the console is shown, pause at the end. @done (1/23/2022, 2:16:35 PM)
         ☐ Add a flag that allows the user to force that deletions and overwrites do not take place.
             This may not be necessary. Just know what you are doing and have a proper backup until you feel comfortable.
-Other features:
-
 General Bugs/Fixes:
     ☐ Look into how the program acts when one directory is nested within another.
         This may just need to be prevented.
