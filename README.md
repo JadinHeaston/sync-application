@@ -35,11 +35,12 @@ You can also compile your own binaries by downloading the source files, opening 
 --check-content(s)
 * --directory-one <DIRECTORY_PATH>
 * --directory-two <DIRECTORY_PATH>
--h - Displays a short help.
+-h - Displays a short help message.
 --help - Displays extended help.
 --hide-console - Hides console.
 * --operation-mode <OPERATION_MODE> | Operation Mode is defined as a string. The available options being "echo", "sync" or "synchronize", and "cont" or "contribute".
 --no-recursive <OPERATION_INTEGER> - Defines where a recursive process should not be used. Represented with an integer: 0 being no recursive on neither, 1 being not on directory-one, 2 being no on directory-two.
+--no-warning - Disables warning that explains the operation and outlines what files are potentially at risk. This should probably only be used when automating the run process.
 --output-files - Dumps all internal database vectors to .log files in the same directory as the application.
 --output-verbose-debug <OUTPUT_LOCATION> - Outputs log as the program runs to assist with debugging. If a log is present, new data is appended to prevent debugging data loss. 
 ```
