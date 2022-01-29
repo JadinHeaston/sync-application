@@ -46,16 +46,16 @@ You can also compile your own binaries by downloading the source files, opening 
 ```
 ### Sync Operations
 #### Contribute (Cont)
-    Contribute will copy any new changes from directory one to directory two.
-    Renaming a file on directory one will result in a new copy of the file within directory two.
-    No deletions or overwrites will NEVER occur within directory two.
+Contribute will copy any new changes from directory one to directory two.
+Renaming a file on directory one will result in a new copy of the file within directory two.
+No deletions or overwrites will NEVER occur within directory two.
 #### Echo
-    Echo will echo any changes made in directory one to directory two.
-    Changes will only occur within directory two.
+Echo will echo any changes made in directory one to directory two.
+Changes will only occur within directory two.
 
 #### Synchronize (Sync)
-    Synchronize will take the newest version from a directory and copy it to the other directory.
-    This results in deletions and changes within BOTH directories.
+Synchronize will take the newest version from a directory and copy it to the other directory.
+This results in deletions and changes within BOTH directories.
 
 # Contact
 Please reach out if you run into any bugs or issues.
