@@ -44,6 +44,18 @@ You can also compile your own binaries by downloading the source files, opening 
 --output-files - Dumps all internal database vectors to .log files in the same directory as the application.
 --output-verbose-debug <OUTPUT_LOCATION> - Outputs log as the program runs to assist with debugging. If a log is present, new data is appended to prevent debugging data loss. 
 ```
+### Sync Operations
+#### Contribute (Cont)
+    Contribute will copy any new changes from directory one to directory two.
+    Renaming a file on directory one will result in a new copy of the file within directory two.
+    No deletions or overwrites will NEVER occur within directory two.
+#### Echo
+    Echo will echo any changes made in directory one to directory two.
+    Changes will only occur within directory two.
+
+#### Synchronize (Sync)
+    Synchronize will take the newest version from a directory and copy it to the other directory.
+    This results in deletions and changes within BOTH directories.
 
 # Contact
 Please reach out if you run into any bugs or issues.
