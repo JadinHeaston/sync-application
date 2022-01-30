@@ -144,8 +144,8 @@ int main(int argc, char* argv[])
             {
                 firstGivenDirectoryPath = formatFilePath(charToWString(argv[i + 1]));
 
-                if (firstGivenDirectoryPath.back() == L'\\')
-                    firstGivenDirectoryPath.pop_back(); //Remove the slash.
+                if (firstGivenDirectoryPath.back() == L'\\' || firstGivenDirectoryPath.back() == L'/')
+                    firstGivenDirectoryPath.pop_back(); //Remove trailing slash.
 
                 if (!std::filesystem::is_directory(firstGivenDirectoryPath)) //Verify path is real and valid.
                 {
@@ -156,7 +156,7 @@ int main(int argc, char* argv[])
                         return 0;
                     }
 
-                    std::wcout << "the '--directory-one' path provided was NOT found. (" << firstGivenDirectoryPath << ")" << std::endl;
+                    std::wcout << "The '--directory-one' path provided was NOT found. (" << firstGivenDirectoryPath << ")" << std::endl;
                     std::cout << "Would you like to create this directory?" << std::endl;
 
                     std::cin >> userInput[0]; //Awaiting user input...
@@ -176,8 +176,8 @@ int main(int argc, char* argv[])
             {
                 secondGivenDirectoryPath = formatFilePath(charToWString(argv[i + 1]));
 
-                if (secondGivenDirectoryPath.back() == L'\\')
-                    secondGivenDirectoryPath.pop_back(); //Remove the slash
+                if (secondGivenDirectoryPath.back() == L'\\' || secondGivenDirectoryPath.back() == L'/')
+                    secondGivenDirectoryPath.pop_back(); //Remove trailing slash
 
                 if (!std::filesystem::is_directory(secondGivenDirectoryPath)) //Verify path is real and valid.
                 {
@@ -188,7 +188,7 @@ int main(int argc, char* argv[])
                         return 0;
                     }
 
-                    std::wcout << "the '--directory-two' path provided was NOT found. (" << secondGivenDirectoryPath << ")" << std::endl;
+                    std::wcout << "The '--directory-two' path provided was NOT found. (" << secondGivenDirectoryPath << ")" << std::endl;
                     std::cout << "Would you like to create this directory?" << std::endl;
                     
                     std::cin >> userInput[0]; //Awaiting user input...
