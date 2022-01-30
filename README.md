@@ -49,8 +49,9 @@ You can also compile your own binaries by downloading the source files, opening 
 
 ### Contribute (Cont)
 Contribute will copy any new changes from directory one to directory two.  
+No deletions will NEVER occur within directory two.  
 Renaming a file on directory one will result in a new copy of the file within directory two.  
-No deletions or overwrites will NEVER occur within directory two.  
+A modified file on directory one will cause the matching file on directory two to be overwritten.
 ### Echo
 Echo will echo any changes made in directory one to directory two.  
 Changes will only occur within directory two.  
