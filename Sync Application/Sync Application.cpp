@@ -30,6 +30,7 @@ bool showConsole = true; //Recieved from arg: --hide-console | defaults to false
 bool verboseDebug = false; //Defines if verbose debugging is enabled.
 bool showWarning = true; //Recieved from arg: --no-warning | defaults to true | Defines whether things are output to the console or not.
 bool dataLossProtection = false; //Recieved from arg: --data-protection | defaults to false;
+bool windowsMaxPathBypass = false; //Determines whether "\\?\" is prepended to path and backslashes are used as directory separators.
 
 //Sets global delimiter used for reading and writing DB files. Tilde typically works well. (CONSIDER USING MULTIPLE CHARACTER DELIMITER FOR SAFETY)
 std::wstring delimitingCharacter = L"▼";
@@ -85,6 +86,15 @@ void removeObject(std::wstring destinationFilePath, bool recursiveRemoval); //Re
 void copyFile(std::wstring source, std::wstring destination); //Copies file.
 void writeToDebug(std::chrono::system_clock::time_point givenTime, bool writeTime, std::wstring textToWrite); //Writes to the debug file.
 
+void syncCompareDirectories(std::vector<std::wstring>& firstGivenVectorDB, std::vector<std::wstring>& secondGivenVectorDB, std::vector<std::wstring>& hashActions, std::vector<std::wstring>& fileOpAction, std::wstring firstGivenPath, std::wstring secondGivenPath)
+{
+
+}
+void contCompareDirectories(std::vector<std::wstring>& firstGivenVectorDB, std::vector<std::wstring>& secondGivenVectorDB, std::vector<std::wstring>& hashActions, std::vector<std::wstring>& fileOpAction, std::wstring firstGivenPath, std::wstring secondGivenPath)
+{
+
+}
+
 int main(int argc, char* argv[])
 {
     ::ShowWindow(::GetConsoleWindow(), SW_SHOW); //Hiding console immediately.
@@ -115,13 +125,15 @@ int main(int argc, char* argv[])
     //Reading args
     if (argc == 1) //No arguments provided. Notify. Close program.
     {
-        std::cout << "No arguments provided.\nUse the \"-h\" or \"--help\" switch to show the available options.\n(-s and -d are required for operation)" << std::endl;
+        std::cout << "No arguments provided.\nUse the \"-h\" or \"--help\" switch to show the available options.\n" << std::endl;
         system("PAUSE");
         return 0;
     }
 
     for (int i = 0; i < argc; i++) // Cycle through all arguments.
     {
+        //std::cout << argv[i] << " : " << strncmp(argv[i], "--", 2) << std::endl;
+
         //Check if the argument contains a single or double slash
         if (strncmp(argv[i], "--", 2) == 0) //Check for double slash
         {
@@ -136,9 +148,9 @@ int main(int argc, char* argv[])
                 return 0;
             }
 
-            if ((strncmp(argv[i], "--check-content", 32) == 0) || (strncmp(argv[i], "--check-contents", 32) == 0)) //Enable file hashing.
+            if ((strcmp(argv[i], "--check-content") == 0) || (strncmp(argv[i], "--check-contents", 32) == 0)) //Enable file hashing.
                 checkContents = true; //Set hashing to true.
-            if (strncmp(argv[i], "--directory-one", 2) == 0) //Directory one path switch.
+            if (strcmp(argv[i], "--directory-one") == 0) //Directory one path switch.
             {
                 firstGivenDirectoryPath = formatFilePath(charToWString(argv[i + 1]));
 
@@ -152,7 +164,7 @@ int main(int argc, char* argv[])
                     return 0;
                 }
             }
-            else if (strncmp(argv[i], "--directory-two", 2) == 0) //Destination two path switch.
+            else if (strcmp(argv[i], "--directory-two") == 0) //Destination two path switch.
             {
                 secondGivenDirectoryPath = formatFilePath(charToWString(argv[i + 1]));
 
@@ -161,28 +173,28 @@ int main(int argc, char* argv[])
 
                 if (!std::filesystem::is_directory(secondGivenDirectoryPath)) //Verify path is real and valid.
                 {
-                    std::wcout << "the '--second-directory' path provided was NOT found. (" << secondGivenDirectoryPath << ")" << std::endl;
+                    std::wcout << "The '--second-directory' path provided was NOT found. (" << secondGivenDirectoryPath << ")" << std::endl;
                     std::cout << "Would you like to create this directory?" << std::endl;
                     //*****
                     system("PAUSE");
                     return 0;
                 }
             }
-            else if (strncmp(argv[i], "--hide-console", 32) == 0) //Defines if anything is output to the console.
+            else if (strcmp(argv[i], "--hide-console") == 0) //Defines if anything is output to the console.
                 showConsole = false;
-            else if (strncmp(argv[i], "--no-recursive", 32) == 0) //Disable recursive operation.
+            else if (strcmp(argv[i], "--no-recursive") == 0) //Disable recursive operation.
                 recursiveSearch = false;
-            else if (strncmp(argv[i], "--no-warning", 32) == 0) //Disable deletion warning.
+            else if (strcmp(argv[i], "--no-warning") == 0) //Disable deletion warning.
                 showWarning = false;
-            else if (strncmp(argv[i], "-operation-mode", 2) == 0) //Operation mode switch.
+            else if (strcmp(argv[i], "--operation-mode") == 0) //Operation mode switch.
                 operationMode = formatFilePath(charToWString(argv[i + 1]));
-            else if ((strncmp(argv[i], "--output-files", 32) == 0)) //Enable file output.
+            else if ((strcmp(argv[i], "--output-files") == 0)) //Enable file output.
                 outputFiles = true;
-            else if (strncmp(argv[i], "--output-verbose-debug", 32) == 0) //Output debug file in running directory.
+            else if (strcmp(argv[i], "--output-verbose-debug") == 0) //Output debug file in running directory.
             {
                 verboseDebug = true; //Set global verbose debug variable to true.
 
-                std::wstring debugFilePath = formatFilePath(charToWString(argv[i + 1])); //Get next argument.
+                debugFilePath = formatFilePath(charToWString(argv[i + 1])); //Get next argument.
 
                 if (debugFilePath.find(L"/")) //Search for a slash to determine if the given text is a full path or a name. If a slash is found, it is a path.
                 {
@@ -209,10 +221,10 @@ int main(int argc, char* argv[])
                 verboseDebugOutput.close();
             }
         }
-        else //Must be single dash.
+        else if (strncmp(argv[i], "-", 1) == 0) //Check for single dash.
         {
             for (int iterator = 1; iterator < sizeof(argv[i]); ++iterator) //Iterating through all characters, after the slash. (Starting at 1 to skip the initial dash)
-                singleCharArguments[argv[i][iterator]] = 1;
+                singleCharArguments[tolower(argv[i][iterator])] = 1; //Ensuring keys are lowercase for easy use later.
         }
 
         //std::cout << argv[i] << std::endl; //*** Display all arguments given.
@@ -221,15 +233,18 @@ int main(int argc, char* argv[])
     //Iterating through argument array and applying arguments.
     for (size_t iterator = 0; iterator < sizeof(singleCharArguments); ++iterator)
     {
+        //std::cout << singleCharArguments['h'] << std::endl;
         if (singleCharArguments['h']) //Short help message.
         {
             //Display help message.
             std::cout << "The three required arguments are: --directory-one <DIRECTORY_PATH>' as the source, --directory-two <DIRECTORY_PATH>' as the destination, and '--operation-mode <OPERATION_MODE>' to specifiy the operation mode." << std::endl;
             std::cout << "The operation mode can either be 'contribute' that only copies files from directory one to directory two, 'echo' that makes directory two look like directory one, or 'synchronize' that will use the newest version from either directory to keep both up to date and in sync." << std::endl;
-            std::cout << "Detailed help can befound by using '--help' or utilizing the readme.md file: https://github.com/JadinHeaston/sync-application" << std::endl;
+            std::cout << "Detailed help can be found by using '--help' or utilizing the readme.md file: https://github.com/JadinHeaston/sync-application" << std::endl;
             system("PAUSE");
             return 0;
         }
+        if (singleCharArguments['l']) //Short help message.
+            windowsMaxPathBypass = true;
     }
     //ARGS FINISHED.
 
@@ -239,15 +254,23 @@ int main(int argc, char* argv[])
 
     //MAX_PATH bypass.
     //Also ensuring that path is an absolute path.
-    firstGivenDirectoryPath = formatFilePath(L"//?/" + std::filesystem::absolute(firstGivenDirectoryPath).wstring());
-    secondGivenDirectoryPath = formatFilePath(L"//?/" + std::filesystem::absolute(secondGivenDirectoryPath).wstring());
+    windowsMaxPathBypass = true;
+    if (windowsMaxPathBypass)
+    {
+        firstGivenDirectoryPath = formatFilePath(L"\\\\?\\" + std::filesystem::absolute(firstGivenDirectoryPath).wstring());
+        secondGivenDirectoryPath = formatFilePath(L"\\\\?\\" + std::filesystem::absolute(secondGivenDirectoryPath).wstring());
+    }
+    else
+    {
+        firstGivenDirectoryPath = formatFilePath(std::filesystem::absolute(firstGivenDirectoryPath).wstring());
+        secondGivenDirectoryPath = formatFilePath(std::filesystem::absolute(secondGivenDirectoryPath).wstring());
+    }
 
     //Double check that there is no slash.
-    //This was added because running a drive letter ("D:") through absolute adds one.
-
-    if (firstGivenDirectoryPath.back() == L'/')
+    //This was added because running a drive letter ("D:") through absolute adds a slash..
+    if (firstGivenDirectoryPath.back() == L'/' || firstGivenDirectoryPath.back() == L'\\')
         firstGivenDirectoryPath.pop_back(); //Remove the slash.
-    if (secondGivenDirectoryPath.back() == L'/')
+    if (secondGivenDirectoryPath.back() == L'/' || secondGivenDirectoryPath.back() == L'\\')
         secondGivenDirectoryPath.pop_back(); //Remove the slash.
 
     if (operationMode != L"")
@@ -328,7 +351,6 @@ int main(int argc, char* argv[])
     //Displaying file locations.
     if (showConsole) std::wcout << L"First Directory: " << firstGivenDirectoryPath << std::endl;
     if (showConsole) std::wcout << L"Second Directory: " << secondGivenDirectoryPath << std::endl;
-
 
     if (verboseDebug) //Debug beginning program information.
     {
@@ -666,22 +688,27 @@ size_t nthOccurrence(std::wstring& givenString, std::wstring delimitingCharacter
     return stringPosition;
 }
 
-//Takes a string and removes "\\" and places "/".
+//Uniformly sets directory separators.
 std::wstring formatFilePath(std::wstring givenString)
 {
-    //if (givenString.find(L"\\\\?\\"))
-    //{
-
-    //}
-    //else
-    //{
-        //Formating givenFile to have the slashes ALL be \ instead of mixed with / and \.
-    for (int i = 0; i < (int)givenString.length(); ++i)
+    if (givenString.find(L"\\\\?\\") != std::wstring::npos) //If the windows max_path bypass is in the path, then all separators must be backslashes.
     {
-        if (givenString[i] == '\\')
-            givenString[i] = '/';
+        //Formating givenFile to have the slashes ALL be \.
+        for (int i = 0; i < (int)givenString.length(); ++i)
+        {
+            if (givenString[i] == '/')
+                givenString[i] = '\\';
+        }
     }
-    //}
+    else
+    {
+        //Formating givenFile to have the slashes ALL be /.
+        for (int i = 0; i < (int)givenString.length(); ++i)
+        {
+            if (givenString[i] == '\\')
+                givenString[i] = '/';
+        }
+    }
 
 
     return givenString;
@@ -788,43 +815,50 @@ void createDirectoryMapDB(std::vector<std::wstring>& givenVectorDB, std::wstring
 
     std::wstring current_file;
     std::wstringstream testStream;
+
+
+    time_t lastModifiedTime;
+    time_t dateCreatedTime;
+
     //Checking whether to search recursively or not
     if (recursiveSearch) {
         //RECURSIVE
         for (std::filesystem::recursive_directory_iterator end, dir(givenStartPath); dir != end; ++dir)
         {
-            // If it's not a directory, list it. If you want to list directories too, just remove this check.
-            //if (std::filesystem::is_regular_file(dir->path()))
-            //{
             //Setting current file equal to the full path of the file.
             current_file = std::filesystem::absolute(dir->path().native());
 
             //Putting path into array.
             testStream << formatFilePath(current_file) << delimitingCharacter;
 
-
-            if (!std::filesystem::is_directory(current_file))
+            // If it's not a directory, list it. If you want to list directories too, just remove this check.
+            if (std::filesystem::is_regular_file(dir->path()))
             {
-                //Getting filesize (in bytes).
-                testStream << std::filesystem::file_size(current_file) << delimitingCharacter;
+                    //if (verboseDebug) writeDebugThreadPool.push_task(writeToDebug, std::chrono::system_clock::now(), true, L"2 Is not a directory: " + formatFilePath(current_file));
+                    testStream << std::filesystem::file_size(current_file) << delimitingCharacter;
+                    //if (verboseDebug) writeDebugThreadPool.push_task(writeToDebug, std::chrono::system_clock::now(), true, L"3 Got File Size: " + formatFilePath(current_file));
+                    //Getting last modified time. In seconds from 1970 EPOCH format.
+                    testStream << boost::filesystem::last_write_time(current_file) << delimitingCharacter;
 
-                //Getting last modified time. In seconds from 1970 EPOCH format.
-                time_t firstDirectoryModifiedTime = boost::filesystem::last_write_time(current_file);
-                testStream << firstDirectoryModifiedTime << delimitingCharacter;
+                    //if (verboseDebug) writeDebugThreadPool.push_task(writeToDebug, std::chrono::system_clock::now(), true, L"4 Got last write time: " + formatFilePath(current_file));
+                    //Getting date created time. In seconds from 1970 EPOCH format.
+                    //if (verboseDebug) writeDebugThreadPool.push_task(writeToDebug, std::chrono::system_clock::now(), true, L"5 Got creation time: " + formatFilePath(current_file));
+                    testStream << boost::filesystem::creation_time(current_file) << delimitingCharacter + delimitingCharacter + newLine; //Adding an additional delimiter, since the hash is not added yet but the matching stuff will be.
 
-                //Getting date created time. In seconds from 1970 EPOCH format.
-                time_t firstDirectorydateCreatedTime = boost::filesystem::creation_time(current_file);
-                testStream << firstDirectorydateCreatedTime << delimitingCharacter + delimitingCharacter + newLine; //Adding an additional delimiter, since the hash is not added yet but the matching stuff will be.
+                    //if (verboseDebug) writeDebugThreadPool.push_task(writeToDebug, std::chrono::system_clock::now(), true, L"6 Data stored for file: " + formatFilePath(current_file));
             }
-            else
+            else if (std::filesystem::is_directory(current_file))
                 testStream << delimitingCharacter + delimitingCharacter + delimitingCharacter + delimitingCharacter + newLine;
+                    
 
+            //if (verboseDebug) writeDebugThreadPool.push_task(writeToDebug, std::chrono::system_clock::now(), true, L"7 Pushing data back: " + formatFilePath(current_file));
             //Append to DB.
             givenVectorDB.push_back(testStream.str());
-
+            //if (verboseDebug) writeDebugThreadPool.push_task(writeToDebug, std::chrono::system_clock::now(), true, L"8 Reseting streamstring: " + formatFilePath(current_file));
             //Clearing stringstream for next iteration.
             testStream.str(std::wstring());
-            //}
+            //if (verboseDebug) writeDebugThreadPool.push_task(writeToDebug, std::chrono::system_clock::now(), true, L"9 finished streamstring: " + formatFilePath(current_file));
+            
         }
     }
     else
@@ -1190,7 +1224,7 @@ void writeToDebug(std::chrono::system_clock::time_point givenTime, bool writeTim
     size_t fileSize = temporaryDebugHandle.tellg(); //Get the file size in bytes.
     temporaryDebugHandle.close(); //Close temporary handle reading 
 
-    if (fileSize >= 104857600) //100 MB
+    if (fileSize >= 102857600) //100 MB
     {
         //Change the file name.
         if (debugFileName.find(L"."))

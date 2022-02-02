@@ -38,6 +38,7 @@ You can also compile your own binaries by downloading the source files, opening 
 -h - Displays a short help message.
 --help - Displays extended help.
 --hide-console - Hides console.
+-l - Bypasses Windows MAX_PATH limit of 260 characters. It appends "\\?\", which requires utilizing backslashes for directory separators in the backend. (Thanks, Windows!)
 * --operation-mode <OPERATION_MODE> | Operation Mode is defined as a string. The available options being "echo", "sync" or "synchronize", and "cont" or "contribute".
 --no-recursive <OPERATION_INTEGER> - Defines where a recursive process should not be used. Represented with an integer: 0 being no recursive on neither, 1 being not on directory-one, 2 being no on directory-two.
 --no-warning - Disables warning that explains the operation and outlines what files are potentially at risk. This should probably only be used when automating the run process.
