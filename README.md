@@ -65,7 +65,7 @@ Conflicts occur when the last modified times are identical, but the file size or
 Once conflicts have been resolve, you can utilize the "--perform-sync-conflict-resolution <RESOLUTION_FILEPATH>" argument to perform the changes. The "--directory-one <DIRECTORY_PATH>" and "--directory-two <DIRECTORY_PATH>" arguments are still required.  
 
 # Contact
-Please reach out if you run into any bugs or issues. - jadinheaston@jadinheaston.com
+Please reach out if you run into any bugs or issues. - jadinheaston@jadinheaston.com  
 I can not promise that I will implement anything, or respond, but I am more likely to if I am aware of the problem to begin with.
 
 ## [Website](https://www.jadinheaston.com/)
