@@ -835,15 +835,17 @@ void createDirectoryMapDB(std::vector<std::wstring>& givenVectorDB, std::wstring
             if (std::filesystem::is_regular_file(dir->path()))
             {
                     //if (verboseDebug) writeDebugThreadPool.push_task(writeToDebug, std::chrono::system_clock::now(), true, L"2 Is not a directory: " + formatFilePath(current_file));
-                    testStream << std::filesystem::file_size(current_file) << delimitingCharacter;
+
                     //if (verboseDebug) writeDebugThreadPool.push_task(writeToDebug, std::chrono::system_clock::now(), true, L"3 Got File Size: " + formatFilePath(current_file));
                     //Getting last modified time. In seconds from 1970 EPOCH format.
-                    testStream << boost::filesystem::last_write_time(current_file) << delimitingCharacter;
+                    lastModifiedTime = boost::filesystem::last_write_time(current_file);
+                    testStream << lastModifiedTime << delimitingCharacter;
 
                     //if (verboseDebug) writeDebugThreadPool.push_task(writeToDebug, std::chrono::system_clock::now(), true, L"4 Got last write time: " + formatFilePath(current_file));
                     //Getting date created time. In seconds from 1970 EPOCH format.
+                    dateCreatedTime = boost::filesystem::creation_time(current_file);
                     //if (verboseDebug) writeDebugThreadPool.push_task(writeToDebug, std::chrono::system_clock::now(), true, L"5 Got creation time: " + formatFilePath(current_file));
-                    testStream << boost::filesystem::creation_time(current_file) << delimitingCharacter + delimitingCharacter + newLine; //Adding an additional delimiter, since the hash is not added yet but the matching stuff will be.
+                    testStream << dateCreatedTime << delimitingCharacter + delimitingCharacter + newLine; //Adding an additional delimiter, since the hash is not added yet but the matching stuff will be.
 
                     //if (verboseDebug) writeDebugThreadPool.push_task(writeToDebug, std::chrono::system_clock::now(), true, L"6 Data stored for file: " + formatFilePath(current_file));
             }

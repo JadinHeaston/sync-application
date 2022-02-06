@@ -42,6 +42,7 @@
     <ConfigurationType>Application</ConfigurationType>
     <UseDebugLibraries>true</UseDebugLibraries>
     <PlatformToolset>v142</PlatformToolset>
+    <CharacterSet>Unicode</CharacterSet>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'" Label="Configuration">
     <ConfigurationType>Application</ConfigurationType>
@@ -119,7 +120,7 @@
       <SDLCheck>true</SDLCheck>
       <PreprocessorDefinitions>_DEBUG;_CONSOLE;_CRT_SECURE_NO_WARNINGS;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <ConformanceMode>true</ConformanceMode>
-      <AdditionalIncludeDirectories>C:\Program Files\ADDITIONAL VISUAL STUDIOS LIBRARIES\OpenSSL\include64;C:\Program Files\ADDITIONAL VISUAL STUDIOS LIBRARIES\boost\boost_1_78_0</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>C:\Program Files\ADDITIONAL VISUAL STUDIOS LIBRARIES\OpenSSL\include64;C:\Program Files\ADDITIONAL VISUAL STUDIOS LIBRARIES\boost\boost_1_75_0_Debug;C:\Program Files\ADDITIONAL VISUAL STUDIOS LIBRARIES\boost\boost_1_75_0_Debug\stage\lib</AdditionalIncludeDirectories>
       <LanguageStandard>stdcpp17</LanguageStandard>
       <LanguageStandard_C>stdc17</LanguageStandard_C>
       <RuntimeLibrary>MultiThreaded</RuntimeLibrary>
@@ -127,7 +128,7 @@
     <Link>
       <SubSystem>Console</SubSystem>
       <GenerateDebugInformation>true</GenerateDebugInformation>
-      <AdditionalLibraryDirectories>C:\Program Files\ADDITIONAL VISUAL STUDIOS LIBRARIES\OpenSSL\lib64;C:\Program Files\ADDITIONAL VISUAL STUDIOS LIBRARIES\boost\boost_1_78_0\stage\lib</AdditionalLibraryDirectories>
+      <AdditionalLibraryDirectories>C:\Program Files\ADDITIONAL VISUAL STUDIOS LIBRARIES\OpenSSL\lib64;C:\Program Files\ADDITIONAL VISUAL STUDIOS LIBRARIES\boost\boost_1_75_0_Debug\stage\lib</AdditionalLibraryDirectories>
       <AdditionalDependencies>"C:\Program Files\ADDITIONAL VISUAL STUDIOS LIBRARIES\OpenSSL\lib64\libsslMT.lib";"C:\Program Files\ADDITIONAL VISUAL STUDIOS LIBRARIES\OpenSSL\lib64\libcryptoMT.lib";"C:\Program Files\ADDITIONAL VISUAL STUDIOS LIBRARIES\OpenSSL\lib64\libcryptoMD.lib";%(AdditionalDependencies)</AdditionalDependencies>
     </Link>
   </ItemDefinitionGroup>
@@ -141,7 +142,7 @@
       <ConformanceMode>true</ConformanceMode>
       <LanguageStandard>stdcpp17</LanguageStandard>
       <LanguageStandard_C>stdc17</LanguageStandard_C>
-      <AdditionalIncludeDirectories>C:\Program Files\ADDITIONAL VISUAL STUDIOS LIBRARIES\OpenSSL\include64;C:\Program Files\ADDITIONAL VISUAL STUDIOS LIBRARIES\boost\boost_1_78_0;C:\Program Files\ADDITIONAL VISUAL STUDIOS LIBRARIES\boost\boost_1_78_0\stage\lib</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>C:\Program Files\ADDITIONAL VISUAL STUDIOS LIBRARIES\OpenSSL\include64;C:\Program Files\ADDITIONAL VISUAL STUDIOS LIBRARIES\boost\boost_1_78_0_Release;C:\Program Files\ADDITIONAL VISUAL STUDIOS LIBRARIES\boost\boost_1_78_0_Release\stage\lib</AdditionalIncludeDirectories>
       <RuntimeLibrary>MultiThreaded</RuntimeLibrary>
     </ClCompile>
     <Link>
@@ -149,7 +150,7 @@
       <EnableCOMDATFolding>true</EnableCOMDATFolding>
       <OptimizeReferences>true</OptimizeReferences>
       <GenerateDebugInformation>true</GenerateDebugInformation>
-      <AdditionalLibraryDirectories>C:\Program Files\ADDITIONAL VISUAL STUDIOS LIBRARIES\OpenSSL\lib64;C:\Program Files\ADDITIONAL VISUAL STUDIOS LIBRARIES\boost\boost_1_78_0\stage\lib;C:\Program Files\ADDITIONAL VISUAL STUDIOS LIBRARIES\boost\boost_1_78_0\lib64-msvc-14.2</AdditionalLibraryDirectories>
+      <AdditionalLibraryDirectories>C:\Program Files\ADDITIONAL VISUAL STUDIOS LIBRARIES\OpenSSL\lib64;C:\Program Files\ADDITIONAL VISUAL STUDIOS LIBRARIES\boost\boost_1_78_0_Release\stage\lib;C:\Program Files\ADDITIONAL VISUAL STUDIOS LIBRARIES\boost\boost_1_78_0_Release\lib64-msvc-14.2</AdditionalLibraryDirectories>
       <AdditionalDependencies>"C:\Program Files\ADDITIONAL VISUAL STUDIOS LIBRARIES\OpenSSL\lib64\libsslMT.lib";"C:\Program Files\ADDITIONAL VISUAL STUDIOS LIBRARIES\OpenSSL\lib64\libcryptoMT.lib";"C:\Program Files\ADDITIONAL VISUAL STUDIOS LIBRARIES\OpenSSL\lib64\libcryptoMD.lib";%(AdditionalDependencies)</AdditionalDependencies>
     </Link>
   </ItemDefinitionGroup>
