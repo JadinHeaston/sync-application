@@ -89,15 +89,6 @@ void copyFile(std::wstring source, std::wstring destination); //Copies file.
 void moveFile(std::wstring givenSourcePath, std::wstring givenDestinationPath); //Moves an object.
 void writeToDebug(std::chrono::system_clock::time_point givenTime, bool writeTime, std::wstring textToWrite); //Writes to the debug file.
 
-void syncCompareDirectories(std::vector<std::wstring>& firstGivenVectorDB, std::vector<std::wstring>& secondGivenVectorDB, std::vector<std::wstring>& hashActions, std::vector<std::wstring>& fileOpAction, std::wstring firstGivenPath, std::wstring secondGivenPath)
-{
-
-}
-void contCompareDirectories(std::vector<std::wstring>& firstGivenVectorDB, std::vector<std::wstring>& secondGivenVectorDB, std::vector<std::wstring>& hashActions, std::vector<std::wstring>& fileOpAction, std::wstring firstGivenPath, std::wstring secondGivenPath)
-{
-
-}
-
 int main(int argc, char* argv[])
 {
     ::ShowWindow(::GetConsoleWindow(), SW_SHOW); //Hiding console immediately.
@@ -185,7 +176,7 @@ int main(int argc, char* argv[])
                     }
                 }
             }
-            else if (strncmp(argv[i], "--directory-two", 2) == 0) //Destination two path switch.
+            else if (strncmp(argv[i], "--directory-two", 32) == 0) //Destination two path switch.
             {
                 secondGivenDirectoryPath = formatFilePath(charToWString(argv[i + 1]));
 
@@ -194,7 +185,14 @@ int main(int argc, char* argv[])
 
                 if (!std::filesystem::is_directory(secondGivenDirectoryPath)) //Verify path is real and valid.
                 {
-                    std::wcout << "The '--second-directory' path provided was NOT found. (" << secondGivenDirectoryPath << ")" << std::endl;
+                    if (std::filesystem::exists(firstGivenDirectoryPath))
+                    {
+                        std::wcout << L"The '--directory-one' path provided is NOT a directory, and a directory can not be created. Please try again. (" << firstGivenDirectoryPath << ")" << std::endl;
+                        system("PAUSE");
+                        return 0;
+                    }
+
+                    std::wcout << "The '--directory-two' path provided was NOT found. (" << secondGivenDirectoryPath << ")" << std::endl;
                     std::cout << "Would you like to create this directory?" << std::endl;
                     
                     std::cin >> userInput[0]; //Awaiting user input...
@@ -330,7 +328,7 @@ int main(int argc, char* argv[])
         std::wcout << L"-------------------------------------------------- WARNING --------------------------------------------------" << std::endl;
         if (operationMode == L"echo")
         {
-            std::wcout << L"The \"ECHO\"operation will take place. This will cause the second directory to look *IDENTICAL* to the first." << std::endl;
+            std::wcout << L"The \"ECHO\" operation will take place. This will cause the second directory to look *IDENTICAL* to the first." << std::endl;
             std::wcout << L"When a file is found within both directories, the program will compare the size and last modified time. When a difference is found, the first directories file will overwrite the seconds. (Hashes are only used when files, size, and modification time are all the same and the --check-contents argument is provided.)" << std::endl;
             std::wcout << L"This option is best used when you are backing up data and want a second directory to match the directory you make changes in." << std::endl;
             std::wcout << L"Deletions and file overwrites are possible within the second directory." << std::endl;
@@ -339,7 +337,7 @@ int main(int argc, char* argv[])
         }
         else if (operationMode == L"synchronize" || operationMode == L"sync")
         {
-            std::wcout << L"The \"SYNCHRONIZE\"operation will take place. This will cause the first and second directories to look identical to each other, with the newest files being kept." << std::endl;
+            std::wcout << L"The \"SYNCHRONIZE\" operation will take place. This will cause the first and second directories to look identical to each other, with the newest files being kept." << std::endl;
             std::wcout << L"When a file is found within both directories, the one with the newest modification time is used and copied to replace the older version." << std::endl;
             std::wcout << L"This option is best used when changes can be made within both directories and you want them both to be synced with the newest versions from both." << std::endl;
             std::wcout << L"Deletions and file overwrites are possible within both directories." << std::endl;
@@ -348,7 +346,7 @@ int main(int argc, char* argv[])
         }
         else if (operationMode == L"contribute" || operationMode == L"cont")
         {
-            std::wcout << L"The \"CONTRIBUTE\"operation will take place. This will cause the first directory to contribute any new files or changes to the second directory." << std::endl;
+            std::wcout << L"The \"CONTRIBUTE\" operation will take place. This will cause the first directory to contribute any new files or changes to the second directory." << std::endl;
             std::wcout << L"When a file is found within both directories, the program will compare the size and last modified time. When a difference is found, the first directories file will overwrite the second directories file. If the file is not present within the second directory, it is copied over to it. (Hashes are only used when files, size, and modification time are all the same and the --check-contents argument is provided.)" << std::endl;
             std::wcout << "This option is best used when you are regularly archiving files and want to keep everything." << std::endl;
             std::wcout << L"No deletions are ever made. File overwrites are possible within the second directory." << std::endl;
@@ -1175,8 +1173,11 @@ void echoCompareDirectories(std::vector<std::wstring>& firstGivenVectorDB, std::
             {
                 workingSize = firstGivenVectorDB[iterator].substr(nthOccurrence(firstGivenVectorDB[iterator], delimitingCharacter, 1) + 1, nthOccurrence(firstGivenVectorDB[iterator], delimitingCharacter, 2) - nthOccurrence(firstGivenVectorDB[iterator], delimitingCharacter, 1) - 1); //Second column
                 workingSizeTwo = secondGivenVectorDB[DB2Line].substr(nthOccurrence(secondGivenVectorDB[DB2Line], delimitingCharacter, 1) + 1, nthOccurrence(secondGivenVectorDB[DB2Line], delimitingCharacter, 2) - nthOccurrence(secondGivenVectorDB[DB2Line], delimitingCharacter, 1) - 1); //Second column
+                
                 if (workingSize == workingSizeTwo) //Check if the file sizes match.
+                {
                     if (checkContents) hashActions.push_back(workingPath + delimitingCharacter + iter1 + delimitingCharacter + iter2 + newLine); //If everything matches, these files need hashed and compared.
+                }
                 else
                     fileOpAction.push_back(L"COPY - Different file sizes" + delimitingCharacter + firstGivenPath + L"/" + workingPath + delimitingCharacter + secondGivenPath + L"/" + workingPath + newLine); //Copy directory one file to directory two.
             }
@@ -1386,9 +1387,11 @@ void contributeCompareDirectories(std::vector<std::wstring>& firstGivenVectorDB,
                 workingSize = firstGivenVectorDB[iterator].substr(nthOccurrence(firstGivenVectorDB[iterator], delimitingCharacter, 1) + 1, nthOccurrence(firstGivenVectorDB[iterator], delimitingCharacter, 2) - nthOccurrence(firstGivenVectorDB[iterator], delimitingCharacter, 1) - 1); //Second column
                 workingSizeTwo = secondGivenVectorDB[DB2Line].substr(nthOccurrence(secondGivenVectorDB[DB2Line], delimitingCharacter, 1) + 1, nthOccurrence(secondGivenVectorDB[DB2Line], delimitingCharacter, 2) - nthOccurrence(secondGivenVectorDB[DB2Line], delimitingCharacter, 1) - 1); //Second column
                 if (workingSize == workingSizeTwo) //Check if the file sizes match.
+                {
                     if (checkContents) hashActions.push_back(workingPath + delimitingCharacter + iter1 + delimitingCharacter + iter2 + newLine); //If everything matches, these files need hashed and compared.
-                    else
-                        fileOpAction.push_back(L"COPY - Different file sizes" + delimitingCharacter + firstGivenPath + L"/" + workingPath + delimitingCharacter + secondGivenPath + L"/" + workingPath + newLine); //Copy directory one file to directory two.
+                }
+                else
+                    fileOpAction.push_back(L"COPY - Different file sizes" + delimitingCharacter + firstGivenPath + L"/" + workingPath + delimitingCharacter + secondGivenPath + L"/" + workingPath + newLine); //Copy directory one file to directory two.
             }
             else //A matching file has been found, with differing last modified times.
                 fileOpAction.push_back(L"COPY - Different last modified time" + delimitingCharacter + firstGivenPath + L"/" + workingPath + delimitingCharacter + secondGivenPath + L"/" + workingPath + newLine); //Copy directory one file to directory two.
