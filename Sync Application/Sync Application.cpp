@@ -85,6 +85,7 @@ void synchronizeCompareDirectories(std::vector<std::wstring>& firstGivenVectorDB
 void contributeCompareDirectories(std::vector<std::wstring>& firstGivenVectorDB, std::vector<std::wstring>& secondGivenVectorDB, std::vector<std::wstring>& hashActions, std::vector<std::wstring>& fileOpAction, std::wstring firstGivenPath, std::wstring secondGivenPath);
 void removeObject(std::wstring destinationFilePath, bool recursiveRemoval); //Removes given object.
 void copyFile(std::wstring source, std::wstring destination); //Copies file.
+void moveFile(std::wstring givenSourcePath, std::wstring givenDestinationPath); //Moves an object.
 void writeToDebug(std::chrono::system_clock::time_point givenTime, bool writeTime, std::wstring textToWrite); //Writes to the debug file.
 
 int main(int argc, char* argv[])
