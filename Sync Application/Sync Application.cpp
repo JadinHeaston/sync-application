@@ -34,6 +34,8 @@ bool windowsMaxPathBypass = false; //Determines whether "\\?\" is prepended to p
 
 std::wstring operationMode; //Holds operation mode to perform.
 
+std::wstring directorySeparator = L"/";
+
 //Sets global delimiter used for reading and writing DB files. Tilde typically works well. (CONSIDER USING MULTIPLE CHARACTER DELIMITER FOR SAFETY)
 std::wstring delimitingCharacter = L"▼";
 //Simple newline dude.
@@ -74,7 +76,7 @@ void createDirectoryMapDB(std::vector<std::wstring>& givenVectorDB, std::wstring
 size_t countFiles(std::wstring pathToDir, bool recursiveLookup); //CURRENTLY UNUSED.
 size_t countDir(std::wstring pathToDir, bool recursiveLookup); //CURRENTLY UNUSED.
 size_t nthOccurrence(std::wstring& givenString, std::wstring delimitingCharacter, size_t nth); //Provides character location of nthOccurrence of a given character in a given string.
-std::wstring formatFilePath(std::wstring givenFile); //Used to change \\ to /
+std::wstring formatFilePath(std::wstring givenFile, std::wstring givenDirectorySeparator = L""); //Used to change \\ to /
 void MThashGivenFile(std::wstring givenFilePath, std::vector<std::wstring>& givenVector, std::wstring lineLocation); //Multithreaded version that writes the outputs to the given vectors.
 std::string convertMD5ToHex(unsigned char* givenDigest); //Used BY hashGivenFile to format ahsh into "human readable" hex value.
 void sortDirectoryDatabases(std::vector<std::wstring>& givenVectorDB); //Created to allow multithreading. Simple std::sort on databases. Originally (and currently) only used for directory DB's.
@@ -233,6 +235,15 @@ int main(int argc, char* argv[])
                         debugFilePath = debugFilePath.substr(0, debugFilePath.find_last_of(L"/") + 1); //Remove filename from path.
                     }
                 }
+                else if (debugFilePath.find(L"\\"))
+                {
+                    //Checking that a file name exists. Continuing with default name appended to the given path if it doesn't.
+                    if (debugFilePath.substr(debugFilePath.find_last_of(L"\\") + 1, std::wstring::npos) != L"")
+                    {
+                        debugFileName = debugFilePath.substr(debugFilePath.find_last_of(L"\\") + 1, std::wstring::npos);
+                        debugFilePath = debugFilePath.substr(0, debugFilePath.find_last_of(L"\\") + 1); //Remove filename from path.
+                    }
+                }
                 else //If there is no slash, then a name was given.
                 {
                     debugFileName = debugFilePath; //Set the given item to be the name.
@@ -272,7 +283,7 @@ int main(int argc, char* argv[])
             return 0;
         }
         if (singleCharArguments['l']) //Short help message.
-            windowsMaxPathBypass = true;
+            windowsMaxPathBypass = true; directorySeparator = L"\\";
     }
     //ARGS FINISHED.
 
@@ -368,7 +379,7 @@ int main(int argc, char* argv[])
             return 0;
         }
         else //The user gave the okay. Continue.
-            std::cout << "Permission to continue granted. Moving forward with program." << std::endl;
+            system("CLS");  std::cout << "Permission to continue granted. Moving forward with program.\n" << std::endl;
     }
 
     if (!showConsole) //If the console should be displayed, then show it.
@@ -717,9 +728,11 @@ size_t nthOccurrence(std::wstring& givenString, std::wstring delimitingCharacter
 }
 
 //Uniformly sets directory separators.
-std::wstring formatFilePath(std::wstring givenString)
+std::wstring formatFilePath(std::wstring givenString, std::wstring givenDirectorySeparator)
 {
-    if (givenString.find(L"\\\\?\\") != std::wstring::npos) //If the windows max_path bypass is in the path, then all separators must be backslashes.
+
+    
+    if (givenDirectorySeparator == L"\\" || givenString.find(L"\\\\?\\") != std::wstring::npos) //If the windows max_path bypass is in the path, then all separators must be backslashes.
     {
         //Formating givenFile to have the slashes ALL be \.
         for (int i = 0; i < (int)givenString.length(); ++i)
@@ -863,7 +876,7 @@ void createDirectoryMapDB(std::vector<std::wstring>& givenVectorDB, std::wstring
             if (std::filesystem::is_regular_file(dir->path()))
             {
                     //if (verboseDebug) writeDebugThreadPool.push_task(writeToDebug, std::chrono::system_clock::now(), true, L"2 Is not a directory: " + formatFilePath(current_file));
-
+                    testStream << std::filesystem::file_size(current_file) << delimitingCharacter;
                     //if (verboseDebug) writeDebugThreadPool.push_task(writeToDebug, std::chrono::system_clock::now(), true, L"3 Got File Size: " + formatFilePath(current_file));
                     //Getting last modified time. In seconds from 1970 EPOCH format.
                     lastModifiedTime = boost::filesystem::last_write_time(current_file);
@@ -946,8 +959,8 @@ void performHashActionFile(std::vector<std::wstring>& hashActions, std::vector<s
     {
         //Grab item...
         currentReadLine = hashActions[iterator]; //Reading the full line.
-        directoryOneFile = firstGivenPath + L"/" + currentReadLine.substr(0, nthOccurrence(currentReadLine, delimitingCharacter, 1)); //Up until first delimiter, adding first dir path.
-        directoryTwoFile = secondGivenPath + L"/" + currentReadLine.substr(0, nthOccurrence(currentReadLine, delimitingCharacter, 1)); //Up until first delimiter, adding second dir path.
+        directoryOneFile = firstGivenPath + directorySeparator + currentReadLine.substr(0, nthOccurrence(currentReadLine, delimitingCharacter, 1)); //Up until first delimiter, adding first dir path.
+        directoryTwoFile = secondGivenPath + directorySeparator + currentReadLine.substr(0, nthOccurrence(currentReadLine, delimitingCharacter, 1)); //Up until first delimiter, adding second dir path.
         directoryOneVectorLocation = currentReadLine.substr(nthOccurrence(currentReadLine, delimitingCharacter, 1) + 1, nthOccurrence(currentReadLine, delimitingCharacter, 2)); //Between first and second delimiter.
         directoryTwoVectorLocation = currentReadLine.substr(nthOccurrence(currentReadLine, delimitingCharacter, 2) + 1, currentReadLine.length() - 1); //Going up until newline.
 
@@ -1004,7 +1017,6 @@ void performFileOpActionFile(std::vector<std::wstring>& fileOpAction)
         currentReadLine.erase(std::remove(currentReadLine.begin(), currentReadLine.end(), '\n'), currentReadLine.end()); //Removing newline character from end of line.
         requestedAction = currentReadLine.substr(0, nthOccurrence(currentReadLine, L" - ", 1)); //Reading requested action. Action word is before the " - ".
 
-
         //Assigning task.
         if (requestedAction == L"DELETE")
         {
@@ -1016,14 +1028,14 @@ void performFileOpActionFile(std::vector<std::wstring>& fileOpAction)
         else if (requestedAction == L"COPY")
         {
             source = currentReadLine.substr(nthOccurrence(currentReadLine, delimitingCharacter, 1) + 1, nthOccurrence(currentReadLine, delimitingCharacter, 2) - nthOccurrence(currentReadLine, delimitingCharacter, 1) - 1); //Reading source. Between first and second delimiter.  
-            destination = currentReadLine.substr(nthOccurrence(currentReadLine, delimitingCharacter, 2) + 1, -1); //Reading destination. Second delimiter to end of string, removing the "\n" characters at the end.
+            destination = currentReadLine.substr(nthOccurrence(currentReadLine, delimitingCharacter, 2) + 1, - 1); //Reading destination. Second delimiter to end of string, removing the "\n" characters at the end.
             if (verboseDebug) writeDebugThreadPool.push_task(writeToDebug, std::chrono::system_clock::now(), true, L"COPYING: " + source + L" - " + destination);
             fileOperationThreadPool.push_task(copyFile, source, destination); //Creating copying task, assigning it to main pool. Directory One file.
         }
         else if (requestedAction == L"MOVE") //Future use for other sync methods. *****
         {
             source = currentReadLine.substr(nthOccurrence(currentReadLine, delimitingCharacter, 1) + 1, nthOccurrence(currentReadLine, delimitingCharacter, 2) - nthOccurrence(currentReadLine, delimitingCharacter, 1) - 1); //Reading source. Between first and second delimiter.  
-            destination = currentReadLine.substr(nthOccurrence(currentReadLine, delimitingCharacter, 2) + 1, -1); //Reading destination. Second delimiter to end of string, removing the "\n" characters at the end.
+            destination = currentReadLine.substr(nthOccurrence(currentReadLine, delimitingCharacter, 2) + 1, - 1); //Reading destination. Second delimiter to end of string, removing the "\n" characters at the end.
             if (verboseDebug) writeDebugThreadPool.push_task(writeToDebug, std::chrono::system_clock::now(), true, L"MOVE: " + source + L" - " + destination); //Log.
             fileOperationThreadPool.push_task(moveFile, source, destination); //Creating move task, assigning it to main pool. Directory one file is moved to directory two.
         }
@@ -1065,7 +1077,7 @@ void removeObject(std::wstring destinationFilePath, bool recursiveRemoval)
 void copyFile(std::wstring givenSourcePath, std::wstring givenDestinationPath)
 {
     //Creating files themselves.
-    std::wstring destinationDirectoriesPath = givenDestinationPath.substr(0, givenDestinationPath.find_last_of(L"/") + 1); //Obtaining path of the destination until the last backslash.
+    std::wstring destinationDirectoriesPath = givenDestinationPath.substr(0, givenDestinationPath.find_last_of(directorySeparator) + 1); //Obtaining path of the destination until the last backslash.
 
     if (!std::filesystem::exists(destinationDirectoriesPath)) //If the directory does not exist, then create it.
         std::filesystem::create_directories(destinationDirectoriesPath);
@@ -1091,7 +1103,7 @@ void copyFile(std::wstring givenSourcePath, std::wstring givenDestinationPath)
 void moveFile(std::wstring givenSourcePath, std::wstring givenDestinationPath)
 {
     //Creating files themselves.
-    std::wstring destinationDirectoriesPath = givenDestinationPath.substr(0, givenDestinationPath.find_last_of(L"/") + 1); //Obtaining path of the destination until the last backslash.
+    std::wstring destinationDirectoriesPath = givenDestinationPath.substr(0, givenDestinationPath.find_last_of(directorySeparator) + 1); //Obtaining path of the destination until the last backslash.
 
     if (!std::filesystem::exists(destinationDirectoriesPath)) //If the directory does not exist, then create it.
         std::filesystem::create_directories(destinationDirectoriesPath);
@@ -1179,17 +1191,17 @@ void echoCompareDirectories(std::vector<std::wstring>& firstGivenVectorDB, std::
                     if (checkContents) hashActions.push_back(workingPath + delimitingCharacter + iter1 + delimitingCharacter + iter2 + newLine); //If everything matches, these files need hashed and compared.
                 }
                 else
-                    fileOpAction.push_back(L"COPY - Different file sizes" + delimitingCharacter + firstGivenPath + L"/" + workingPath + delimitingCharacter + secondGivenPath + L"/" + workingPath + newLine); //Copy directory one file to directory two.
+                    fileOpAction.push_back(L"COPY - Different file sizes" + delimitingCharacter + firstGivenPath + directorySeparator + workingPath + delimitingCharacter + secondGivenPath + directorySeparator + workingPath + newLine); //Copy directory one file to directory two.
             }
             else //A matching file has been found, with differing last modified times.
-                fileOpAction.push_back(L"COPY - Different last modified time" + delimitingCharacter + firstGivenPath + L"/" + workingPath + delimitingCharacter + secondGivenPath + L"/" + workingPath + newLine); //Copy directory one file to directory two.
+                fileOpAction.push_back(L"COPY - Different last modified time" + delimitingCharacter + firstGivenPath + directorySeparator + workingPath + delimitingCharacter + secondGivenPath + directorySeparator + workingPath + newLine); //Copy directory one file to directory two.
         }
         else
         {
             if (std::filesystem::is_directory(firstGivenVectorDB[iterator].substr(0, nthOccurrence(firstGivenVectorDB[iterator], delimitingCharacter, 1))) && std::filesystem::is_empty(firstGivenVectorDB[iterator].substr(0, nthOccurrence(firstGivenVectorDB[iterator], delimitingCharacter, 1))))
-                fileOpAction.push_back(L"COPY - Empty directory present on source" + delimitingCharacter + firstGivenPath + L"/" + workingPath + delimitingCharacter + secondGivenPath + L"/" + workingPath + newLine); //Copy directory one file to directory two.
+                fileOpAction.push_back(L"COPY - Empty directory present on source" + delimitingCharacter + firstGivenPath + directorySeparator + workingPath + delimitingCharacter + secondGivenPath + directorySeparator + workingPath + newLine); //Copy directory one file to directory two.
             else
-                fileOpAction.push_back(L"COPY - No destination found" + delimitingCharacter + firstGivenPath + L"/" + workingPath + delimitingCharacter + secondGivenPath + L"/" + workingPath + newLine); //Copy directory one file to directory two.
+                fileOpAction.push_back(L"COPY - No destination found" + delimitingCharacter + firstGivenPath + directorySeparator + workingPath + delimitingCharacter + secondGivenPath + directorySeparator + workingPath + newLine); //Copy directory one file to directory two.
         }
     }
 
@@ -1286,17 +1298,17 @@ void synchronizeCompareDirectories(std::vector<std::wstring>& firstGivenVectorDB
                 }
             }
             else if (workingDateMod > workingDateModTwo) //If the directory one file is newer than the directory two file.
-                fileOpAction.push_back(L"COPY - Different last modified time" + delimitingCharacter + firstGivenPath + L"/" + workingPath + delimitingCharacter + secondGivenPath + L"/" + workingPath + newLine); //Copy directory one file to directory two.
+                fileOpAction.push_back(L"COPY - Different last modified time" + delimitingCharacter + firstGivenPath + directorySeparator + workingPath + delimitingCharacter + secondGivenPath + directorySeparator + workingPath + newLine); //Copy directory one file to directory two.
             else //The directory two file must be the newer file. Copy it to directory one.
-                fileOpAction.push_back(L"COPY - Different last modified time" + delimitingCharacter + secondGivenPath + L"/" + workingPath + delimitingCharacter + firstGivenPath + L"/" + workingPath + newLine); //Copy directory two file to directory one.
+                fileOpAction.push_back(L"COPY - Different last modified time" + delimitingCharacter + secondGivenPath + directorySeparator + workingPath + delimitingCharacter + firstGivenPath + directorySeparator + workingPath + newLine); //Copy directory two file to directory one.
 
         }
         else //No matching file from directory one found in directory two. Copy the file over to directory two.
         {
             if (std::filesystem::is_directory(firstGivenVectorDB[iterator].substr(0, nthOccurrence(firstGivenVectorDB[iterator], delimitingCharacter, 1))) && std::filesystem::is_empty(firstGivenVectorDB[iterator].substr(0, nthOccurrence(firstGivenVectorDB[iterator], delimitingCharacter, 1))))
-                fileOpAction.push_back(L"COPY - Empty directory present on directory one and not directory two" + delimitingCharacter + firstGivenPath + L"/" + workingPath + delimitingCharacter + secondGivenPath + L"/" + workingPath + newLine); //Copy first directory file to second directory.
+                fileOpAction.push_back(L"COPY - Empty directory present on directory one and not directory two" + delimitingCharacter + firstGivenPath + directorySeparator + workingPath + delimitingCharacter + secondGivenPath + directorySeparator + workingPath + newLine); //Copy first directory file to second directory.
             else
-                fileOpAction.push_back(L"COPY - No match from directory one found in directory two" + delimitingCharacter + firstGivenPath + L"/" + workingPath + delimitingCharacter + secondGivenPath + L"/" + workingPath + newLine); //Copy first directory file to second directory.
+                fileOpAction.push_back(L"COPY - No match from directory one found in directory two" + delimitingCharacter + firstGivenPath + directorySeparator + workingPath + delimitingCharacter + secondGivenPath + directorySeparator + workingPath + newLine); //Copy first directory file to second directory.
         }
     }
 
@@ -1311,9 +1323,9 @@ void synchronizeCompareDirectories(std::vector<std::wstring>& firstGivenVectorDB
         if (secondGivenVectorDB[iterator].substr(nthOccurrence(secondGivenVectorDB[iterator], delimitingCharacter, 5) + 1, 7) != L"MATCHED")
         {
             if (std::filesystem::is_directory(secondGivenVectorDB[iterator].substr(0, nthOccurrence(secondGivenVectorDB[iterator], delimitingCharacter, 1))) && std::filesystem::is_empty(secondGivenVectorDB[iterator].substr(0, nthOccurrence(secondGivenVectorDB[iterator], delimitingCharacter, 1))))
-                fileOpAction.push_back(L"COPY - Empty directory present on directory two and not directory one" + delimitingCharacter + firstGivenPath + L"/" + workingPath + delimitingCharacter + secondGivenPath + L"/" + workingPath + newLine); //Copy empty directory found in directory two that is not present in directory one.
+                fileOpAction.push_back(L"COPY - Empty directory present on directory two and not directory one" + delimitingCharacter + firstGivenPath + directorySeparator + workingPath + delimitingCharacter + secondGivenPath + directorySeparator + workingPath + newLine); //Copy empty directory found in directory two that is not present in directory one.
             else
-                fileOpAction.push_back(L"COPY - No match from directory two found in directory one" + delimitingCharacter + secondGivenVectorDB[iterator].substr(0, nthOccurrence(secondGivenVectorDB[iterator], delimitingCharacter, 1)) + delimitingCharacter + firstGivenPath + L"/" + workingPath + newLine); //Copy file from directory two that is not present in the directory one.
+                fileOpAction.push_back(L"COPY - No match from directory two found in directory one" + delimitingCharacter + secondGivenVectorDB[iterator].substr(0, nthOccurrence(secondGivenVectorDB[iterator], delimitingCharacter, 1)) + delimitingCharacter + firstGivenPath + directorySeparator + workingPath + newLine); //Copy file from directory two that is not present in the directory one.
         }
             
     }
@@ -1393,17 +1405,17 @@ void contributeCompareDirectories(std::vector<std::wstring>& firstGivenVectorDB,
                     if (checkContents) hashActions.push_back(workingPath + delimitingCharacter + iter1 + delimitingCharacter + iter2 + newLine); //If everything matches, these files need hashed and compared.
                 }
                 else
-                    fileOpAction.push_back(L"COPY - Different file sizes" + delimitingCharacter + firstGivenPath + L"/" + workingPath + delimitingCharacter + secondGivenPath + L"/" + workingPath + newLine); //Copy directory one file to directory two.
+                    fileOpAction.push_back(L"COPY - Different file sizes" + delimitingCharacter + firstGivenPath + directorySeparator + workingPath + delimitingCharacter + secondGivenPath + directorySeparator + workingPath + newLine); //Copy directory one file to directory two.
             }
             else //A matching file has been found, with differing last modified times.
-                fileOpAction.push_back(L"COPY - Different last modified time" + delimitingCharacter + firstGivenPath + L"/" + workingPath + delimitingCharacter + secondGivenPath + L"/" + workingPath + newLine); //Copy directory one file to directory two.
+                fileOpAction.push_back(L"COPY - Different last modified time" + delimitingCharacter + firstGivenPath + directorySeparator + workingPath + delimitingCharacter + secondGivenPath + directorySeparator + workingPath + newLine); //Copy directory one file to directory two.
         }
         else
         {
             if (std::filesystem::is_directory(firstGivenVectorDB[iterator].substr(0, nthOccurrence(firstGivenVectorDB[iterator], delimitingCharacter, 1))) && std::filesystem::is_empty(firstGivenVectorDB[iterator].substr(0, nthOccurrence(firstGivenVectorDB[iterator], delimitingCharacter, 1))))
-                fileOpAction.push_back(L"COPY - Empty directory present on source" + delimitingCharacter + firstGivenPath + L"/" + workingPath + delimitingCharacter + secondGivenPath + L"/" + workingPath + newLine); //Copy directory one file to directory two.
+                fileOpAction.push_back(L"COPY - Empty directory present on source" + delimitingCharacter + firstGivenPath + directorySeparator + workingPath + delimitingCharacter + secondGivenPath + directorySeparator + workingPath + newLine); //Copy directory one file to directory two.
             else
-                fileOpAction.push_back(L"COPY - No destination found" + delimitingCharacter + firstGivenPath + L"/" + workingPath + delimitingCharacter + secondGivenPath + L"/" + workingPath + newLine); //Copy directory one file to directory two.
+                fileOpAction.push_back(L"COPY - No destination found" + delimitingCharacter + firstGivenPath + directorySeparator + workingPath + delimitingCharacter + secondGivenPath + directorySeparator + workingPath + newLine); //Copy directory one file to directory two.
         }
     }
 
@@ -1458,7 +1470,7 @@ void compareHashes(std::vector<std::wstring>& firstGivenVectorDB, std::vector<st
                 if (operationMode == L"echo" || operationMode == L"contribute" || operationMode == L"cont")
                 {
                     std::wstring currentDB1FilePath = firstGivenVectorDB[iterator].substr(firstGivenPath.length() + 1, nthOccurrence(firstGivenVectorDB[iterator], delimitingCharacter, 1) - firstGivenPath.length() - 1); //Getting path of file.
-                    fileOpAction.push_back(L"COPY - Different hashes" + delimitingCharacter + firstGivenPath + L"/" + currentDB1FilePath + delimitingCharacter + secondGivenPath + L"/" + currentDB1FilePath + newLine); //Copy first directory file to second directory.
+                    fileOpAction.push_back(L"COPY - Different hashes" + delimitingCharacter + firstGivenPath + directorySeparator + currentDB1FilePath + delimitingCharacter + secondGivenPath + directorySeparator + currentDB1FilePath + newLine); //Copy first directory file to second directory.
                 }
                 else if (operationMode == L"synchronize" || operationMode == L"sync")
                 {
