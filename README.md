@@ -26,8 +26,9 @@ You can also compile your own binaries by downloading the source files, opening 
 (Eventually, I will provide a better in-depth walk-through.)
 
 # Options
-"Sync Application.exe" [OPTIONS] -o <OPERATION_MODE> -s <DIRECTORY_PATH> -d <DIRECTORY_PATH>
-## List of Arguments
+OUTDATED: "Sync Application.exe" [OPTIONS] -o <OPERATION_MODE> -s <DIRECTORY_PATH> -d <DIRECTORY_PATH>  
+
+## List of Arguments (OUTDATED)
 (An asterisk indicates a required input)
 
 **NOTE**: *Paths should NOT end with a back slash ("\\") as quotation marks could be escaped. Usage of forward slashes ("/") is encouraged and what is used internally to avoid conflicts.*
@@ -65,6 +66,15 @@ The conflicts can be resolved by removing one of the two paths. **The path kept 
 Conflicts occur when the last modified times are identical, but the file size or hashes differ. There is no way to know which version is the "new" one, and thus no safe changes can be made.  
 Once conflicts have been resolve, you can utilize the "--perform-sync-conflict-resolution <RESOLUTION_FILEPATH>" argument to perform the changes. The "--directory-one <DIRECTORY_PATH>" and "--directory-two <DIRECTORY_PATH>" arguments are still required.  
 
+# Software Shoutouts
+This appliation uses several incredible open-source pieces of software and code.  
+I want to give thinks, and provide the reasources for other people to utilize their tools and show appreciation to them. Without these libraries, this would never have been made.
+* [Boost](https://www.boost.org/) - Filesystem
+    * I initially used the Boost Filesystem library handle all filesystem interactions, but have since moved to the built-in filesystem utilities (which were taken from Boost!). I currently use Boost to obtain file metadata times (last modification and creation times). I find the data returned a little easier to work with.
+* [OpenSSL](https://www.openssl.org/)
+    * A good resource for MD5 hashing can be found here on the [openssl.org](https://www.openssl.org/docs/man1.1.1/man3/MD5.html) website.
+* [thread-pool by bshoshany](https://github.com/bshoshany/thread-pool)  
+    * This library is FANTASTIC. It is very easy to implement, and works very well. While working on this project, I initially created it as a single threaded application. After troubleshooting why my comparisons were so slow, I looked into multi-threading it to increase performance. While my problem was a simple bad implementation of comparing two large vectors, this library made creating multi-threaded applications very easy. I use it for most projects now.  
 # Contact
 Please reach out if you run into any bugs or issues. - jadinheaston@jadinheaston.com  
 I can not promise that I will implement anything, or respond, but I am more likely to if I am aware of the problem to begin with.
