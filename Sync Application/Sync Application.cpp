@@ -20,7 +20,10 @@
 #include <unordered_map> //Map.
 #include "thread_pool.hpp" //Thread pool stuff.
 
+#include "curl/curl.h"
 
+//CURL* curlHandle = curl_easy_init();
+//https://curl.se/libcurl/c/curl_easy_init.html
 
 //ARGUMENT DEFAULTS:
 bool checkContents = false; ////Recieved from arg: --check-content | Defaults to false.
@@ -200,7 +203,7 @@ int main(int argc, char* argv[])
                     std::cin >> userInput[0]; //Awaiting user input...
 
                     //Verify if the user is okay with continuing.
-                    if (toupper(userInput[0]) != 'Y') //The input is NOT a "Y".
+                    if (toupper(userInput[0]) == 'Y') //The input is a "Y".
                         std::filesystem::create_directories(secondGivenDirectoryPath); //Creating directory.
                     else //The user gave the okay. Continue.
                     {
