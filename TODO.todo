@@ -65,6 +65,7 @@ Main tasks:
             ✔ This should probably pause the output at the end of running. - Maybe an arg mutation for this? - No mutation. If the console is shown, pause at the end. @done (1/23/2022, 2:16:35 PM)
         ☐ Add a flag that allows the user to force that deletions and overwrites do not take place.
             This may not be necessary. Just know what you are doing and have a proper backup until you feel comfortable.
+            Change this to be a --dry-run argument.
         ☐ Have the program check the folder count, file count, and size (bytes) of the directories and return if they are what is expect.
             This would help debugging things and potentially allow users to identify when issues go wrong.
 Other features:
