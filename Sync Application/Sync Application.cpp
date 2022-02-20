@@ -624,7 +624,7 @@ void writeUnicodeToFile(std::ofstream& outputFile, std::wstring inputWstring)
 std::wstring charToWString(char* givenCharArray)
 {
     std::string intermediaryString = givenCharArray;
-    size_t wchars_num = MultiByteToWideChar(65001, 0, intermediaryString.c_str(), -1, NULL, 0);
+    int wchars_num = MultiByteToWideChar(65001, 0, intermediaryString.c_str(), -1, NULL, 0);
     wchar_t* wstr = new wchar_t[wchars_num];
     MultiByteToWideChar(65001, 0, intermediaryString.c_str(), -1, wstr, wchars_num);
 
@@ -1185,7 +1185,7 @@ void echoCompareDirectories(std::vector<std::wstring>& firstGivenVectorDB, std::
             firstGivenVectorDB[iterator].insert(firstGivenVectorDB[iterator].length() - 1, L"MATCHED" + delimitingCharacter + iter2); //Add match marker and line.
             secondGivenVectorDB[DB2Line].insert(secondGivenVectorDB[DB2Line].length() - 1, L"MATCHED" + delimitingCharacter + iter1); //Add match marker and line.
 
-            if (!std::filesystem::is_directory(firstGivenVectorDB[iterator].substr(0, nthOccurrence(firstGivenVectorDB[iterator], delimitingCharacter, 1)))) //If the path not a directory, skip the iteration.
+            if (std::filesystem::is_directory(firstGivenVectorDB[iterator].substr(0, nthOccurrence(firstGivenVectorDB[iterator], delimitingCharacter, 1)))) //If the path not a directory, skip the iteration.
                 continue;
 
             workingDateMod = firstGivenVectorDB[iterator].substr(nthOccurrence(firstGivenVectorDB[iterator], delimitingCharacter, 2) + 1, nthOccurrence(firstGivenVectorDB[iterator], delimitingCharacter, 3) - nthOccurrence(firstGivenVectorDB[iterator], delimitingCharacter, 2) - 1); //Third column
@@ -1307,10 +1307,9 @@ void synchronizeCompareDirectories(std::vector<std::wstring>& firstGivenVectorDB
                 }
             }
             else if (workingDateMod > workingDateModTwo) //If the directory one file is newer than the directory two file.
-                fileOpAction.push_back(L"COPY - Different last modified time" + delimitingCharacter + firstGivenPath + directorySeparator + workingPath + delimitingCharacter + secondGivenPath + directorySeparator + workingPath + newLine); //Copy directory one file to directory two.
+                fileOpAction.push_back(L"COPY - Directory one file has a newer last modified time" + delimitingCharacter + firstGivenPath + directorySeparator + workingPath + delimitingCharacter + secondGivenPath + directorySeparator + workingPath + newLine); //Copy directory one file to directory two.
             else //The directory two file must be the newer file. Copy it to directory one.
-                fileOpAction.push_back(L"COPY - Different last modified time" + delimitingCharacter + secondGivenPath + directorySeparator + workingPath + delimitingCharacter + firstGivenPath + directorySeparator + workingPath + newLine); //Copy directory two file to directory one.
-
+                fileOpAction.push_back(L"COPY - Directory two file has a newer last modified time" + delimitingCharacter + secondGivenPath + directorySeparator + workingPath + delimitingCharacter + firstGivenPath + directorySeparator + workingPath + newLine); //Copy directory two file to directory one.
         }
         else //No matching file from directory one found in directory two. Copy the file over to directory two.
         {
@@ -1331,12 +1330,15 @@ void synchronizeCompareDirectories(std::vector<std::wstring>& firstGivenVectorDB
     {
         if (secondGivenVectorDB[iterator].substr(nthOccurrence(secondGivenVectorDB[iterator], delimitingCharacter, 5) + 1, 7) != L"MATCHED")
         {
+            //Getting workingPath
+            workingPath = secondGivenVectorDB[iterator].substr(0, nthOccurrence(secondGivenVectorDB[iterator], delimitingCharacter, 1));
+            workingPath = workingPath.erase(workingPath.find(secondGivenPath), secondGivenPath.length() + 1);
+
             if (std::filesystem::is_directory(secondGivenVectorDB[iterator].substr(0, nthOccurrence(secondGivenVectorDB[iterator], delimitingCharacter, 1))) && std::filesystem::is_empty(secondGivenVectorDB[iterator].substr(0, nthOccurrence(secondGivenVectorDB[iterator], delimitingCharacter, 1))))
-                fileOpAction.push_back(L"COPY - Empty directory present on directory two and not directory one" + delimitingCharacter + firstGivenPath + directorySeparator + workingPath + delimitingCharacter + secondGivenPath + directorySeparator + workingPath + newLine); //Copy empty directory found in directory two that is not present in directory one.
+                fileOpAction.push_back(L"COPY - Empty directory present on directory two and not directory one" + delimitingCharacter + secondGivenPath + directorySeparator + workingPath + delimitingCharacter + firstGivenPath + directorySeparator + workingPath + newLine); //Copy empty directory found in directory two that is not present in directory one.
             else
                 fileOpAction.push_back(L"COPY - No match from directory two found in directory one" + delimitingCharacter + secondGivenVectorDB[iterator].substr(0, nthOccurrence(secondGivenVectorDB[iterator], delimitingCharacter, 1)) + delimitingCharacter + firstGivenPath + directorySeparator + workingPath + newLine); //Copy file from directory two that is not present in the directory one.
         }
-            
     }
 
 
@@ -1400,7 +1402,7 @@ void contributeCompareDirectories(std::vector<std::wstring>& firstGivenVectorDB,
             firstGivenVectorDB[iterator].insert(firstGivenVectorDB[iterator].length() - 1, L"MATCHED" + delimitingCharacter + iter2); //Add match marker and line.
             secondGivenVectorDB[DB2Line].insert(secondGivenVectorDB[DB2Line].length() - 1, L"MATCHED" + delimitingCharacter + iter1); //Add match marker and line.
 
-            if (!std::filesystem::is_directory(firstGivenVectorDB[iterator].substr(0, nthOccurrence(firstGivenVectorDB[iterator], delimitingCharacter, 1)))) //If the path not a directory, skip the iteration.
+            if (std::filesystem::is_directory(firstGivenVectorDB[iterator].substr(0, nthOccurrence(firstGivenVectorDB[iterator], delimitingCharacter, 1)))) //If the path not a directory, skip the iteration.
                 continue;
 
             workingDateMod = firstGivenVectorDB[iterator].substr(nthOccurrence(firstGivenVectorDB[iterator], delimitingCharacter, 2) + 1, nthOccurrence(firstGivenVectorDB[iterator], delimitingCharacter, 3) - nthOccurrence(firstGivenVectorDB[iterator], delimitingCharacter, 2) - 1); //Third column
