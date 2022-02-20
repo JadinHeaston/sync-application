@@ -44,7 +44,7 @@ std::wstring delimitingCharacter = L"▼";
 //Simple newline dude.
 std::wstring newLine = L"\n";
 //Buffer size for hashing
-const int hashBufferSize = 4096;
+const size_t hashBufferSize = 4096;
 
 //Creating threadpools.
 thread_pool threadPool(std::thread::hardware_concurrency()); //"Default" pool
@@ -64,10 +64,10 @@ std::wstring secondGivenDirectoryPath;
 std::ofstream verboseDebugOutput; //Hold potential future file handle if verbose debugging is enabled.
 std::wstring debugFilePath = L"";
 std::wstring debugFileName = L"debug.log";
-int debugFileCount = 1;
+size_t debugFileCount = 1;
 
 //Holds an array of single letter arguments that need to be applied.
-std::unordered_map<char, int> singleCharArguments;
+std::unordered_map<char, size_t> singleCharArguments;
 
 
 //FUNCTION PROTOTYPES
@@ -96,6 +96,8 @@ void writeToDebug(std::chrono::system_clock::time_point givenTime, bool writeTim
 
 int main(int argc, char* argv[])
 {
+    std::cout << SIZE_MAX << std::endl;
+    system("PAUSE");
     ::ShowWindow(::GetConsoleWindow(), SW_SHOW); //Hiding console immediately.
 
     std::chrono::time_point start = std::chrono::steady_clock::now(); //START TIMER.
@@ -111,7 +113,7 @@ int main(int argc, char* argv[])
     std::vector<std::wstring> fileOpActions;
 
     //Verifying that no \ escaped " exist in the path string.
-    for (int i = 0; i < argc; i++)
+    for (size_t i = 0; i < argc; i++)
     {
         std::size_t found = std::string(argv[i]).find("\"");
         if (found != std::string::npos)
@@ -129,7 +131,7 @@ int main(int argc, char* argv[])
         return 0;
     }
 
-    for (int i = 0; i < argc; i++) // Cycle through all arguments.
+    for (size_t i = 0; i < argc; i++) // Cycle through all arguments.
     {
         //std::cout << argv[i] << " : " << strncmp(argv[i], "--", 2) << std::endl;
 
@@ -265,7 +267,7 @@ int main(int argc, char* argv[])
         }
         else if (strncmp(argv[i], "-", 1) == 0) //Check for single dash.
         {
-            for (int iterator = 1; iterator < sizeof(argv[i]); ++iterator) //Iterating through all characters, after the slash. (Starting at 1 to skip the initial dash)
+            for (size_t iterator = 1; iterator < sizeof(argv[i]); ++iterator) //Iterating through all characters, after the slash. (Starting at 1 to skip the initial dash)
                 singleCharArguments[tolower(argv[i][iterator])] = 1; //Ensuring keys are lowercase for easy use later.
         }
 
@@ -515,25 +517,25 @@ int main(int argc, char* argv[])
         //std::wstring currentReadLine;
 
         //Directory one.
-        for (int testIter = 0; testIter < directoryOneDB.size(); ++testIter)
+        for (size_t testIter = 0; testIter < directoryOneDB.size(); ++testIter)
         {
             currentReadLine = directoryOneDB[testIter]; //Grab item
             writeUnicodeToFile(firstFileStream, currentReadLine); //Write it
         }
         //Directory two.
-        for (int testIter = 0; testIter < directoryTwoDB.size(); ++testIter)
+        for (size_t testIter = 0; testIter < directoryTwoDB.size(); ++testIter)
         {
             currentReadLine = directoryTwoDB[testIter]; //Grab item
             writeUnicodeToFile(secondFileStream, currentReadLine); //Write it
         }
         //Hash actions.
-        for (int testIter = 0; testIter < hashActions.size(); ++testIter)
+        for (size_t testIter = 0; testIter < hashActions.size(); ++testIter)
         {
             currentReadLine = hashActions[testIter]; //Grab item
             writeUnicodeToFile(hashActionFile, currentReadLine); //Write it
         }
         //File operation actions.
-        for (int testIter = 0; testIter < fileOpActions.size(); ++testIter)
+        for (size_t testIter = 0; testIter < fileOpActions.size(); ++testIter)
         {
             currentReadLine = fileOpActions[testIter]; //Grab item
             writeUnicodeToFile(fileOpActionFile, currentReadLine); //Write it
@@ -618,7 +620,7 @@ void writeUnicodeToFile(std::ofstream& outputFile, std::wstring inputWstring)
 std::wstring charToWString(char* givenCharArray)
 {
     std::string intermediaryString = givenCharArray;
-    int wchars_num = MultiByteToWideChar(65001, 0, intermediaryString.c_str(), -1, NULL, 0);
+    size_t wchars_num = MultiByteToWideChar(65001, 0, intermediaryString.c_str(), -1, NULL, 0);
     wchar_t* wstr = new wchar_t[wchars_num];
     MultiByteToWideChar(65001, 0, intermediaryString.c_str(), -1, wstr, wchars_num);
 
@@ -738,7 +740,7 @@ std::wstring formatFilePath(std::wstring givenString, std::wstring givenDirector
     if (givenDirectorySeparator == L"\\" || givenString.find(L"\\\\?\\") != std::wstring::npos) //If the windows max_path bypass is in the path, then all separators must be backslashes.
     {
         //Formating givenFile to have the slashes ALL be \.
-        for (int i = 0; i < (int)givenString.length(); ++i)
+        for (size_t i = 0; i < (size_t)givenString.length(); ++i)
         {
             if (givenString[i] == '/')
                 givenString[i] = '\\';
@@ -747,7 +749,7 @@ std::wstring formatFilePath(std::wstring givenString, std::wstring givenDirector
     else
     {
         //Formating givenFile to have the slashes ALL be /.
-        for (int i = 0; i < (int)givenString.length(); ++i)
+        for (size_t i = 0; i < (size_t)givenString.length(); ++i)
         {
             if (givenString[i] == '\\')
                 givenString[i] = '/';
@@ -804,7 +806,7 @@ void MThashGivenFile(std::wstring givenFilePath, std::vector<std::wstring>& give
     }
 
     //Finish the MD5, place it in the digest.
-    int MD5Result = MD5_Final(digest, &md5Context);
+    size_t MD5Result = MD5_Final(digest, &md5Context);
 
     //Verify hash completed successfully.
     if (MD5Result == 0) // Hash failed.
@@ -831,7 +833,7 @@ std::string convertMD5ToHex(unsigned char* givenDigest)
     std::string outputHexString;
 
     //Convert the 128-bit hash to hex.
-    for (int i = 0; i < MD5_DIGEST_LENGTH; i++)
+    for (size_t i = 0; i < MD5_DIGEST_LENGTH; i++)
     {
         sprintf(hexBuffer, "%02x", givenDigest[i]);
         outputHexString.append(hexBuffer);
@@ -958,7 +960,7 @@ void performHashActionFile(std::vector<std::wstring>& hashActions, std::vector<s
     std::wstring directoryTwoVectorLocation;
 
     if (showConsole) std::cout << "Assigning hash thread tasks." << std::endl;
-    for (int iterator = 0; iterator < hashActionSize; ++iterator) //Iterating through hashAction file.
+    for (size_t iterator = 0; iterator < hashActionSize; ++iterator) //Iterating through hashAction file.
     {
         //Grab item...
         currentReadLine = hashActions[iterator]; //Reading the full line.
@@ -1013,7 +1015,7 @@ void performFileOpActionFile(std::vector<std::wstring>& fileOpAction)
 
 
     if (showConsole) std::cout << "Assigning file operation thread tasks." << std::endl;
-    for (int iterator = 0; iterator < fileOpSize; ++iterator) //Iterating through hashAction file.
+    for (size_t iterator = 0; iterator < fileOpSize; ++iterator) //Iterating through hashAction file.
     {
         currentReadLine = fileOpAction[iterator]; //Reading line.
 

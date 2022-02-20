@@ -71,6 +71,8 @@ This appliation uses several incredible open-source pieces of software and code.
 I want to give thinks, and provide the reasources for other people to utilize their tools and show appreciation to them. Without these libraries, this would never have been made.
 * [Boost](https://www.boost.org/) - Filesystem
     * I initially used the Boost Filesystem library handle all filesystem interactions, but have since moved to the built-in filesystem utilities (which were taken from Boost!). I currently use Boost to obtain file metadata times (last modification and creation times). I find the data returned a little easier to work with.
+* [libcurl](https://curl.se/libcurl/)
+    * While not implemented yet, I plan to utilize CURL for doing network based tasks. Although I am not familiar with it yet, I believe it can at least handle the directory listings that are required to do the comparisons. - Handling hashing over network is a more difficult task, and a feature that won't be used much. One of the driving purposes of this project was to minimize network bandwidth/utilization required for synchronizations. Hashing files is generally unnecessary. 
 * [OpenSSL](https://www.openssl.org/)
     * A good resource for MD5 hashing can be found here on the [openssl.org](https://www.openssl.org/docs/man1.1.1/man3/MD5.html) website.
 * [thread-pool by bshoshany](https://github.com/bshoshany/thread-pool)  
