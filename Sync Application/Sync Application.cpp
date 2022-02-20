@@ -96,8 +96,6 @@ void writeToDebug(std::chrono::system_clock::time_point givenTime, bool writeTim
 
 int main(int argc, char* argv[])
 {
-    std::cout << SIZE_MAX << std::endl;
-    system("PAUSE");
     ::ShowWindow(::GetConsoleWindow(), SW_SHOW); //Hiding console immediately.
 
     std::chrono::time_point start = std::chrono::steady_clock::now(); //START TIMER.
