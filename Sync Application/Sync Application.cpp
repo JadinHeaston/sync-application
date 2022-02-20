@@ -34,7 +34,7 @@ bool verboseDebug = false; //Defines if verbose debugging is enabled.
 bool showWarning = true; //Recieved from arg: --no-warning | defaults to true | Defines whether things are output to the console or not.
 bool dataLossProtection = false; //Recieved from arg: --data-protection | defaults to false;
 bool windowsMaxPathBypass = false; //Determines whether "\\?\" is prepended to path and backslashes are used as directory separators.
-
+bool addToConfigFile = false; //Recieved from arugment --add-to-config 
 std::wstring operationMode; //Holds operation mode to perform.
 
 std::wstring directorySeparator = L"/";
@@ -314,6 +314,12 @@ int main(int argc, char* argv[])
         firstGivenDirectoryPath.pop_back(); //Remove the slash.
     if (secondGivenDirectoryPath.back() == L'/' || secondGivenDirectoryPath.back() == L'\\')
         secondGivenDirectoryPath.pop_back(); //Remove the slash.
+
+    //Check if we are creating a configuration file.
+    if (addToConfigFile)
+    {
+
+    }
 
     if (operationMode != L"")
     {
