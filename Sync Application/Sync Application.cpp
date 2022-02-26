@@ -22,8 +22,6 @@
 
 #include "curl/curl.h"
 
-//CURL* curlHandle = curl_easy_init();
-//https://curl.se/libcurl/c/curl_easy_init.html
 
 //ARGUMENT DEFAULTS:
 bool checkContents = false; ////Recieved from arg: --check-content | Defaults to false.
@@ -1538,4 +1536,26 @@ void writeToDebug(std::chrono::system_clock::time_point givenTime, bool writeTim
     }
 
     verboseDebugOutput.close(); //Close file.
+}
+
+
+std::wstring determineProtocol(std::wstring givenPath)
+{
+    //There are several supported protocols: Windows path,Linux path, UNC path, SFTP
+    //For the usage of internet protocols, I require the protocol/username/password to be defined with their own arguments.
+    //A list of how each one can identified be seen below:
+        //Windows path:
+            //Windows paths typically use backslashes "\", but Windows will automatically convert forward slashes "/" into backslashes in the backend.
+            //This can either start with a drive letter followed by a colon, such as "X:".
+            //It can also be a relative path that begins with a slash.
+        //Linux path:
+            //Linux uses forward slashes, and will start with a forward slash "/" when it is a fully qualified path.
+            //This can also be a relative path.
+        //UNC path:
+            //A UNC path must begin with "\\{SERVERNAME\". (This uses forward slashes for Linux)
+            //The {SERVERNAME} can be set to a question mark "?" to allow for native long path support within Windows.
+        //SFTP:
+            //SFTP Specification defines the use of a forward slash "/"
+            
+    return;
 }
