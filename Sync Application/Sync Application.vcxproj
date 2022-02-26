@@ -157,6 +157,14 @@
   <ItemGroup>
     <ClCompile Include="Sync Application.cpp" />
   </ItemGroup>
+  <ItemGroup>
+    <ClInclude Include="configFile.h" />
+    <ClInclude Include="debugging.h" />
+    <ClInclude Include="fileOperations.h" />
+    <ClInclude Include="hashing.h" />
+    <ClInclude Include="syncOperations.h" />
+    <ClInclude Include="wideStrings.h" />
+  </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">
   </ImportGroup>

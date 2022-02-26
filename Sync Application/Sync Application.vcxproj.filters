@@ -19,4 +19,24 @@
       <Filter>Source Files</Filter>
     </ClCompile>
   </ItemGroup>
+  <ItemGroup>
+    <ClInclude Include="configFile.h">
+      <Filter>Source Files</Filter>
+    </ClInclude>
+    <ClInclude Include="wideStrings.h">
+      <Filter>Source Files</Filter>
+    </ClInclude>
+    <ClInclude Include="hashing.h">
+      <Filter>Source Files</Filter>
+    </ClInclude>
+    <ClInclude Include="debugging.h">
+      <Filter>Source Files</Filter>
+    </ClInclude>
+    <ClInclude Include="syncOperations.h">
+      <Filter>Source Files</Filter>
+    </ClInclude>
+    <ClInclude Include="fileOperations.h">
+      <Filter>Source Files</Filter>
+    </ClInclude>
+  </ItemGroup>
 </Project>
