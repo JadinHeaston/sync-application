@@ -112,7 +112,6 @@ void echoCompareDirectories(std::vector<std::wstring>& firstGivenVectorDB, std::
     std::wstring iter1;
     std::wstring iter2;
 
-
     //Column variables to avoid streamline calls on vectors.
     std::wstring workingPath;
     std::wstring workingPathTwo;
@@ -182,7 +181,6 @@ void echoCompareDirectories(std::vector<std::wstring>& firstGivenVectorDB, std::
         if (secondGivenVectorDB[iterator].substr(nthOccurrence(secondGivenVectorDB[iterator], delimitingCharacter, 5) + 1, 7) != L"MATCHED")
             fileOpAction.push_back(L"DELETE - No source found" + delimitingCharacter + secondGivenVectorDB[iterator].substr(0, nthOccurrence(secondGivenVectorDB[iterator], delimitingCharacter, 1)) + newLine); //Delete directory two file. No directory one file found that matches.
     }
-
 
     //If matching files need to be hashed, do so.
     if (argumentVariables["internalObject"]["Check File Contents"])

@@ -106,7 +106,6 @@ void createDirectoryMapDB(std::vector<std::wstring>& givenVectorDB, std::wstring
 
 }
 
-
 //Functions asks for a path to directory and will return number of files. - Also asks for a T/F bool determining whether a search should be recursive.
 size_t countFiles(std::wstring pathToDir, bool recursiveLookup)
 {
@@ -172,7 +171,6 @@ size_t countDir(std::wstring pathToDir, bool recursiveLookup)
     }
     return directoryCounter; //Return files!
 }
-
 
 //Performs "filesystem::remove_all" on given path.
 void removeObject(std::wstring destinationFilePath, bool recursiveRemoval)

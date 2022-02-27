@@ -28,13 +28,7 @@ std::mutex coutMutex; //Lock for wcout to prevent errors display console message
 
 using json = nlohmann::json; //Setting json namespace to a simgler term.
 json argumentVariables;
-//ARGUMENT DEFAULTS:
-bool showWarning = true; //Recieved from arg: --no-warning | defaults to true | Defines whether things are output to the console or not.
-bool dataLossProtection = false; //Recieved from arg: --data-protection | defaults to false;
-bool addToConfigFile = false; //Recieved from arugment --add-to-config
-bool outputConfig = false;
 
-std::wstring operationMode; //Holds operation mode to perform.
 
 std::wstring directorySeparator = L"/";
 std::wstring pathToConfigFile;
@@ -89,8 +83,6 @@ void removeObject(std::wstring destinationFilePath, bool recursiveRemoval); //Re
 void copyFile(std::wstring source, std::wstring destination); //Copies file.
 void moveFile(std::wstring givenSourcePath, std::wstring givenDestinationPath); //Moves an object.
 
-std::wstring determineProtocol(std::wstring givenPath); //Not created.
-
 //Internal header files:
 #include "wideStrings.h"
 #include "configFile.h"
@@ -105,13 +97,234 @@ int main(int argc, char* argv[])
 
     std::chrono::time_point start = std::chrono::steady_clock::now(); //START TIMER.
 
-    //Defining default arguments.
-    argumentVariables["internalObject"]["Check File Contents"] = false; ////Recieved from arg: --check-content | Defaults to false.
-    argumentVariables["internalObject"]["Output Files"] = false; //Recieved from arg: --output-files | Defaults to false.
-    argumentVariables["internalObject"]["Show Console"] = true; //Recieved from arg: --hide-console | defaults to false | Defines whether things are output to the console or not.
-    argumentVariables["internalObject"]["Recursive Search"] = true; //Recieved from arg: --no-recursive | defaults to true.
-    argumentVariables["internalObject"]["Verbose Debugging"] = false; //Defines if verbose debugging is enabled.
-    argumentVariables["internalObject"]["Windows Max Path Bypass"] = false; //Determines whether "\\?\" is prepended to path and backslashes are used as directory separators.
+
+    //Default arguments that don't need stored in a configuration.
+    bool useConfigurationFile = false;
+    bool showHelpMessage = false;
+
+
+    //Iterate through arguments for a help message, or a use configuration message.
+    //Check results of previous iteration.
+    if (showHelpMessage)
+    {
+
+    }
+    else if (useConfigurationFile)
+    {
+
+    }
+    else //There is no help message or configuration file being used.
+    {
+        //Defining default arguments.
+        argumentVariables["internalObject"]["Check File Contents"] = false; ////Recieved from arg: --check-content | Defaults to false.
+        argumentVariables["internalObject"]["Output Files"] = false; //Recieved from arg: --output-files | Defaults to false.
+        argumentVariables["internalObject"]["Show Console"] = true; //Recieved from arg: --hide-console | defaults to false | Defines whether things are output to the console or not.
+        argumentVariables["internalObject"]["Recursive Search"] = true; //Recieved from arg: --no-recursive | defaults to true.
+        argumentVariables["internalObject"]["Verbose Debugging"] = false; //Defines if verbose debugging is enabled.
+        argumentVariables["internalObject"]["Windows Max Path Bypass"] = false; //Determines whether "\\?\" is prepended to path and backslashes are used as directory separators.
+        argumentVariables["internalObject"]["Show Warning"] = true; //Recieved from arg: --no-warning | defaults to true | Defines whether things are output to the console or not.
+        argumentVariables["internalObject"]["Operation Mode"] = L""; //Holds operation mode to perform.
+
+
+        //Default arguments that don't need stored in a configuration.
+        //bool dataLossProtection = false; //Recieved from arg: --data-protection | defaults to false;
+        bool addToConfigFile = false; //Recieved from arugment --add-to-config
+
+        //Verifying that no \ escaped " exist in the path string.
+        for (size_t i = 0; i < argc; i++)
+        {
+            std::size_t found = std::string(argv[i]).find("\"");
+            if (found != std::string::npos)
+            {
+                std::cout << "ERROR: Rogue quote found. Likely due to a \"\\\" placed before a double quote (\"). Please double check your input and try again." << std::endl;
+                system("PAUSE");
+                return 0;
+            }
+        }
+        //Reading args
+        if (argc == 1) //No arguments provided. Notify. Close program.
+        {
+            std::cout << "No arguments provided.\nUse the \"-h\" or \"--help\" switch to show the available options.\n" << std::endl;
+            system("PAUSE");
+            return 0;
+        }
+
+        for (size_t i = 0; i < argc; i++) // Cycle through all arguments.
+        {
+            //std::cout << argv[i] << " : " << strncmp(argv[i], "--", 2) << std::endl;
+
+            //Check if the argument contains a single or double slash
+            if (strncmp(argv[i], "--", 2) == 0) //Check for double slash
+            {
+                if (strcmp(argv[1], "--help") == 0) //Checking second argument for if it is "-h" or "-help".
+                {
+                    //Display help
+                    std::cout << "Defaults:" << std::endl;
+                    std::cout << "--check-content - F | --output-files - F | --output-verbose-debug <FILEPATH> - NULL | --no-recursive - T" << std::endl;
+                    std::cout << "HELP PROVIDED. GET FUCKED" << std::endl;
+
+                    system("PAUSE");
+                    return 0;
+                }
+
+                if ((strcmp(argv[i], "--check-content") == 0) || (strncmp(argv[i], "--check-contents", 32) == 0)) //Enable file hashing.
+                    argumentVariables["internalObject"]["Check File Contents"] = true; //Set hashing to true.
+                if (strcmp(argv[i], "--directory-one") == 0) //Directory one path switch.
+                {
+                    firstGivenDirectoryPath = formatFilePath(charToWString(argv[i + 1]));
+
+                    if (firstGivenDirectoryPath.back() == L'\\' || firstGivenDirectoryPath.back() == L'/')
+                        firstGivenDirectoryPath.pop_back(); //Remove trailing slash.
+
+                    if (!std::filesystem::is_directory(firstGivenDirectoryPath)) //Verify path is real and valid.
+                    {
+                        if (std::filesystem::exists(firstGivenDirectoryPath))
+                        {
+                            std::wcout << L"The '--directory-one' path provided is NOT a directory, and a directory can not be created. Please try again. (" << firstGivenDirectoryPath << ")" << std::endl;
+                            system("PAUSE");
+                            return 0;
+                        }
+
+                        std::wcout << "The '--directory-one' path provided was NOT found. (" << firstGivenDirectoryPath << ")" << std::endl;
+                        std::cout << "Would you like to create this directory?" << std::endl;
+
+                        std::cin >> userInput[0]; //Awaiting user input...
+
+                        //Verify if the user is okay with continuing.
+                        if (toupper(userInput[0]) != 'Y') //The input is NOT a "Y".
+                            std::filesystem::create_directories(firstGivenDirectoryPath); //Creating directory.
+                        else //The user gave the okay. Continue.
+                        {
+                            std::cout << "No directory created. Program ending." << std::endl;
+                            system("PAUSE");
+                            return 0;
+                        }
+                    }
+                }
+                else if (strncmp(argv[i], "--directory-two", 32) == 0) //Destination two path switch.
+                {
+                    secondGivenDirectoryPath = formatFilePath(charToWString(argv[i + 1]));
+
+                    if (secondGivenDirectoryPath.back() == L'\\' || secondGivenDirectoryPath.back() == L'/')
+                        secondGivenDirectoryPath.pop_back(); //Remove trailing slash
+
+                    if (!std::filesystem::is_directory(secondGivenDirectoryPath)) //Verify path is real and valid.
+                    {
+                        if (std::filesystem::exists(firstGivenDirectoryPath))
+                        {
+                            std::wcout << L"The '--directory-one' path provided is NOT a directory, and a directory can not be created. Please try again. (" << firstGivenDirectoryPath << ")" << std::endl;
+                            system("PAUSE");
+                            return 0;
+                        }
+
+                        std::wcout << "The '--directory-two' path provided was NOT found. (" << secondGivenDirectoryPath << ")" << std::endl;
+                        std::cout << "Would you like to create this directory?" << std::endl;
+
+                        std::cin >> userInput[0]; //Awaiting user input...
+
+                        //Verify if the user is okay with continuing.
+                        if (toupper(userInput[0]) == 'Y') //The input is a "Y".
+                            std::filesystem::create_directories(secondGivenDirectoryPath); //Creating directory.
+                        else //The user gave the okay. Continue.
+                        {
+                            std::cout << "No directory created. Program ending." << std::endl;
+                            system("PAUSE");
+                            return 0;
+                        }
+                    }
+                }
+                else if (strncmp(argv[i], "--hide-console", 32) == 0) //Defines if anything is output to the console.
+                    argumentVariables["internalObject"]["Show Console"] = false;
+                else if (strcmp(argv[i], "--no-recursive") == 0) //Disable recursive operation.
+                    argumentVariables["internalObject"]["No Recursive"] = false;
+                else if (strcmp(argv[i], "--no-warning") == 0) //Disable deletion warning.
+                    argumentVariables["internalObject"]["Show Warning"] = false;
+                else if (strcmp(argv[i], "--operation-mode") == 0) //Operation mode switch.
+                    argumentVariables["internalObject"]["Operation Mode"] = charToWString(argv[i + 1]);
+                else if ((strcmp(argv[i], "--output-files") == 0)) //Enable file output.
+                    argumentVariables["internalObject"]["Output Files"] = true;
+                else if ((strcmp(argv[i], "--add-to-config") == 0)) //Enable file output.
+                {
+                    addToConfigFile = true;
+                    pathToConfigFile = formatFilePath(charToWString(argv[i + 1]));
+                }
+                else if (strcmp(argv[i], "--output-verbose-debug") == 0) //Output debug file in running directory.
+                {
+                    argumentVariables["internalObject"]["Verbose Debugging"] = true; //Set global verbose debug variable to true.
+
+                    argumentVariables["internalObject"]["Debug File Path"] = formatFilePath(charToWString(argv[i + 1])); //Get next argument.
+                    debugFilePath = formatFilePath(charToWString(argv[i + 1]));
+                    if (debugFilePath.find(L"/")) //Search for a slash to determine if the given text is a full path or a name. If a slash is found, it is a path.
+                    {
+                        //Checking that a file name exists. Continuing with default name appended to the given path if it doesn't.
+                        if (debugFilePath.substr(debugFilePath.find_last_of(L"/") + 1, std::wstring::npos) != L"")
+                        {
+                            debugFileName = debugFilePath.substr(debugFilePath.find_last_of(L"/") + 1, std::wstring::npos);
+                            debugFilePath = debugFilePath.substr(0, debugFilePath.find_last_of(L"/") + 1); //Remove filename from path.
+                        }
+                    }
+                    else if (debugFilePath.find(L"\\"))
+                    {
+                        //Checking that a file name exists. Continuing with default name appended to the given path if it doesn't.
+                        if (debugFilePath.substr(debugFilePath.find_last_of(L"\\") + 1, std::wstring::npos) != L"")
+                        {
+                            debugFileName = debugFilePath.substr(debugFilePath.find_last_of(L"\\") + 1, std::wstring::npos);
+                            debugFilePath = debugFilePath.substr(0, debugFilePath.find_last_of(L"\\") + 1); //Remove filename from path.
+                        }
+                    }
+                    else //If there is no slash, then a name was given.
+                    {
+                        debugFileName = debugFilePath; //Set the given item to be the name.
+                        debugFilePath = L""; //Set the path to nothing. The name will be appended to this and cause the file to be created in the same location as the running application.
+                    }
+
+                    verboseDebugOutput.open(debugFilePath + debugFileName, std::ios::out | std::ios::binary | std::ios::app); //Open the file.
+                    if (!verboseDebugOutput.is_open())
+                    {
+                        std::wcout << L"Debug file path not usable: " + debugFilePath + debugFileName << std::endl;
+                        system("PAUSE");
+                        return 0;
+                    }
+                    verboseDebugOutput.close();
+                }
+            }
+            else if (strncmp(argv[i], "-", 1) == 0) //Check for single dash.
+            {
+                for (size_t iterator = 1; iterator < sizeof(argv[i]); ++iterator) //Iterating through all characters, after the slash. (Starting at 1 to skip the initial dash)
+                    singleCharArguments[tolower(argv[i][iterator])] = 1; //Ensuring keys are lowercase for easy use later.
+            }
+
+            //std::cout << argv[i] << std::endl; //*** Display all arguments given.
+        }
+
+        //Iterating through argument array and applying arguments.
+        for (size_t iterator = 0; iterator < sizeof(singleCharArguments); ++iterator)
+        {
+            //std::cout << singleCharArguments['h'] << std::endl;
+            if (singleCharArguments['h']) //Short help message.
+            {
+                //Display help message.
+                std::cout << "The three required arguments are: --directory-one <DIRECTORY_PATH>' as the source, --directory-two <DIRECTORY_PATH>' as the destination, and '--operation-mode <OPERATION_MODE>' to specifiy the operation mode." << std::endl;
+                std::cout << "The operation mode can either be 'contribute' that only copies files from directory one to directory two, 'echo' that makes directory two look like directory one, or 'synchronize' that will use the newest version from either directory to keep both up to date and in sync." << std::endl;
+                std::cout << "Detailed help can be found by using '--help' or utilizing the readme.md file: https://github.com/JadinHeaston/sync-application" << std::endl;
+                system("PAUSE");
+                return 0;
+            }
+            if (singleCharArguments['l']) //Windows Max Path Bypass
+            {
+                argumentVariables["internalObject"]["Windows Max Path Bypass"] = true; directorySeparator = L"\\";
+            }
+        }
+        //ARGS FINISHED.
+
+
+
+        //Add arguments to a configuration file, if needed.
+        if (addToConfigFile)
+            addToConfigurationFile(pathToConfigFile, argumentVariables);
+
+    }
+
     //Creating vectors to hold directory maps.
     std::vector<std::wstring> directoryOneDB;
     std::vector<std::wstring> directoryTwoDB;
@@ -119,193 +332,6 @@ int main(int argc, char* argv[])
     //Creating action vectors.
     std::vector<std::wstring> hashActions;
     std::vector<std::wstring> fileOpActions;
-
-    //Verifying that no \ escaped " exist in the path string.
-    for (size_t i = 0; i < argc; i++)
-    {
-        std::size_t found = std::string(argv[i]).find("\"");
-        if (found != std::string::npos)
-        {
-            std::cout << "ERROR: Rogue quote found. Likely due to a \"\\\" placed before a double quote (\"). Please double check your input and try again." << std::endl;
-            system("PAUSE");
-            return 0;
-        }
-    }
-    //Reading args
-    if (argc == 1) //No arguments provided. Notify. Close program.
-    {
-        std::cout << "No arguments provided.\nUse the \"-h\" or \"--help\" switch to show the available options.\n" << std::endl;
-        system("PAUSE");
-        return 0;
-    }
-
-    for (size_t i = 0; i < argc; i++) // Cycle through all arguments.
-    {
-        //std::cout << argv[i] << " : " << strncmp(argv[i], "--", 2) << std::endl;
-
-        //Check if the argument contains a single or double slash
-        if (strncmp(argv[i], "--", 2) == 0) //Check for double slash
-        {
-            if (strcmp(argv[1], "--help") == 0) //Checking second argument for if it is "-h" or "-help".
-            {
-                //Display help
-                std::cout << "Defaults:" << std::endl;
-                std::cout << "--check-content - F | --output-files - F | --output-verbose-debug <FILEPATH> - NULL | --no-recursive - T" << std::endl;
-                std::cout << "HELP PROVIDED. GET FUCKED" << std::endl;
-
-                system("PAUSE");
-                return 0;
-            }
-
-            if ((strcmp(argv[i], "--check-content") == 0) || (strncmp(argv[i], "--check-contents", 32) == 0)) //Enable file hashing.
-                argumentVariables["internalObject"]["Check File Contents"] = true; //Set hashing to true.
-            if (strcmp(argv[i], "--directory-one") == 0) //Directory one path switch.
-            {
-                firstGivenDirectoryPath = formatFilePath(charToWString(argv[i + 1]));
-
-                if (firstGivenDirectoryPath.back() == L'\\' || firstGivenDirectoryPath.back() == L'/')
-                    firstGivenDirectoryPath.pop_back(); //Remove trailing slash.
-
-                if (!std::filesystem::is_directory(firstGivenDirectoryPath)) //Verify path is real and valid.
-                {
-                    if (std::filesystem::exists(firstGivenDirectoryPath))
-                    {
-                        std::wcout << L"The '--directory-one' path provided is NOT a directory, and a directory can not be created. Please try again. (" << firstGivenDirectoryPath << ")" << std::endl;
-                        system("PAUSE");
-                        return 0;
-                    }
-
-                    std::wcout << "The '--directory-one' path provided was NOT found. (" << firstGivenDirectoryPath << ")" << std::endl;
-                    std::cout << "Would you like to create this directory?" << std::endl;
-
-                    std::cin >> userInput[0]; //Awaiting user input...
-
-                    //Verify if the user is okay with continuing.
-                    if (toupper(userInput[0]) != 'Y') //The input is NOT a "Y".
-                        std::filesystem::create_directories(firstGivenDirectoryPath); //Creating directory.
-                    else //The user gave the okay. Continue.
-                    {
-                        std::cout << "No directory created. Program ending." << std::endl;
-                        system("PAUSE");
-                        return 0;
-                    }
-                }
-            }
-            else if (strncmp(argv[i], "--directory-two", 32) == 0) //Destination two path switch.
-            {
-                secondGivenDirectoryPath = formatFilePath(charToWString(argv[i + 1]));
-
-                if (secondGivenDirectoryPath.back() == L'\\' || secondGivenDirectoryPath.back() == L'/')
-                    secondGivenDirectoryPath.pop_back(); //Remove trailing slash
-
-                if (!std::filesystem::is_directory(secondGivenDirectoryPath)) //Verify path is real and valid.
-                {
-                    if (std::filesystem::exists(firstGivenDirectoryPath))
-                    {
-                        std::wcout << L"The '--directory-one' path provided is NOT a directory, and a directory can not be created. Please try again. (" << firstGivenDirectoryPath << ")" << std::endl;
-                        system("PAUSE");
-                        return 0;
-                    }
-
-                    std::wcout << "The '--directory-two' path provided was NOT found. (" << secondGivenDirectoryPath << ")" << std::endl;
-                    std::cout << "Would you like to create this directory?" << std::endl;
-                    
-                    std::cin >> userInput[0]; //Awaiting user input...
-
-                    //Verify if the user is okay with continuing.
-                    if (toupper(userInput[0]) == 'Y') //The input is a "Y".
-                        std::filesystem::create_directories(secondGivenDirectoryPath); //Creating directory.
-                    else //The user gave the okay. Continue.
-                    {
-                        std::cout << "No directory created. Program ending." << std::endl;
-                        system("PAUSE");
-                        return 0;
-                    }
-                }
-            }
-            else if (strncmp(argv[i], "--hide-console", 32) == 0) //Defines if anything is output to the console.
-                argumentVariables["internalObject"]["Show Console"] = false;
-            else if (strcmp(argv[i], "--no-recursive") == 0) //Disable recursive operation.
-                argumentVariables["internalObject"]["No Recursive"] = false;
-            else if (strcmp(argv[i], "--no-warning") == 0) //Disable deletion warning.
-                showWarning = false;
-            else if (strcmp(argv[i], "--operation-mode") == 0) //Operation mode switch.
-                operationMode = formatFilePath(charToWString(argv[i + 1]));
-            else if ((strcmp(argv[i], "--output-files") == 0)) //Enable file output.
-                argumentVariables["internalObject"]["Output Files"] = true;
-            else if ((strcmp(argv[i], "--add-to-config") == 0)) //Enable file output.
-            {
-                addToConfigFile = true;
-                pathToConfigFile = formatFilePath(charToWString(argv[i + 1]));
-            }
-            else if (strcmp(argv[i], "--output-verbose-debug") == 0) //Output debug file in running directory.
-            {
-                argumentVariables["internalObject"]["Output Verbose Debug"] = true; //Set global verbose debug variable to true.
-
-                argumentVariables["internalObject"]["Debug File Path"] = formatFilePath(charToWString(argv[i + 1])); //Get next argument.
-                debugFilePath = formatFilePath(charToWString(argv[i + 1]));
-                if (debugFilePath.find(L"/")) //Search for a slash to determine if the given text is a full path or a name. If a slash is found, it is a path.
-                {
-                    //Checking that a file name exists. Continuing with default name appended to the given path if it doesn't.
-                    if (debugFilePath.substr(debugFilePath.find_last_of(L"/") + 1, std::wstring::npos) != L"")
-                    {
-                        debugFileName = debugFilePath.substr(debugFilePath.find_last_of(L"/") + 1, std::wstring::npos);
-                        debugFilePath = debugFilePath.substr(0, debugFilePath.find_last_of(L"/") + 1); //Remove filename from path.
-                    }
-                }
-                else if (debugFilePath.find(L"\\"))
-                {
-                    //Checking that a file name exists. Continuing with default name appended to the given path if it doesn't.
-                    if (debugFilePath.substr(debugFilePath.find_last_of(L"\\") + 1, std::wstring::npos) != L"")
-                    {
-                        debugFileName = debugFilePath.substr(debugFilePath.find_last_of(L"\\") + 1, std::wstring::npos);
-                        debugFilePath = debugFilePath.substr(0, debugFilePath.find_last_of(L"\\") + 1); //Remove filename from path.
-                    }
-                }
-                else //If there is no slash, then a name was given.
-                {
-                    debugFileName = debugFilePath; //Set the given item to be the name.
-                    debugFilePath = L""; //Set the path to nothing. The name will be appended to this and cause the file to be created in the same location as the running application.
-                }
-
-                verboseDebugOutput.open(debugFilePath + debugFileName, std::ios::out | std::ios::binary | std::ios::app); //Open the file.
-                if (!verboseDebugOutput.is_open())
-                {
-                    std::wcout << L"Debug file path not usable: " + debugFilePath + debugFileName << std::endl;
-                    system("PAUSE");
-                    return 0;
-                }
-                verboseDebugOutput.close();
-            }
-        }
-        else if (strncmp(argv[i], "-", 1) == 0) //Check for single dash.
-        {
-            for (size_t iterator = 1; iterator < sizeof(argv[i]); ++iterator) //Iterating through all characters, after the slash. (Starting at 1 to skip the initial dash)
-                singleCharArguments[tolower(argv[i][iterator])] = 1; //Ensuring keys are lowercase for easy use later.
-        }
-
-        //std::cout << argv[i] << std::endl; //*** Display all arguments given.
-    }
-
-    //Iterating through argument array and applying arguments.
-    for (size_t iterator = 0; iterator < sizeof(singleCharArguments); ++iterator)
-    {
-        //std::cout << singleCharArguments['h'] << std::endl;
-        if (singleCharArguments['h']) //Short help message.
-        {
-            //Display help message.
-            std::cout << "The three required arguments are: --directory-one <DIRECTORY_PATH>' as the source, --directory-two <DIRECTORY_PATH>' as the destination, and '--operation-mode <OPERATION_MODE>' to specifiy the operation mode." << std::endl;
-            std::cout << "The operation mode can either be 'contribute' that only copies files from directory one to directory two, 'echo' that makes directory two look like directory one, or 'synchronize' that will use the newest version from either directory to keep both up to date and in sync." << std::endl;
-            std::cout << "Detailed help can be found by using '--help' or utilizing the readme.md file: https://github.com/JadinHeaston/sync-application" << std::endl;
-            system("PAUSE");
-            return 0;
-        }
-        if (singleCharArguments['l']) //Windows Max Path Bypass
-        {
-            argumentVariables["internalObject"]["Windows Max Path Bypass"] = true; directorySeparator = L"\\";
-        }
-    }
-    //ARGS FINISHED.
 
 
     //If debugging is enabled, write the "new application line"
@@ -331,15 +357,16 @@ int main(int argc, char* argv[])
     if (secondGivenDirectoryPath.back() == L'/' || secondGivenDirectoryPath.back() == L'\\')
         secondGivenDirectoryPath.pop_back(); //Remove the slash.
 
-    if (operationMode != L"")
+    if (argumentVariables["internalObject"]["Operation Mode"].get<std::wstring>() != L"")
     {
-        std::transform(operationMode.begin(), operationMode.end(), operationMode.begin(), towlower); //Convert to lowercase for easy comparison.
+        //std::wstring operationMode = argumentVariables["internalObject"]["Operation Mode"];
+        std::transform(argumentVariables["internalObject"]["Operation Mode"].begin(), argumentVariables["internalObject"]["Operation Mode"].end(), argumentVariables["internalObject"]["Operation Mode"].begin(), towlower); //Convert to lowercase for easy comparison.
             
         //Check that it is a legitimate value.
-        if (operationMode != L"echo" && (operationMode != L"synchronize" && operationMode != L"sync") && (operationMode != L"contribute" && operationMode != L"cont"))
+        if (argumentVariables["internalObject"]["Operation Mode"].get<std::wstring>() != L"echo" && (argumentVariables["internalObject"]["Operation Mode"].get<std::wstring>() != L"synchronize" && argumentVariables["internalObject"]["Operation Mode"].get<std::wstring>() != L"sync") && (argumentVariables["internalObject"]["Operation Mode"].get<std::wstring>() != L"contribute" && argumentVariables["internalObject"]["Operation Mode"].get<std::wstring>() != L"cont"))
         {
             writeDebugThreadPool.push_task(writeToDebug, std::chrono::system_clock::now(), true, L"Error-----");
-            std::wcout << L"Invalid Operation Mode: " << operationMode << std::endl;
+            std::wcout << L"Invalid Operation Mode: " << stringToWString(argumentVariables["internalObject"]["Operation Mode"]) << std::endl;
             return 0;
         }
     }
@@ -352,12 +379,7 @@ int main(int argc, char* argv[])
     }
 
     //Show warning before continuing.
-    if (showWarning) showWarningMessage();
-
-    //Add arguments to a configuration file.
-    if (addToConfigFile)
-        addToConfigurationFile(pathToConfigFile, argumentVariables);
-
+    if (argumentVariables["internalObject"]["Show Warning"]) showWarningMessage();
 
     if (!argumentVariables["internalObject"]["Show Console"]) //If the console should be displayed, then show it.
         ::ShowWindow(::GetConsoleWindow(), SW_HIDE);
@@ -385,7 +407,7 @@ int main(int argc, char* argv[])
     writeDebugThreadPool.push_task(writeToDebug, std::chrono::system_clock::now(), true, L"----- SORTING DIRECTORY LISTS -----");
     writeConsoleMessagesPool.push_task(displayConsoleMessage, L"Sorting lists...");
 
-    //Semi-Sorting directories. This may be changed to be a natural sorting later. (to make it more human-readable)
+    //Sorting directories. This may be changed to be a natural sorting later. (to make it more human-readable)
     threadPool.push_task(sortDirectoryDatabases, std::ref(directoryOneDB));
     threadPool.push_task(sortDirectoryDatabases, std::ref(directoryTwoDB));
     threadPool.wait_for_tasks();
@@ -394,30 +416,29 @@ int main(int argc, char* argv[])
     writeConsoleMessagesPool.push_task(displayConsoleMessage, L"Sorting finished...");
 
 
-
     //FUTURE FEATURE: CHECK WHAT OPERATION IS BEING DONE.
-    if (operationMode == L"echo")
+    if (argumentVariables["internalObject"]["Operation Mode"].get<std::wstring>() == L"echo")
     {
-        writeDebugThreadPool.push_task(writeToDebug, std::chrono::system_clock::now(), true, L"----- DIRECTORY COMPARISON - " + operationMode + L" -----");
+        writeDebugThreadPool.push_task(writeToDebug, std::chrono::system_clock::now(), true, L"----- DIRECTORY COMPARISON - " + argumentVariables["internalObject"]["Operation Mode"].get<std::wstring>() + L" -----");
         writeConsoleMessagesPool.push_task(displayConsoleMessage, L"Beginning directory comparison function.");
         echoCompareDirectories(directoryOneDB, directoryTwoDB, hashActions, fileOpActions, firstGivenDirectoryPath, secondGivenDirectoryPath); //Handles a LOT of stuff. Includes the process of hashing files before ending.
-        writeDebugThreadPool.push_task(writeToDebug, std::chrono::system_clock::now(), true, L"----- *COMPLETED* DIRECTORY COMPARISON - " + operationMode + L" -----");
+        writeDebugThreadPool.push_task(writeToDebug, std::chrono::system_clock::now(), true, L"----- *COMPLETED* DIRECTORY COMPARISON - " + argumentVariables["internalObject"]["Operation Mode"].get<std::wstring>() + L" -----");
         writeConsoleMessagesPool.push_task(displayConsoleMessage, L"Directory comparing finished...");
     }
-    else if (operationMode == L"synchronize" || operationMode == L"sync")
+    else if (argumentVariables["internalObject"]["Operation Mode"].get<std::wstring>() == L"synchronize" || argumentVariables["internalObject"]["Operation Mode"].get<std::wstring>() == L"sync")
     {
-        writeDebugThreadPool.push_task(writeToDebug, std::chrono::system_clock::now(), true, L"----- DIRECTORY COMPARISON - " + operationMode + L" -----");
+        writeDebugThreadPool.push_task(writeToDebug, std::chrono::system_clock::now(), true, L"----- DIRECTORY COMPARISON - " + argumentVariables["internalObject"]["Operation Mode"].get<std::wstring>() + L" -----");
         writeConsoleMessagesPool.push_task(displayConsoleMessage, L"Beginning directory comparison function for synchronization mode.");
         synchronizeCompareDirectories(directoryOneDB, directoryTwoDB, hashActions, fileOpActions, firstGivenDirectoryPath, secondGivenDirectoryPath); //Includes the process of hashing files and comparing again before ending.
-        writeDebugThreadPool.push_task(writeToDebug, std::chrono::system_clock::now(), true, L"----- *COMPLETED* DIRECTORY COMPARISON - " + operationMode + L" -----");
+        writeDebugThreadPool.push_task(writeToDebug, std::chrono::system_clock::now(), true, L"----- *COMPLETED* DIRECTORY COMPARISON - " + argumentVariables["internalObject"]["Operation Mode"].get<std::wstring>() + L" -----");
         writeConsoleMessagesPool.push_task(displayConsoleMessage, L"Directory comparing finished..."); //***
     }
-    else if (operationMode == L"contribute" || operationMode == L"cont")
+    else if (argumentVariables["internalObject"]["Operation Mode"].get<std::wstring>() == L"contribute" || argumentVariables["internalObject"]["Operation Mode"].get<std::wstring>() == L"cont")
     {
-        writeDebugThreadPool.push_task(writeToDebug, std::chrono::system_clock::now(), true, L"----- DIRECTORY COMPARISON - " + operationMode + L" -----");
+        writeDebugThreadPool.push_task(writeToDebug, std::chrono::system_clock::now(), true, L"----- DIRECTORY COMPARISON - " + argumentVariables["internalObject"]["Operation Mode"].get<std::wstring>() + L" -----");
         writeConsoleMessagesPool.push_task(displayConsoleMessage, L"Beginning directory comparison function for synchronization mode.");
         contributeCompareDirectories(directoryOneDB, directoryTwoDB, hashActions, fileOpActions, firstGivenDirectoryPath, secondGivenDirectoryPath); //Includes the process of hashing files and comparing again before ending.
-        writeDebugThreadPool.push_task(writeToDebug, std::chrono::system_clock::now(), true, L"----- *COMPLETED* DIRECTORY COMPARISON - " + operationMode + L" -----");
+        writeDebugThreadPool.push_task(writeToDebug, std::chrono::system_clock::now(), true, L"----- *COMPLETED* DIRECTORY COMPARISON - " + argumentVariables["internalObject"]["Operation Mode"].get<std::wstring>() + L" -----");
         writeConsoleMessagesPool.push_task(displayConsoleMessage, L"Directory comparing finished...");
     }
     
@@ -755,12 +776,12 @@ void compareHashes(std::vector<std::wstring>& firstGivenVectorDB, std::vector<st
         {
             if (DB1Hash != DB2Hash) //Hashes do NOT match. 
             {
-                if (operationMode == L"echo" || operationMode == L"contribute" || operationMode == L"cont")
+                if (argumentVariables["internalObject"]["Operation Mode"].get<std::wstring>() == L"echo" || argumentVariables["internalObject"]["Operation Mode"].get<std::wstring>() == L"contribute" || argumentVariables["internalObject"]["Operation Mode"].get<std::wstring>() == L"cont")
                 {
                     std::wstring currentDB1FilePath = firstGivenVectorDB[iterator].substr(firstGivenPath.length() + 1, nthOccurrence(firstGivenVectorDB[iterator], delimitingCharacter, 1) - firstGivenPath.length() - 1); //Getting path of file.
                     fileOpAction.push_back(L"COPY - Different hashes" + delimitingCharacter + firstGivenPath + directorySeparator + currentDB1FilePath + delimitingCharacter + secondGivenPath + directorySeparator + currentDB1FilePath + newLine); //Copy first directory file to second directory.
                 }
-                else if (operationMode == L"synchronize" || operationMode == L"sync")
+                else if (argumentVariables["internalObject"]["Operation Mode"].get<std::wstring>() == L"synchronize" || argumentVariables["internalObject"]["Operation Mode"].get<std::wstring>() == L"sync")
                 {
                     //Alert user that hashes differ, and we do not know which to keep //*****
                 }

@@ -68,7 +68,7 @@ void showWarningMessage()
 {
     //Displaying warning information.
     std::wcout << L"-------------------------------------------------- WARNING --------------------------------------------------" << std::endl;
-    if (operationMode == L"echo")
+    if (argumentVariables["internalObject"]["Operation Mode"].get<std::wstring>() == L"echo")
     {
         std::wcout << L"The \"ECHO\" operation will take place. This will cause the second directory to look *IDENTICAL* to the first." << std::endl;
         std::wcout << L"When a file is found within both directories, the program will compare the size and last modified time. When a difference is found, the first directories file will overwrite the seconds. (Hashes are only used when files, size, and modification time are all the same and the --check-contents argument is provided.)" << std::endl;
@@ -77,7 +77,7 @@ void showWarningMessage()
         std::wcout << L"First Directory: " << firstGivenDirectoryPath << std::endl;
         std::wcout << L"Second Directory: " << secondGivenDirectoryPath << std::endl;
     }
-    else if (operationMode == L"synchronize" || operationMode == L"sync")
+    else if (argumentVariables["internalObject"]["Operation Mode"].get<std::wstring>() == L"synchronize" || argumentVariables["internalObject"]["Operation Mode"].get<std::wstring>() == L"sync")
     {
         std::wcout << L"The \"SYNCHRONIZE\" operation will take place. This will cause the first and second directories to look identical to each other, with the newest files being kept." << std::endl;
         std::wcout << L"When a file is found within both directories, the one with the newest modification time is used and copied to replace the older version." << std::endl;
@@ -86,7 +86,7 @@ void showWarningMessage()
         std::wcout << L"First Directory: " << firstGivenDirectoryPath << std::endl;
         std::wcout << L"Second Directory: " << secondGivenDirectoryPath << std::endl;
     }
-    else if (operationMode == L"contribute" || operationMode == L"cont")
+    else if (argumentVariables["internalObject"]["Operation Mode"].get<std::wstring>() == L"contribute" || argumentVariables["internalObject"]["Operation Mode"].get<std::wstring>() == L"cont")
     {
         std::wcout << L"The \"CONTRIBUTE\" operation will take place. This will cause the first directory to contribute any new files or changes to the second directory." << std::endl;
         std::wcout << L"When a file is found within both directories, the program will compare the size and last modified time. When a difference is found, the first directories file will overwrite the second directories file. If the file is not present within the second directory, it is copied over to it. (Hashes are only used when files, size, and modification time are all the same and the --check-contents argument is provided.)" << std::endl;
