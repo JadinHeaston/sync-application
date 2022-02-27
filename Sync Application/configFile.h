@@ -12,7 +12,8 @@ void addToConfigurationFile(std::wstring pathToConfig, json givenArguments, std:
     //Read the file.
     configFileReading >> configurationFileJSON;
     
-    //Iterating through all top level obejcts. These are the IDs of the configuration.
+    //Iterating through all top level objects. These are the IDs of the configuration.
+        //If a single object is found. Just use that.
 
     //Check if an ID was given. If not, add 1 to the largestNumericID found and use that.
     if (configurationID == L"")

@@ -60,7 +60,7 @@ void contributeCompareDirectories(std::vector<std::wstring>& firstGivenVectorDB,
                 workingSizeTwo = secondGivenVectorDB[DB2Line].substr(nthOccurrence(secondGivenVectorDB[DB2Line], delimitingCharacter, 1) + 1, nthOccurrence(secondGivenVectorDB[DB2Line], delimitingCharacter, 2) - nthOccurrence(secondGivenVectorDB[DB2Line], delimitingCharacter, 1) - 1); //Second column
                 if (workingSize == workingSizeTwo) //Check if the file sizes match.
                 {
-                    if (argumentVariables["internalObject"]["Check File Contents"]) hashActions.push_back(workingPath + delimitingCharacter + iter1 + delimitingCharacter + iter2 + newLine); //If everything matches, these files need hashed and compared.
+                    if (argumentVariables["internalObject"]["Check File Contents"].get<bool>()) hashActions.push_back(workingPath + delimitingCharacter + iter1 + delimitingCharacter + iter2 + newLine); //If everything matches, these files need hashed and compared.
                 }
                 else
                     fileOpAction.push_back(L"COPY - Different file sizes" + delimitingCharacter + firstGivenPath + directorySeparator + workingPath + delimitingCharacter + secondGivenPath + directorySeparator + workingPath + newLine); //Copy directory one file to directory two.
@@ -80,7 +80,7 @@ void contributeCompareDirectories(std::vector<std::wstring>& firstGivenVectorDB,
     DB2Map.clear();
 
     //If matching files need to be hashed, do so.
-    if (argumentVariables["internalObject"]["Check File Contents"])
+    if (argumentVariables["internalObject"]["Check File Contents"].get<bool>())
     {
         writeConsoleMessagesPool.push_task(displayConsoleMessage, L"Beginning hash process. " + std::to_wstring(hashActions.size() * 2) + L" Files to be hashed...");
         performHashActionFile(hashActions, firstGivenVectorDB, secondGivenVectorDB, firstGivenPath, secondGivenPath);
@@ -254,11 +254,12 @@ void synchronizeCompareDirectories(std::vector<std::wstring>& firstGivenVectorDB
                 workingSizeTwo = secondGivenVectorDB[DB2Line].substr(nthOccurrence(secondGivenVectorDB[DB2Line], delimitingCharacter, 1) + 1, nthOccurrence(secondGivenVectorDB[DB2Line], delimitingCharacter, 2) - nthOccurrence(secondGivenVectorDB[DB2Line], delimitingCharacter, 1) - 1); //Second column
                 if (workingSize == workingSizeTwo) //Check if the file sizes match.
                 {
-                    if (argumentVariables["internalObject"]["Check File Contents"]) hashActions.push_back(workingPath + delimitingCharacter + iter1 + delimitingCharacter + iter2 + newLine); //If everything matches, these files need hashed and compared.
+                    if (argumentVariables["internalObject"]["Check File Contents"].get<bool>()) hashActions.push_back(workingPath + delimitingCharacter + iter1 + delimitingCharacter + iter2 + newLine); //If everything matches, these files need hashed and compared.
                 }
                 else //If the file sizes are different, we don't know which is newer. Alert the user.
                 {
                     //*****
+                    //Output conflict file.
                 }
             }
             else if (workingDateMod > workingDateModTwo) //If the directory one file is newer than the directory two file.
@@ -298,7 +299,7 @@ void synchronizeCompareDirectories(std::vector<std::wstring>& firstGivenVectorDB
 
 
     //If matching files need to be hashed, do so.
-    if (argumentVariables["internalObject"]["Check File Contents"])
+    if (argumentVariables["internalObject"]["Check File Contents"].get<bool>())
     {
         writeConsoleMessagesPool.push_task(displayConsoleMessage, L"Beginning hash process. " + std::to_wstring(hashActions.size() * 2) + L" Files to be hashed...");
         performHashActionFile(hashActions, firstGivenVectorDB, secondGivenVectorDB, firstGivenPath, secondGivenPath);

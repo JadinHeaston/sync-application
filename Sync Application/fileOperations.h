@@ -1,7 +1,7 @@
 #pragma once
 
 //Creates a list of all files and directories within a given directory. Places each entry in a delimited format into the given wstring vector.
-void createDirectoryMapDB(std::vector<std::wstring>& givenVectorDB, std::wstring givenStartPath)
+void createDirectoryMapDB(std::vector<std::wstring>& givenVectorDB, std::wstring givenStartPath, bool recursiveSearch)
 {
     //Making the given path an actual usable path. idk why
     std::filesystem::path dirPath(givenStartPath);
@@ -19,7 +19,7 @@ void createDirectoryMapDB(std::vector<std::wstring>& givenVectorDB, std::wstring
     time_t dateCreatedTime;
 
     //Checking whether to search recursively or not
-    if (argumentVariables["internalObject"]["Recursive Search"])
+    if (recursiveSearch)
     {
         //RECURSIVE
         for (std::filesystem::recursive_directory_iterator end, dir(givenStartPath); dir != end; ++dir)

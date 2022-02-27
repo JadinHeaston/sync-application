@@ -91,7 +91,6 @@ int main(int argc, char* argv[])
 
     std::chrono::time_point start = std::chrono::steady_clock::now(); //START TIMER.
 
-
     //Default arguments that don't need stored in a configuration.
     bool useConfigurationFile = false;
     bool showHelpMessage = false;
@@ -113,7 +112,10 @@ int main(int argc, char* argv[])
         argumentVariables["internalObject"]["Check File Contents"] = false; ////Recieved from arg: --check-content | Defaults to false.
         argumentVariables["internalObject"]["Output Files"] = false; //Recieved from arg: --output-files | Defaults to false.
         argumentVariables["internalObject"]["Show Console"] = true; //Recieved from arg: --hide-console | defaults to false | Defines whether things are output to the console or not.
-        argumentVariables["internalObject"]["Recursive Search"] = true; //Recieved from arg: --no-recursive | defaults to true.
+        
+        argumentVariables["internalObject"]["Directory One"]["Recursive Search"] = true; //Recieved from arg: --no-recursive | defaults to true.
+        argumentVariables["internalObject"]["Directory Two"]["Recursive Search"] = true; //Recieved from arg: --no-recursive | defaults to true.
+        
         argumentVariables["internalObject"]["Verbose Debugging"] = false; //Defines if verbose debugging is enabled.
         argumentVariables["internalObject"]["Windows Max Path Bypass"] = false; //Determines whether "\\?\" is prepended to path and backslashes are used as directory separators.
         argumentVariables["internalObject"]["Show Warning"] = true; //Recieved from arg: --no-warning | defaults to true | Defines whether things are output to the console or not.
@@ -153,17 +155,20 @@ int main(int argc, char* argv[])
                 if (strcmp(argv[1], "--help") == 0) //Checking second argument for if it is "-h" or "-help".
                 {
                     //Display help
-                    std::cout << "Defaults:" << std::endl;
-                    std::cout << "--check-content - F | --output-files - F | --output-verbose-debug <FILEPATH> - NULL | --no-recursive - T" << std::endl;
                     std::cout << "HELP PROVIDED. GET FUCKED" << std::endl;
 
                     system("PAUSE");
                     return 0;
                 }
-
-                if ((strcmp(argv[i], "--check-content") == 0) || (strncmp(argv[i], "--check-contents", 32) == 0)) //Enable file hashing.
+                else if ((strcmp(argv[i], "--configuration-name") == 0)) //Gets the provided configuration name.
+                    std::wstring configurationName = charToWString(argv[i + 1]);
+                else if ((strcmp(argv[i], "--check-content") == 0) || (strncmp(argv[i], "--check-contents", 32) == 0)) //Enable file hashing.
                     argumentVariables["internalObject"]["Check File Contents"] = true; //Set hashing to true.
-                if (strcmp(argv[i], "--directory-one") == 0) //Directory one path switch.
+                else if (strncmp(argv[i], "--add-to-config", 32) == 0) //Sets the configuration name.
+                {
+
+                }
+                else if (strcmp(argv[i], "--directory-one") == 0) //Directory one path switch.
                 {
                     firstGivenDirectoryPath = formatFilePath(charToWString(argv[i + 1]));
 
@@ -229,8 +234,10 @@ int main(int argc, char* argv[])
                 }
                 else if (strncmp(argv[i], "--hide-console", 32) == 0) //Defines if anything is output to the console.
                     argumentVariables["internalObject"]["Show Console"] = false;
-                else if (strcmp(argv[i], "--no-recursive") == 0) //Disable recursive operation.
-                    argumentVariables["internalObject"]["No Recursive"] = false;
+                else if (strcmp(argv[i], "--no-recursive-one") == 0) //Disable recursive operation for directory one.
+                    argumentVariables["internalObject"]["Directory One"]["Recursive Search"] = false;
+                else if (strcmp(argv[i], "--no-recursive-two") == 0) //Disable recursive operation for directory one.
+                    argumentVariables["internalObject"]["Directory Two"]["Recursive Search"] = false;
                 else if (strcmp(argv[i], "--no-warning") == 0) //Disable deletion warning.
                     argumentVariables["internalObject"]["Show Warning"] = false;
                 else if (strcmp(argv[i], "--operation-mode") == 0) //Operation mode switch.
@@ -304,9 +311,10 @@ int main(int argc, char* argv[])
                 system("PAUSE");
                 return 0;
             }
-            if (singleCharArguments['l']) //Windows Max Path Bypass
+            else if (singleCharArguments['l']) //Windows Max Path Bypass
             {
-                argumentVariables["internalObject"]["Windows Max Path Bypass"] = true; directorySeparator = L"\\";
+                argumentVariables["internalObject"]["Windows Max Path Bypass"] = true; 
+                directorySeparator = L"\\"; //Set directory separator appropriately.
             }
         }
         //ARGS FINISHED.
@@ -390,8 +398,8 @@ int main(int argc, char* argv[])
     writeConsoleMessagesPool.push_task(displayConsoleMessage, L"Creating directory maps...");
 
     //Creating initial directory map.
-    threadPool.push_task(createDirectoryMapDB, std::ref(directoryOneDB), std::ref(firstGivenDirectoryPath));
-    threadPool.push_task(createDirectoryMapDB, std::ref(directoryTwoDB), std::ref(secondGivenDirectoryPath));
+    threadPool.push_task(createDirectoryMapDB, std::ref(directoryOneDB), std::ref(firstGivenDirectoryPath), argumentVariables["internalObject"]["Directory One"]["Recursive Search"].get<bool>());
+    threadPool.push_task(createDirectoryMapDB, std::ref(directoryTwoDB), std::ref(secondGivenDirectoryPath), argumentVariables["internalObject"]["Directory Two"]["Recursive Search"].get<bool>());
     threadPool.wait_for_tasks();
 
     writeDebugThreadPool.push_task(writeToDebug, std::chrono::system_clock::now(), true, L"----- *COMPLETED* DIRECTORY CRAWLING -----");
@@ -781,7 +789,6 @@ void compareHashes(std::vector<std::wstring>& firstGivenVectorDB, std::vector<st
     }
 
 }
-
 
 //Allows you to multi-thread the process of doign a simple sort of a vector.
 void sortVector(std::vector<std::wstring>& givenVectorDB)
