@@ -1,6 +1,8 @@
 # Sync Application
 (No. The name is not finalized.)
 
+NOTE: This readme file does not accurately reflect what the code is capable of right now.
+
 - [Description](#description)
 - [Requirements](#requirements)
 - [Installation](#installation)
