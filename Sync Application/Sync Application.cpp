@@ -67,21 +67,15 @@ std::unordered_map<char, size_t> singleCharArguments;
 
 
 //FUNCTION PROTOTYPES
-void createDirectoryMapDB(std::vector<std::wstring>& givenVectorDB, std::wstring givenStartPath); //Creates database of given directory. Providing file names with their size, date mod, and date created values.
-size_t countFiles(std::wstring pathToDir, bool recursiveLookup); //CURRENTLY UNUSED.
-size_t countDir(std::wstring pathToDir, bool recursiveLookup); //CURRENTLY UNUSED.
 size_t nthOccurrence(std::wstring& givenString, std::wstring delimitingCharacter, size_t nth); //Provides character location of nthOccurrence of a given character in a given string.
 std::wstring formatFilePath(std::wstring givenFile, std::wstring givenDirectorySeparator = L""); //Used to change \\ to /
-void sortDirectoryDatabases(std::vector<std::wstring>& givenVectorDB); //Created to allow multithreading. Simple std::sort on databases. Originally (and currently) only used for directory DB's.
+void sortVector(std::vector<std::wstring>& givenVectorDB); //Created to allow multithreading. Simple std::sort on databases. Originally (and currently) only used for directory DB's.
 void performFileOpActionFile(std::vector<std::wstring>& fileOpAction); //Goes through File Operation Actions vector. Interprets data and assigns task to thread pool.
 void performHashActionFile(std::vector<std::wstring>& hashActions, std::vector<std::wstring>& firstGivenVectorDB, std::vector<std::wstring>& secondGivenVectorDB, std::wstring firstGivenPath, std::wstring secondGivenPath); //
 void compareHashes(std::vector<std::wstring>& firstGivenVectorDB, std::vector<std::wstring>& secondGivenVectorDB, std::vector<std::wstring>& fileOpAction, std::wstring firstGivenPath, std::wstring secondGivenPath); //
 void echoCompareDirectories(std::vector<std::wstring>& firstGivenVectorDB, std::vector<std::wstring>& secondGivenVectorDB, std::vector<std::wstring>& hashActions, std::vector<std::wstring>& fileOpAction, std::wstring firstGivenPath, std::wstring secondGivenPath);
 void synchronizeCompareDirectories(std::vector<std::wstring>& firstGivenVectorDB, std::vector<std::wstring>& secondGivenVectorDB, std::vector<std::wstring>& hashActions, std::vector<std::wstring>& fileOpAction, std::wstring firstGivenPath, std::wstring secondGivenPath);
 void contributeCompareDirectories(std::vector<std::wstring>& firstGivenVectorDB, std::vector<std::wstring>& secondGivenVectorDB, std::vector<std::wstring>& hashActions, std::vector<std::wstring>& fileOpAction, std::wstring firstGivenPath, std::wstring secondGivenPath);
-void removeObject(std::wstring destinationFilePath, bool recursiveRemoval); //Removes given object.
-void copyFile(std::wstring source, std::wstring destination); //Copies file.
-void moveFile(std::wstring givenSourcePath, std::wstring givenDestinationPath); //Moves an object.
 
 //Internal header files:
 #include "wideStrings.h"
@@ -408,8 +402,8 @@ int main(int argc, char* argv[])
     writeConsoleMessagesPool.push_task(displayConsoleMessage, L"Sorting lists...");
 
     //Sorting directories. This may be changed to be a natural sorting later. (to make it more human-readable)
-    threadPool.push_task(sortDirectoryDatabases, std::ref(directoryOneDB));
-    threadPool.push_task(sortDirectoryDatabases, std::ref(directoryTwoDB));
+    threadPool.push_task(sortVector, std::ref(directoryOneDB));
+    threadPool.push_task(sortVector, std::ref(directoryTwoDB));
     threadPool.wait_for_tasks();
 
     writeDebugThreadPool.push_task(writeToDebug, std::chrono::system_clock::now(), true, L"----- *COMPLETED* SORTING DIRECTORY LISTS -----");
@@ -448,9 +442,6 @@ int main(int argc, char* argv[])
     performFileOpActionFile(fileOpActions); //Regardless of the type of operation, a file operation check should occur.
     writeDebugThreadPool.push_task(writeToDebug, std::chrono::system_clock::now(), true, L"----- *COMPLETED* FILE OPERATIONS -----");
     writeConsoleMessagesPool.push_task(displayConsoleMessage, L"File Operations finished!");
-
-
-
 
     //Outputting files!
     if (argumentVariables["internalObject"]["Output Files"])
@@ -789,4 +780,11 @@ void compareHashes(std::vector<std::wstring>& firstGivenVectorDB, std::vector<st
         }
     }
 
+}
+
+
+//Allows you to multi-thread the process of doign a simple sort of a vector.
+void sortVector(std::vector<std::wstring>& givenVectorDB)
+{
+    std::sort(givenVectorDB.begin(), givenVectorDB.end());
 }

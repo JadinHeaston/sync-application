@@ -1,12 +1,5 @@
 #pragma once
 
-
-//Allows you to multi-thread the process of doign a simple sort of a vector.
-void sortDirectoryDatabases(std::vector<std::wstring>& givenVectorDB)
-{
-    std::sort(givenVectorDB.begin(), givenVectorDB.end());
-}
-
 //Creates a list of all files and directories within a given directory. Places each entry in a delimited format into the given wstring vector.
 void createDirectoryMapDB(std::vector<std::wstring>& givenVectorDB, std::wstring givenStartPath)
 {
