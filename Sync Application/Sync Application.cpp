@@ -29,7 +29,6 @@ std::mutex coutMutex; //Lock for wcout to prevent errors display console message
 using json = nlohmann::json; //Setting json namespace to a simgler term.
 json argumentVariables;
 
-
 std::wstring directorySeparator = L"/";
 std::wstring pathToConfigFile;
 
@@ -79,8 +78,8 @@ void contributeCompareDirectories(std::vector<std::wstring>& firstGivenVectorDB,
 
 //Internal header files:
 #include "wideStrings.h"
-#include "configFile.h"
 #include "debugging.h"
+#include "configFile.h"
 #include "hashing.h"
 #include "syncOperations.h"
 #include "fileOperations.h"
@@ -94,9 +93,11 @@ int main(int argc, char* argv[])
     //Default arguments that don't need stored in a configuration.
     bool useConfigurationFile = false;
     bool showHelpMessage = false;
-
+    std::wstring configurationName;
 
     //Iterate through arguments for a help message, or a use configuration message.
+    
+
     //Check results of previous iteration.
     if (showHelpMessage)
     {
@@ -161,12 +162,13 @@ int main(int argc, char* argv[])
                     return 0;
                 }
                 else if ((strcmp(argv[i], "--configuration-name") == 0)) //Gets the provided configuration name.
-                    std::wstring configurationName = charToWString(argv[i + 1]);
+                    configurationName = charToWString(argv[i + 1]);
                 else if ((strcmp(argv[i], "--check-content") == 0) || (strncmp(argv[i], "--check-contents", 32) == 0)) //Enable file hashing.
                     argumentVariables["internalObject"]["Check File Contents"] = true; //Set hashing to true.
-                else if (strncmp(argv[i], "--add-to-config", 32) == 0) //Sets the configuration name.
+                else if ((strcmp(argv[i], "--add-to-config") == 0)) //Enable file output.
                 {
-
+                    addToConfigFile = true;
+                    pathToConfigFile = formatFilePath(charToWString(argv[i + 1]));
                 }
                 else if (strcmp(argv[i], "--directory-one") == 0) //Directory one path switch.
                 {
@@ -244,11 +246,6 @@ int main(int argc, char* argv[])
                     argumentVariables["internalObject"]["Operation Mode"] = charToWString(argv[i + 1]);
                 else if ((strcmp(argv[i], "--output-files") == 0)) //Enable file output.
                     argumentVariables["internalObject"]["Output Files"] = true;
-                else if ((strcmp(argv[i], "--add-to-config") == 0)) //Enable file output.
-                {
-                    addToConfigFile = true;
-                    pathToConfigFile = formatFilePath(charToWString(argv[i + 1]));
-                }
                 else if (strcmp(argv[i], "--output-verbose-debug") == 0) //Output debug file in running directory.
                 {
                     argumentVariables["internalObject"]["Verbose Debugging"] = true; //Set global verbose debug variable to true.
@@ -312,19 +309,21 @@ int main(int argc, char* argv[])
                 return 0;
             }
             else if (singleCharArguments['l']) //Windows Max Path Bypass
-            {
-                argumentVariables["internalObject"]["Windows Max Path Bypass"] = true; 
-                directorySeparator = L"\\"; //Set directory separator appropriately.
-            }
+                argumentVariables["internalObject"]["Windows Max Path Bypass"] = true;
         }
         //ARGS FINISHED.
 
-
+        //Checking if backslashes need to be used internally to support the max path bypass (UNC)
+        if (argumentVariables["internalObject"]["Windows Max Path Bypass"])
+            directorySeparator = L"\\"; //Set directory separator appropriately.
 
         //Add arguments to a configuration file, if needed.
         if (addToConfigFile)
-            addToConfigurationFile(pathToConfigFile, argumentVariables);
+            addToConfigurationFile(pathToConfigFile, argumentVariables, wstringToString(configurationName));
 
+        std::cout << addToConfigFile << std::endl;
+        system("PAUSE");
+        return 1;
     }
 
     //Creating vectors to hold directory maps.
@@ -759,9 +758,11 @@ void compareHashes(std::vector<std::wstring>& firstGivenVectorDB, std::vector<st
     {
         //Get matched value of DB1.
         DB1Match = firstGivenVectorDB[iterator].substr(nthOccurrence(firstGivenVectorDB[iterator], delimitingCharacter, 5) + 1, nthOccurrence(firstGivenVectorDB[iterator], delimitingCharacter, 6));
+        
         //Check if the object has been matched. If so, continue to the next iteration and do nothing.
         if (DB1Match != L"MATCHED")
             continue;
+
         //Get DB1 hash and corresponding line for DB2.
         DB1Hash = firstGivenVectorDB[iterator].substr(nthOccurrence(firstGivenVectorDB[iterator], delimitingCharacter, 4) + 1, nthOccurrence(firstGivenVectorDB[iterator], delimitingCharacter, 5));
 

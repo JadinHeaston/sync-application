@@ -25,6 +25,14 @@ std::wstring stringToWString(const std::string& s)
     return temp;
 }
 
+//Converts wstring to string.
+std::string wstringToString(const std::wstring& s)
+{
+    std::string temp(s.length(), ' ');
+    std::copy(s.begin(), s.end(), temp.begin());
+    return temp;
+}
+
 //This seems as though it would work. I have not tried it yet.
 std::wstring readUnicodeFile(std::wifstream& givenWideFile)
 {
