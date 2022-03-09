@@ -101,7 +101,8 @@ int main(int argc, char* argv[])
     //Check results of previous iteration.
     if (showHelpMessage)
     {
-
+        //A message will go here. I think?
+        // Yes
     }
     else if (useConfigurationFile)
     {
@@ -323,7 +324,7 @@ int main(int argc, char* argv[])
 
         std::cout << addToConfigFile << std::endl;
         system("PAUSE");
-        return 1;
+        //return 1;
     }
 
     //Creating vectors to hold directory maps.

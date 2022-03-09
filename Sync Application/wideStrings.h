@@ -1,11 +1,5 @@
 #pragma once
 
-//Writing unicode to file. Stolen from https://cppcodetips.wordpress.com/2014/09/16/reading-and-writing-a-unicode-file-in-c/
-void writeUnicodeToFile(std::ofstream& outputFile, std::wstring inputWstring)
-{
-    outputFile.write((char*)inputWstring.c_str(), inputWstring.length() * sizeof(wchar_t));
-}
-
 //Converts character arrays to wstring.
 std::wstring charToWString(char* givenCharArray)
 {
@@ -43,4 +37,17 @@ std::wstring readUnicodeFile(std::wifstream& givenWideFile)
     wstr.resize(str.size() / sizeof(wchar_t));
     std::memcpy(&wstr[0], str.c_str(), str.size()); // copy data into wstring
     return wstr;
+}
+
+//Writing unicode to file. Stolen from https://cppcodetips.wordpress.com/2014/09/16/reading-and-writing-a-unicode-file-in-c/
+void writeUnicodeToFile(std::wofstream& outputFile, std::wstring inputWstring)
+{
+    outputFile.write(inputWstring.c_str(), inputWstring.length());
+}
+//Writing unicode to file. Stolen from https://cppcodetips.wordpress.com/2014/09/16/reading-and-writing-a-unicode-file-in-c/
+void writeUnicodeToFile(std::ofstream& outputFile, std::wstring inputWstring)
+{
+    return;
+    outputFile.write((char*)inputWstring.c_str(), inputWstring.length() * sizeof(wchar_t));
+    
 }
