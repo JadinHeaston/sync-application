@@ -32,9 +32,6 @@
     <ClInclude Include="hashing.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="wideStrings.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
     <ClInclude Include="syncOperations.h">
       <Filter>Header Files</Filter>
     </ClInclude>

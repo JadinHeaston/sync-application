@@ -3,7 +3,7 @@
 //This means the function that writes to the debug file and the function that writes content to the console.
 
 //Writes to the the debug file.
-void writeToDebug(std::chrono::system_clock::time_point givenTime, bool writeTime, std::wstring textToWrite)
+void writeToDebug(std::chrono::system_clock::time_point givenTime, bool writeTime, std::string textToWrite)
 {
     //Check if we are actually writing to the debug file.
     if (!argumentVariables["internalObject"]["Verbose Debugging"])
@@ -17,10 +17,10 @@ void writeToDebug(std::chrono::system_clock::time_point givenTime, bool writeTim
     if (fileSize >= 102857600) //100 MB
     {
         //Change the file name.
-        if (debugFileName.find(L"."))
-            debugFileName = debugFileName.insert(debugFileName.find(L"."), L" - " + std::to_wstring(debugFileCount));
+        if (debugFileName.find("."))
+            debugFileName = debugFileName.insert(debugFileName.find("."), " - " + debugFileCount);
         else
-            debugFileName = debugFileName.append(L" - " + std::to_wstring(debugFileCount));
+            debugFileName = debugFileName.append(" - " + debugFileCount);
         ++debugFileCount; //Incrememnt debug file count.
     }
 
@@ -38,67 +38,65 @@ void writeToDebug(std::chrono::system_clock::time_point givenTime, bool writeTim
 
         std::string temporaryString = buff; //Put the buffer into the string;
 
-        std::wstring timeValue = stringToWString(temporaryString); //Converting string to wstring.
+        std::string timeValue = temporaryString; //Storing time value.
 
-        timeValue = timeValue + L": "; //Appending "delimiter".
+        timeValue = timeValue + ": "; //Appending "delimiter".
 
         //Add the current time of writing.
-        writeUnicodeToFile(verboseDebugOutput, timeValue + textToWrite + newLine); //Write this to the debug file.
+        writeToFile(verboseDebugOutput, timeValue + textToWrite + newLine); //Write this to the debug file.
     }
     else
-    {
-        writeUnicodeToFile(verboseDebugOutput, textToWrite + newLine); //Write this to the debug file.
-    }
+        writeToFile(verboseDebugOutput, textToWrite + newLine); //Write this to the debug file.
 
     verboseDebugOutput.close(); //Close file.
 }
 
-void displayConsoleMessage(std::wstring givenMessage)
+//Writes the message to the console, if the console is being shown/used.
+void displayConsoleMessage(std::string givenMessage)
 {
-    
     if (!argumentVariables["internalObject"]["Show Console"])
         return;
 
     std::lock_guard<std::mutex> coutLock(coutMutex);
-    std::wcout << givenMessage << std::endl;
+    std::cout << givenMessage << std::endl;
 }
 
 //This section ignores whether the console is shown or not.
 void showWarningMessage()
 {
     //Displaying warning information.
-    std::wcout << L"-------------------------------------------------- WARNING --------------------------------------------------" << std::endl;
-    if (argumentVariables["internalObject"]["Operation Mode"].get<std::wstring>() == L"echo")
+    std::cout << "-------------------------------------------------- WARNING --------------------------------------------------" << std::endl;
+    if (argumentVariables["internalObject"]["Operation Mode"].get<std::string>() == "echo")
     {
-        std::wcout << L"The \"ECHO\" operation will take place. This will cause the second directory to look *IDENTICAL* to the first." << std::endl;
-        std::wcout << L"When a file is found within both directories, the program will compare the size and last modified time. When a difference is found, the first directories file will overwrite the seconds. (Hashes are only used when files, size, and modification time are all the same and the --check-contents argument is provided.)" << std::endl;
-        std::wcout << L"This option is best used when you are backing up data and want a second directory to match the directory you make changes in." << std::endl;
-        std::wcout << L"Deletions and file overwrites are possible within the second directory." << std::endl;
-        std::wcout << L"First Directory: " << firstGivenDirectoryPath << std::endl;
-        std::wcout << L"Second Directory: " << secondGivenDirectoryPath << std::endl;
+        std::cout << "The \"ECHO\" operation will take place. This will cause the second directory to look *IDENTICAL* to the first." << std::endl;
+        std::cout << "When a file is found within both directories, the program will compare the size and last modified time. When a difference is found, the first directories file will overwrite the seconds. (Hashes are only used when files, size, and modification time are all the same and the --check-contents argument is provided.)" << std::endl;
+        std::cout << "This option is best used when you are backing up data and want a second directory to match the directory you make changes in." << std::endl;
+        std::cout << "Deletions and file overwrites are possible within the second directory." << std::endl;
+        std::cout << "First Directory: " << firstGivenDirectoryPath << std::endl;
+        std::cout << "Second Directory: " << secondGivenDirectoryPath << std::endl;
     }
-    else if (argumentVariables["internalObject"]["Operation Mode"].get<std::wstring>() == L"synchronize" || argumentVariables["internalObject"]["Operation Mode"].get<std::wstring>() == L"sync")
+    else if (argumentVariables["internalObject"]["Operation Mode"].get<std::string>() == "synchronize" || argumentVariables["internalObject"]["Operation Mode"].get<std::string>() == "sync")
     {
-        std::wcout << L"The \"SYNCHRONIZE\" operation will take place. This will cause the first and second directories to look identical to each other, with the newest files being kept." << std::endl;
-        std::wcout << L"When a file is found within both directories, the one with the newest modification time is used and copied to replace the older version." << std::endl;
-        std::wcout << L"This option is best used when changes can be made within both directories and you want them both to be synced with the newest versions from both." << std::endl;
-        std::wcout << L"Deletions and file overwrites are possible within both directories." << std::endl;
-        std::wcout << L"First Directory: " << firstGivenDirectoryPath << std::endl;
-        std::wcout << L"Second Directory: " << secondGivenDirectoryPath << std::endl;
+        std::cout << "The \"SYNCHRONIZE\" operation will take place. This will cause the first and second directories to look identical to each other, with the newest files being kept." << std::endl;
+        std::cout << "When a file is found within both directories, the one with the newest modification time is used and copied to replace the older version." << std::endl;
+        std::cout << "This option is best used when changes can be made within both directories and you want them both to be synced with the newest versions from both." << std::endl;
+        std::cout << "Deletions and file overwrites are possible within both directories." << std::endl;
+        std::cout << "First Directory: " << firstGivenDirectoryPath << std::endl;
+        std::cout << "Second Directory: " << secondGivenDirectoryPath << std::endl;
     }
-    else if (argumentVariables["internalObject"]["Operation Mode"].get<std::wstring>() == L"contribute" || argumentVariables["internalObject"]["Operation Mode"].get<std::wstring>() == L"cont")
+    else if (argumentVariables["internalObject"]["Operation Mode"].get<std::string>() == "contribute" || argumentVariables["internalObject"]["Operation Mode"].get<std::string>() == "cont")
     {
-        std::wcout << L"The \"CONTRIBUTE\" operation will take place. This will cause the first directory to contribute any new files or changes to the second directory." << std::endl;
-        std::wcout << L"When a file is found within both directories, the program will compare the size and last modified time. When a difference is found, the first directories file will overwrite the second directories file. If the file is not present within the second directory, it is copied over to it. (Hashes are only used when files, size, and modification time are all the same and the --check-contents argument is provided.)" << std::endl;
-        std::wcout << "This option is best used when you are regularly archiving files and want to keep everything." << std::endl;
-        std::wcout << L"No deletions are ever made. File overwrites are possible within the second directory." << std::endl;
-        std::wcout << L"First Directory: " << firstGivenDirectoryPath << std::endl;
-        std::wcout << L"Second Directory: " << secondGivenDirectoryPath << std::endl;
+        std::cout << "The \"CONTRIBUTE\" operation will take place. This will cause the first directory to contribute any new files or changes to the second directory." << std::endl;
+        std::cout << "When a file is found within both directories, the program will compare the size and last modified time. When a difference is found, the first directories file will overwrite the second directories file. If the file is not present within the second directory, it is copied over to it. (Hashes are only used when files, size, and modification time are all the same and the --check-contents argument is provided.)" << std::endl;
+        std::cout << "This option is best used when you are regularly archiving files and want to keep everything." << std::endl;
+        std::cout << "No deletions are ever made. File overwrites are possible within the second directory." << std::endl;
+        std::cout << "First Directory: " << firstGivenDirectoryPath << std::endl;
+        std::cout << "Second Directory: " << secondGivenDirectoryPath << std::endl;
     }
 
-    std::wcout << std::endl;
-    std::wcout << L"(This warning can be disabled by adding the \"--no-warning\" argument)" << std::endl;
-    std::wcout << L"File operations are permenant (ESPECIALLY DELETIONS). Do you wish to proceed, knowing what files are potentially at risk? (Y/N)" << std::endl;
+    std::cout << std::endl;
+    std::cout << "(This warning can be disabled by adding the \"--no-warning\" argument)" << std::endl;
+    std::cout << "File operations are permenant (ESPECIALLY DELETIONS). Do you wish to proceed, knowing what files are potentially at risk? (Y/N)" << std::endl;
     
     std::cin >> userInput[0]; //Awaiting user input...
 

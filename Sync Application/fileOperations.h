@@ -1,7 +1,13 @@
 #pragma once
 
+//Writing To File
+void writeToFile(std::ofstream& outputFile, std::string inputWstring)
+{
+    outputFile.write((char*)inputWstring.c_str(), inputWstring.length());
+}
+
 //Creates a list of all files and directories within a given directory. Places each entry in a delimited format into the given wstring vector.
-void createDirectoryMapDB(std::vector<std::wstring>& givenVectorDB, std::wstring givenStartPath, bool recursiveSearch)
+void createDirectoryMapDB(std::vector<std::string>& givenVectorDB, std::string givenStartPath, bool recursiveSearch)
 {
     //Making the given path an actual usable path. idk why
     std::filesystem::path dirPath(givenStartPath);
@@ -11,8 +17,8 @@ void createDirectoryMapDB(std::vector<std::wstring>& givenVectorDB, std::wstring
     //Creating a stringstream to hold the file size
     std::stringstream temporaryStringStreamFileAndDirSearch;
 
-    std::wstring current_file;
-    std::wstringstream testStream;
+    std::string current_file;
+    std::stringstream testStream;
 
 
     time_t lastModifiedTime;
@@ -25,7 +31,7 @@ void createDirectoryMapDB(std::vector<std::wstring>& givenVectorDB, std::wstring
         for (std::filesystem::recursive_directory_iterator end, dir(givenStartPath); dir != end; ++dir)
         {
             //Setting current file equal to the full path of the file.
-            current_file = std::filesystem::absolute(dir->path().native());
+            current_file = std::filesystem::absolute(dir->path().native()).string();
 
             //Putting path into array.
             testStream << formatFilePath(current_file) << delimitingCharacter;
@@ -57,7 +63,7 @@ void createDirectoryMapDB(std::vector<std::wstring>& givenVectorDB, std::wstring
             givenVectorDB.push_back(testStream.str());
             //writeDebugThreadPool.push_task(writeToDebug, std::chrono::system_clock::now(), true, L"8 Reseting streamstring: " + formatFilePath(current_file));
             //Clearing stringstream for next iteration.
-            testStream.str(std::wstring());
+            testStream.str(std::string());
             //writeDebugThreadPool.push_task(writeToDebug, std::chrono::system_clock::now(), true, L"9 finished streamstring: " + formatFilePath(current_file));
 
         }
@@ -71,7 +77,7 @@ void createDirectoryMapDB(std::vector<std::wstring>& givenVectorDB, std::wstring
             if (std::filesystem::is_regular_file(itr->path()))
             {
                 //Setting current file equal to the full path of the file.
-                current_file = std::filesystem::absolute(itr->path().native());
+                current_file = std::filesystem::absolute(itr->path().native()).string();
 
                 //Putting path into array.
                 testStream << current_file << delimitingCharacter;
@@ -91,7 +97,7 @@ void createDirectoryMapDB(std::vector<std::wstring>& givenVectorDB, std::wstring
                 givenVectorDB.push_back(testStream.str());
 
                 //Clearing stringstream for next iteration.
-                testStream.str(std::wstring());
+                testStream.str(std::string());
             }
 
         }
@@ -100,7 +106,7 @@ void createDirectoryMapDB(std::vector<std::wstring>& givenVectorDB, std::wstring
 }
 
 //Functions asks for a path to directory and will return number of files. - Also asks for a T/F bool determining whether a search should be recursive.
-size_t countFiles(std::wstring pathToDir, bool recursiveLookup)
+size_t countFiles(std::string pathToDir, bool recursiveLookup)
 {
     size_t fileCounter = 0;
 
@@ -133,7 +139,7 @@ size_t countFiles(std::wstring pathToDir, bool recursiveLookup)
 }
 
 //Functions asks for a path to a directory and will return number of files. - Also asks for a T/F bool determining whether a search should be recursive.
-size_t countDir(std::wstring pathToDir, bool recursiveLookup)
+size_t countDir(std::string pathToDir, bool recursiveLookup)
 {
     size_t directoryCounter = 0;
 
@@ -166,7 +172,7 @@ size_t countDir(std::wstring pathToDir, bool recursiveLookup)
 }
 
 //Performs "filesystem::remove_all" on given path.
-void removeObject(std::wstring destinationFilePath, bool recursiveRemoval)
+void removeObject(std::string destinationFilePath, bool recursiveRemoval)
 {
     if (!std::filesystem::exists(destinationFilePath)) //Verify it is a normal file. I don't know what other types there are, but I'll avoid deleting them until I know.
         return;
@@ -184,15 +190,15 @@ void removeObject(std::wstring destinationFilePath, bool recursiveRemoval)
     //Sending errors to that error_code seems to fix some problems?
     //An error was occuring sometimes when deleting destination empty directories, but adding this error part make it just work.
     if (ec.value() == 5) //If error value is 5, it is access denied.
-        writeDebugThreadPool.push_task(writeToDebug, std::chrono::system_clock::now(), true, L"ERROR. ACCESS DENIED: " + destinationFilePath); //Log.
+        writeDebugThreadPool.push_task(writeToDebug, std::chrono::system_clock::now(), true, "ERROR. ACCESS DENIED: " + destinationFilePath); //Log.
 
 }
 
 //Copying file.
-void copyFile(std::wstring givenSourcePath, std::wstring givenDestinationPath)
+void copyFile(std::string givenSourcePath, std::string givenDestinationPath)
 {
     //Creating files themselves.
-    std::wstring destinationDirectoriesPath = givenDestinationPath.substr(0, givenDestinationPath.find_last_of(directorySeparator) + 1); //Obtaining path of the destination until the last backslash.
+    std::string destinationDirectoriesPath = givenDestinationPath.substr(0, givenDestinationPath.find_last_of(directorySeparator) + 1); //Obtaining path of the destination until the last backslash.
 
     if (!std::filesystem::exists(destinationDirectoriesPath)) //If the directory does not exist, then create it.
         std::filesystem::create_directories(destinationDirectoriesPath);
@@ -209,16 +215,16 @@ void copyFile(std::wstring givenSourcePath, std::wstring givenDestinationPath)
         std::filesystem::copy(givenSourcePath, givenDestinationPath, std::filesystem::copy_options::overwrite_existing, ec); //Copying the file. - If a directory is being looked at, it would have already been made above. This will do nothing.
 
         if (ec.value() == 5) //If error value is 5, it is access denied.
-            writeDebugThreadPool.push_task(writeToDebug, std::chrono::system_clock::now(), true, L"ERROR. ACCESS DENIED: " + givenSourcePath + L" - " + givenDestinationPath); //Log.
+            writeDebugThreadPool.push_task(writeToDebug, std::chrono::system_clock::now(), true, "ERROR. ACCESS DENIED: " + givenSourcePath + " - " + givenDestinationPath); //Log.
     }
 
 }
 
 //Moving file.
-void moveFile(std::wstring givenSourcePath, std::wstring givenDestinationPath)
+void moveFile(std::string givenSourcePath, std::string givenDestinationPath)
 {
     //Creating files themselves.
-    std::wstring destinationDirectoriesPath = givenDestinationPath.substr(0, givenDestinationPath.find_last_of(directorySeparator) + 1); //Obtaining path of the destination until the last backslash.
+    std::string destinationDirectoriesPath = givenDestinationPath.substr(0, givenDestinationPath.find_last_of(directorySeparator) + 1); //Obtaining path of the destination until the last backslash.
 
     if (!std::filesystem::exists(destinationDirectoriesPath)) //If the directory does not exist, then create it.
         std::filesystem::create_directories(destinationDirectoriesPath);
@@ -235,7 +241,7 @@ void moveFile(std::wstring givenSourcePath, std::wstring givenDestinationPath)
         std::filesystem::copy(givenSourcePath, givenDestinationPath, std::filesystem::copy_options::overwrite_existing, ec); //Copying the file. - If a directory is being looked at, it would have already been made above. This will do nothing.
 
         if (ec.value() == 5) //If error value is 5, it is access denied.
-            writeDebugThreadPool.push_task(writeToDebug, std::chrono::system_clock::now(), true, L"ERROR. ACCESS DENIED: " + givenSourcePath + L" - " + givenDestinationPath); //Log.
+            writeDebugThreadPool.push_task(writeToDebug, std::chrono::system_clock::now(), true, "ERROR. ACCESS DENIED: " + givenSourcePath + " - " + givenDestinationPath); //Log.
 
         removeObject(givenSourcePath, false); //Now that the file is copied, remove the source file.
     }

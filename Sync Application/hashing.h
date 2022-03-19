@@ -23,9 +23,9 @@ std::string convertMD5ToHex(unsigned char* givenDigest)
 
 //Multithreadable hash given file that also handles writing the result to the givenVector.
 //Asks for the path to the file to hash, a vector to store output in, and line location in that vector to modify.
-void MThashGivenFile(std::wstring givenFilePath, std::vector<std::wstring>& givenVector, std::wstring lineLocation)
+void MThashGivenFile(std::string givenFilePath, std::vector<std::string>& givenVector, std::string lineLocation)
 {
-    writeDebugThreadPool.push_task(writeToDebug, std::chrono::system_clock::now(), true, L"HASHING STARTED: " + givenFilePath);
+    writeDebugThreadPool.push_task(writeToDebug, std::chrono::system_clock::now(), true, "HASHING STARTED: " + givenFilePath);
 
     //https://www.quora.com/How-can-I-get-the-MD5-or-SHA-hash-of-a-file-in-C
     //Define relevant variables.
@@ -46,7 +46,7 @@ void MThashGivenFile(std::wstring givenFilePath, std::vector<std::wstring>& give
 
     if (fileHandle.fail())
     {
-        writeDebugThreadPool.push_task(writeToDebug, std::chrono::system_clock::now(), true, L"ERROR - FAIL FLAG BEFORE HASHING: " + givenFilePath);
+        writeDebugThreadPool.push_task(writeToDebug, std::chrono::system_clock::now(), true, "ERROR - FAIL FLAG BEFORE HASHING: " + givenFilePath);
         return;
     }
 
@@ -60,7 +60,7 @@ void MThashGivenFile(std::wstring givenFilePath, std::vector<std::wstring>& give
 
         if (fileHandle.bad())
         {
-            writeDebugThreadPool.push_task(writeToDebug, std::chrono::system_clock::now(), true, L"ERROR - BAD FLAG DURING HASHING: " + givenFilePath);
+            writeDebugThreadPool.push_task(writeToDebug, std::chrono::system_clock::now(), true, "ERROR - BAD FLAG DURING HASHING: " + givenFilePath);
             return;
         }
 
@@ -71,14 +71,14 @@ void MThashGivenFile(std::wstring givenFilePath, std::vector<std::wstring>& give
 
     //Verify hash completed successfully.
     if (MD5Result == 0) // Hash failed.
-        std::wcout << L"HASH FAILED. 0 RETURNED." + givenFilePath << std::endl;
+        std::cout << "HASH FAILED. 0 RETURNED." + givenFilePath << std::endl;
 
     //Close file.
     fileHandle.close();
 
-    writeDebugThreadPool.push_task(writeToDebug, std::chrono::system_clock::now(), true, L"HASHING COMPLETED: " + givenFilePath);
+    writeDebugThreadPool.push_task(writeToDebug, std::chrono::system_clock::now(), true, "HASHING COMPLETED: " + givenFilePath);
 
     //Write the result to the vector.
-    givenVector[_wtoi(lineLocation.c_str())].insert(nthOccurrence(givenVector[_wtoi(lineLocation.c_str())], delimitingCharacter, 4) + 1, stringToWString(convertMD5ToHex(digest)));
+    givenVector[std::stoi(lineLocation.c_str())].insert(nthOccurrence(givenVector[std::stoi(lineLocation.c_str())], delimitingCharacter, 4) + 1, convertMD5ToHex(digest));
     return;
 }

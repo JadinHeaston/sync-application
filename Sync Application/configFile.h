@@ -4,7 +4,7 @@
 void change_key(json& object, const std::string& old_key, const std::string& new_key);
 std::string filetostring(std::ifstream& givenFile);
 
-void addToConfigurationFile(std::wstring pathToConfig, json givenArguments, std::string configurationName)
+void addToConfigurationFile(std::string pathToConfig, json givenArguments, std::string configurationName)
 {
     if (configurationName == "")
     {
@@ -16,49 +16,57 @@ void addToConfigurationFile(std::wstring pathToConfig, json givenArguments, std:
     json configurationFileJSON;
     size_t largestNumericID = NULL;
     std::vector<std::string> foundConfigIDs;
+
     //Open configuration file of reading.
     std::wifstream configFileReading(pathToConfig);
+
     //Reading each line and storing it in a single string.
     std::wstring currentLine;
     std::wstring finalString;
 
-    finalString = readUnicodeFile(configFileReading);
+    finalString = configFileReading;
 
+    system("PAUSE");
+    std::wcout << finalString << std::endl;
+
+    system("PAUSE");
     //std::wstring tempString = LR"()";
     configurationFileJSON = finalString;
+    if (!json::accept(finalString))
+    {
+        std::cout << "NOT ACCEPTED" << std::endl;
+    }
+    else
+    {
+        std::cout << "ACCEPTED" << std::endl;
+    }
+
     system("PAUSE");
-    //if (!json::accept(configFileReading))
-    //{
-    //    std::cout << "NOT ACCEPTED" << std::endl;
-    //}
-    //else
-    //{
-    //    std::cout << "ACCEPTED" << std::endl;
-    //}
+    std::string failFilePath = "TEST.log";
+    std::ofstream failFile(failFilePath, std::ios::out);
 
-
-    std::wstring test = L"ここにいﾋ (I'm Here) ft. rionos (Stephen Walking Remix)";
-    std::wstring failFilePath = L"TEST.log";
-    std::wofstream failFile(failFilePath, std::ios::out);
-    writeUnicodeToFile(failFile, test);
-    failFile.close();
+    std::string temp = "ここにいる (I'm Here) ft. rionos (Stephen Walking Remix) - Aiob";
+    writeUnicodeToFile(failFile, temp);
     //writeUnicodeToFile(failFile, stringToWString(configurationFileJSON.dump(5)));
+
+
+    configurationFileJSON = givenArguments.dump();
+    std::cout << givenArguments.dump(5) << std::endl;
+    system("PAUSE");
+    std::cout << configurationFileJSON.dump(5) << std::endl;
+    system("PAUSE");
+    //change_key(configurationFileJSON, "cum", configurationName); //Change the top level key to be the configuration ID.
+
+    system("PAUSE"); 
+    writeUnicodeToFile(failFile, stringToWString(givenArguments.dump(5)));
+
+    system("PAUSE");
+    writeUnicodeToFile(failFile, stringToWString(configurationFileJSON.dump(5)));
+    
+
+    failFile.close();
     system("PAUSE");
     exit(1);
-
-
-    //std::cout << finalString << std::endl;
-    //configurationFileJSON = configurationFileJSON.dump();
-    //std::cout << givenArguments.dump(5) << std::endl;
-    //system("PAUSE");
-    //std::cout << configurationFileJSON.dump(5) << std::endl;
-    //system("PAUSE");
-    //change_key(configurationFileJSON, "cum", configurationName); //Change the top level key to be the configuration ID.
-    //writeUnicodeToFile(failFile, stringToWString(givenArguments.dump(5)));
-    //writeUnicodeToFile(failFile, stringToWString(configurationFileJSON.dump(5)));
-    //
-    //std::cout << configurationFileJSON["cum"] << std::endl;
-
     //Iterating through all top level objects. These are the IDs of the configuration.
     //for (json::iterator JSONiterator = configurationFileJSON.begin(); JSONiterator != configurationFileJSON.end(); ++JSONiterator)
     //{
@@ -68,9 +76,7 @@ void addToConfigurationFile(std::wstring pathToConfig, json givenArguments, std:
     //    //foundConfigIDs.push_back(JSONiterator.key()); //Store all IDs found.
     //}
     //std::cout << foundConfigIDs[0] << std::endl;
-    std::cout << "YO" << std::endl;
-    system("PAUSE");
-    exit(1);
+
 
 
 
@@ -105,6 +111,7 @@ void addToConfigurationFile(std::wstring pathToConfig, json givenArguments, std:
     //Output to configuration file.
     //std::ofstream configFileWriting(pathToConfig, std::ios::out | std::ios::app | std::ios::binary);
     //writeUnicodeToFile(configFileWriting, stringToWString(givenArguments.dump(5))); //Write the serialized json to the file. "5" indicates the indenting amount.
+    //configFileWriting.close();
 }
 
 void change_key(json& object, const std::string& old_key, const std::string& new_key)
@@ -122,9 +129,9 @@ bool is_empty(std::ifstream& pFile)
     return pFile.peek() == std::ifstream::traits_type::eof();
 }
 
-void readFromConfigurationFile(std::wstring pathToConfig, json givenArguments, std::wstring configurationName)
+void readFromConfigurationFile(std::string pathToConfig, json givenArguments, std::wstring configurationName)
 {
-    change_key(givenArguments, wstringToString(configurationName), "internalObject"); //Change the top level key to be the internal version needed.
+    change_key(givenArguments, configurationName, "internalObject"); //Change the top level key to be the internal version needed.
 }
 
 std::string filetostring(std::ifstream& givenFile) 
