@@ -1,250 +1,249 @@
-#pragma once
-
-//Writing To File
-void writeToFile(std::ofstream& outputFile, std::string inputWstring)
-{
-    outputFile.write((char*)inputWstring.c_str(), inputWstring.length());
-}
+﻿#pragma once
 
 //Creates a list of all files and directories within a given directory. Places each entry in a delimited format into the given wstring vector.
 void createDirectoryMapDB(std::vector<std::string>& givenVectorDB, std::string givenStartPath, bool recursiveSearch)
 {
-    //Making the given path an actual usable path. idk why
-    std::filesystem::path dirPath(givenStartPath);
-    std::filesystem::directory_iterator end_itr;
+	//Making the given path an actual usable path. idk why
+	std::filesystem::path dirPath(givenStartPath);
+	std::filesystem::directory_iterator end_itr;
 
 
-    //Creating a stringstream to hold the file size
-    std::stringstream temporaryStringStreamFileAndDirSearch;
+	//Creating a stringstream to hold the file size
+	std::stringstream temporaryStringStreamFileAndDirSearch;
 
-    std::string current_file;
-    std::stringstream testStream;
+	std::string current_file;
+	std::stringstream testStream;
+
+	std::filesystem::file_time_type lastModifiedTime;
+	//std::filesystem::file_time_type dateCreatedTime;
+
+	//Checking whether to search recursively or not
+	if (recursiveSearch)
+	{
+		//RECURSIVE
+		for (std::filesystem::recursive_directory_iterator end, dir(givenStartPath); dir != end; ++dir)
+		{
+			//Setting current file equal to the full path of the file.
+			current_file = dir->path().u8string();
+
+			//Putting path into array.
+			testStream << dir->path().u8string() << delimitingCharacter;
+
+			// If it's not a directory, list it. If you want to list directories too, just remove this check.
+			if (std::filesystem::is_regular_file(std::filesystem::u8path(current_file)))
+			{
+				//writeDebugThreadPool.push_task(writeToDebug, std::chrono::system_clock::now(), true, L"2 Is not a directory: " + formatFilePath(current_file));
+				testStream << std::filesystem::file_size(std::filesystem::u8path(current_file)) << delimitingCharacter;
+				//writeDebugThreadPool.push_task(writeToDebug, std::chrono::system_clock::now(), true, L"3 Got File Size: " + formatFilePath(current_file));
+				//Getting last modified time. In 'seconds from 1970 EPOCH' format.
+				lastModifiedTime = std::filesystem::last_write_time(std::filesystem::u8path(current_file));
+				testStream << lastModifiedTime.time_since_epoch().count() << delimitingCharacter;
+
+				//writeDebugThreadPool.push_task(writeToDebug, std::chrono::system_clock::now(), true, L"4 Got last write time: " + formatFilePath(current_file));
+				//Getting date created time. In 'seconds from 1970 EPOCH' format.
+				//dateCreatedTime = std::filesystem::(current_file);
+				//writeDebugThreadPool.push_task(writeToDebug, std::chrono::system_clock::now(), true, L"5 Got creation time: " + formatFilePath(current_file));
+				//testStream << dateCreatedTime.time_since_epoch().count() << delimitingCharacter + delimitingCharacter + newLine; //Adding an additional delimiter, since the hash is not added yet but the matching stuff will be.
+				testStream << delimitingCharacter + delimitingCharacter + newLine;
+				//writeDebugThreadPool.push_task(writeToDebug, std::chrono::system_clock::now(), true, L"6 Data stored for file: " + formatFilePath(current_file));
+
+				//if (current_file == "\\\\?\\C:\\Users\\Jadin-PC\\source\\repos\\JadinHeaston\\sync-application\\Sync Application\\TEST DIRECTORY\\ここにいる (I'm Here) ft. rionos (Stephen Walking Remix) - Aiobahn.mp3")
+				//{
+				//	std::cout << testStream.str() << std::endl;
+				//	//system("PAUSE");
+				//}
+
+				//writeDebugThreadPool.push_task(writeToDebug, std::chrono::system_clock::now(), true, L"7 Pushing data back: " + formatFilePath(current_file));
+
+				//Append to DB.
+				givenVectorDB.push_back(testStream.str());
+				//writeDebugThreadPool.push_task(writeToDebug, std::chrono::system_clock::now(), true, L"8 Reseting streamstring: " + formatFilePath(current_file));
 
 
-    time_t lastModifiedTime;
-    time_t dateCreatedTime;
+				//writeDebugThreadPool.push_task(writeToDebug, std::chrono::system_clock::now(), true, "9 finished streamstring: " + formatFilePath(current_file));
+			}
+			
+			//Clearing stringstream for next iteration.
+			testStream.str(std::string());
+		}
+	}
+	else
+	{
+		//NON-RECURSIVE
+		// cycle through the directory
+		for (std::filesystem::directory_iterator itr(givenStartPath); itr != end_itr; ++itr)
+		{
+			// If it's not a directory, list it. If you want to list directories too, just remove this check.
+			if (std::filesystem::is_regular_file(itr->path()))
+			{
+				//Setting current file equal to the full path of the file.
+				current_file = std::filesystem::absolute(itr->path()).string();
 
-    //Checking whether to search recursively or not
-    if (recursiveSearch)
-    {
-        //RECURSIVE
-        for (std::filesystem::recursive_directory_iterator end, dir(givenStartPath); dir != end; ++dir)
-        {
-            //Setting current file equal to the full path of the file.
-            current_file = std::filesystem::absolute(dir->path().native()).string();
+				//Putting path into array.
+				testStream << current_file << delimitingCharacter;
 
-            //Putting path into array.
-            testStream << formatFilePath(current_file) << delimitingCharacter;
+				//Getting filesize (in bytes).
+				testStream << std::filesystem::file_size(current_file) << delimitingCharacter;
 
-            // If it's not a directory, list it. If you want to list directories too, just remove this check.
-            if (std::filesystem::is_regular_file(dir->path()))
-            {
-                //writeDebugThreadPool.push_task(writeToDebug, std::chrono::system_clock::now(), true, L"2 Is not a directory: " + formatFilePath(current_file));
-                testStream << std::filesystem::file_size(current_file) << delimitingCharacter;
-                //writeDebugThreadPool.push_task(writeToDebug, std::chrono::system_clock::now(), true, L"3 Got File Size: " + formatFilePath(current_file));
-                //Getting last modified time. In seconds from 1970 EPOCH format.
-                lastModifiedTime = boost::filesystem::last_write_time(current_file);
-                testStream << lastModifiedTime << delimitingCharacter;
+				//Getting last modified time. In seconds from 1970 EPOCH format.
+				time_t firstDirectoryModifiedTime = boost::filesystem::last_write_time(current_file);
+				testStream << firstDirectoryModifiedTime << delimitingCharacter;
 
-                //writeDebugThreadPool.push_task(writeToDebug, std::chrono::system_clock::now(), true, L"4 Got last write time: " + formatFilePath(current_file));
-                //Getting date created time. In seconds from 1970 EPOCH format.
-                dateCreatedTime = boost::filesystem::creation_time(current_file);
-                //writeDebugThreadPool.push_task(writeToDebug, std::chrono::system_clock::now(), true, L"5 Got creation time: " + formatFilePath(current_file));
-                testStream << dateCreatedTime << delimitingCharacter + delimitingCharacter + newLine; //Adding an additional delimiter, since the hash is not added yet but the matching stuff will be.
+				//Getting date created time. In seconds from 1970 EPOCH format.
+				time_t firstDirectorydateCreatedTime = boost::filesystem::creation_time(current_file);
+				testStream << firstDirectorydateCreatedTime << delimitingCharacter + newLine;
 
-                //writeDebugThreadPool.push_task(writeToDebug, std::chrono::system_clock::now(), true, L"6 Data stored for file: " + formatFilePath(current_file));
-            }
-            else if (std::filesystem::is_directory(current_file))
-                testStream << delimitingCharacter + delimitingCharacter + delimitingCharacter + delimitingCharacter + newLine;
+				//Append to DB.
+				givenVectorDB.push_back(testStream.str());
 
+				//Clearing stringstream for next iteration.
+				testStream.str(std::string());
+			}
 
-            //writeDebugThreadPool.push_task(writeToDebug, std::chrono::system_clock::now(), true, L"7 Pushing data back: " + formatFilePath(current_file));
-            //Append to DB.
-            givenVectorDB.push_back(testStream.str());
-            //writeDebugThreadPool.push_task(writeToDebug, std::chrono::system_clock::now(), true, L"8 Reseting streamstring: " + formatFilePath(current_file));
-            //Clearing stringstream for next iteration.
-            testStream.str(std::string());
-            //writeDebugThreadPool.push_task(writeToDebug, std::chrono::system_clock::now(), true, L"9 finished streamstring: " + formatFilePath(current_file));
-
-        }
-    }
-    else
-    {
-        // cycle through the directory
-        for (std::filesystem::directory_iterator itr(givenStartPath); itr != end_itr; ++itr)
-        {
-            // If it's not a directory, list it. If you want to list directories too, just remove this check.
-            if (std::filesystem::is_regular_file(itr->path()))
-            {
-                //Setting current file equal to the full path of the file.
-                current_file = std::filesystem::absolute(itr->path().native()).string();
-
-                //Putting path into array.
-                testStream << current_file << delimitingCharacter;
-
-                //Getting filesize (in bytes).
-                testStream << std::filesystem::file_size(current_file) << delimitingCharacter;
-
-                //Getting last modified time. In seconds from 1970 EPOCH format.
-                time_t firstDirectoryModifiedTime = boost::filesystem::last_write_time(current_file);
-                testStream << firstDirectoryModifiedTime << delimitingCharacter;
-
-                //Getting date created time. In seconds from 1970 EPOCH format.
-                time_t firstDirectorydateCreatedTime = boost::filesystem::creation_time(current_file);
-                testStream << firstDirectorydateCreatedTime << delimitingCharacter + newLine;
-
-                //Append to DB.
-                givenVectorDB.push_back(testStream.str());
-
-                //Clearing stringstream for next iteration.
-                testStream.str(std::string());
-            }
-
-        }
-    }
+		}
+	}
 
 }
 
 //Functions asks for a path to directory and will return number of files. - Also asks for a T/F bool determining whether a search should be recursive.
 size_t countFiles(std::string pathToDir, bool recursiveLookup)
 {
-    size_t fileCounter = 0;
+	size_t fileCounter = 0;
 
-    //Making path a path it likes.
-    std::filesystem::path dirPath(pathToDir);
+	//Making path a path it likes.
+	std::filesystem::path dirPath(pathToDir);
 
-    //Checking if user wanted a recursive lookup.
-    if (recursiveLookup)
-    {
-        //Performing recursive searching...
-        for (std::filesystem::recursive_directory_iterator end, dir(pathToDir); dir != end; ++dir)
-        {
-            //Verify item is a file.
-            if (std::filesystem::is_regular_file(dir->path()))
-                fileCounter++; //Count files specifically.
-        }
-    }
-    else
-    {
-        std::filesystem::directory_iterator end_itr;
-        //Cycle through the GIVEN directory. No deeper. Any directories are just directories directly viewable.
-        for (std::filesystem::directory_iterator itr(dirPath); itr != end_itr; ++itr)
-        {
-            //Verify item is a file.
-            if (std::filesystem::is_regular_file(itr->path()))
-                fileCounter++; //Count files specifically.
-        }
-    }
-    return fileCounter; //Return files!
+	//Checking if user wanted a recursive lookup.
+	if (recursiveLookup)
+	{
+		//Performing recursive searching...
+		for (std::filesystem::recursive_directory_iterator end, dir(pathToDir); dir != end; ++dir)
+		{
+			//Verify item is a file.
+			if (std::filesystem::is_regular_file(dir->path()))
+				fileCounter++; //Count files specifically.
+		}
+	}
+	else
+	{
+		std::filesystem::directory_iterator end_itr;
+		//Cycle through the GIVEN directory. No deeper. Any directories are just directories directly viewable.
+		for (std::filesystem::directory_iterator itr(dirPath); itr != end_itr; ++itr)
+		{
+			//Verify item is a file.
+			if (std::filesystem::is_regular_file(itr->path()))
+				fileCounter++; //Count files specifically.
+		}
+	}
+	return fileCounter; //Return files!
 }
 
 //Functions asks for a path to a directory and will return number of files. - Also asks for a T/F bool determining whether a search should be recursive.
 size_t countDir(std::string pathToDir, bool recursiveLookup)
 {
-    size_t directoryCounter = 0;
+	size_t directoryCounter = 0;
 
-    //Making path a path it likes.
-    std::filesystem::path dirPath(pathToDir);
+	//Making path a path it likes.
+	std::filesystem::path dirPath(pathToDir);
 
-    //Checking if user wanted a recursive lookup.
-    if (recursiveLookup)
-    {
-        //Performing recursive searching...
-        for (std::filesystem::recursive_directory_iterator end, dir(pathToDir); dir != end; ++dir)
-        {
-            //Verifying the item is a directory.
-            if (std::filesystem::is_directory(dir->path()))
-                directoryCounter++;
-        }
-    }
-    else
-    {
-        std::filesystem::directory_iterator end_itr;
-        //Cycle through the GIVEN directory. No deeper. Any directories are just directories directly viewable.
-        for (std::filesystem::directory_iterator itr(dirPath); itr != end_itr; ++itr)
-        {
-            //Verifying the item is a directory.
-            if (std::filesystem::is_directory(itr->path()))
-                directoryCounter++; //Count directories specifically.
-        }
-    }
-    return directoryCounter; //Return files!
+	//Checking if user wanted a recursive lookup.
+	if (recursiveLookup)
+	{
+		//Performing recursive searching...
+		for (std::filesystem::recursive_directory_iterator end, dir(pathToDir); dir != end; ++dir)
+		{
+			//Verifying the item is a directory.
+			if (std::filesystem::is_directory(dir->path()))
+				directoryCounter++;
+		}
+	}
+	else
+	{
+		std::filesystem::directory_iterator end_itr;
+		//Cycle through the GIVEN directory. No deeper. Any directories are just directories directly viewable.
+		for (std::filesystem::directory_iterator itr(dirPath); itr != end_itr; ++itr)
+		{
+			//Verifying the item is a directory.
+			if (std::filesystem::is_directory(itr->path()))
+				directoryCounter++; //Count directories specifically.
+		}
+	}
+	return directoryCounter; //Return files!
 }
 
 //Performs "filesystem::remove_all" on given path.
 void removeObject(std::string destinationFilePath, bool recursiveRemoval)
 {
-    if (!std::filesystem::exists(destinationFilePath)) //Verify it is a normal file. I don't know what other types there are, but I'll avoid deleting them until I know.
-        return;
+	if (!std::filesystem::exists(destinationFilePath)) //Verify it is a normal file. I don't know what other types there are, but I'll avoid deleting them until I know.
+		return;
 
-    std::error_code ec; //Create error handler.
+	std::error_code ec; //Create error handler.
 
-    //if (std::filesystem::is_directory(destinationFilePath))
-    //    return; //do nothing
+	//if (std::filesystem::is_directory(destinationFilePath))
+	//    return; //do nothing
 
-    if (recursiveRemoval) //Determine which remove method we are using.
-        std::filesystem::remove_all(destinationFilePath, ec); //Removing all.
-    else
-        std::filesystem::remove(destinationFilePath, ec); //Removing.
+	if (recursiveRemoval) //Determine which remove method we are using.
+		std::filesystem::remove_all(destinationFilePath, ec); //Removing all.
+	else
+		std::filesystem::remove(destinationFilePath, ec); //Removing.
 
-    //Sending errors to that error_code seems to fix some problems?
-    //An error was occuring sometimes when deleting destination empty directories, but adding this error part make it just work.
-    if (ec.value() == 5) //If error value is 5, it is access denied.
-        writeDebugThreadPool.push_task(writeToDebug, std::chrono::system_clock::now(), true, "ERROR. ACCESS DENIED: " + destinationFilePath); //Log.
+	//Sending errors to that error_code seems to fix some problems?
+	//An error was occuring sometimes when deleting destination empty directories, but adding this error part make it just work.
+	if (ec.value() == 5) //If error value is 5, it is access denied.
+		writeDebugThreadPool.push_task(writeToDebug, std::chrono::system_clock::now(), true, "ERROR. ACCESS DENIED: " + destinationFilePath); //Log.
 
 }
 
 //Copying file.
 void copyFile(std::string givenSourcePath, std::string givenDestinationPath)
 {
-    //Creating files themselves.
-    std::string destinationDirectoriesPath = givenDestinationPath.substr(0, givenDestinationPath.find_last_of(directorySeparator) + 1); //Obtaining path of the destination until the last backslash.
+	//Creating files themselves.
+	std::string destinationDirectoriesPath = givenDestinationPath.substr(0, givenDestinationPath.find_last_of(directorySeparator) + 1); //Obtaining path of the destination until the last backslash.
 
-    if (!std::filesystem::exists(destinationDirectoriesPath)) //If the directory does not exist, then create it.
-        std::filesystem::create_directories(destinationDirectoriesPath);
+	if (!std::filesystem::exists(std::filesystem::u8path(destinationDirectoriesPath))) //If the directory does not exist, then create it.
+		std::filesystem::create_directories(std::filesystem::u8path(destinationDirectoriesPath));
 
-    while (!std::filesystem::exists(destinationDirectoriesPath)) //Wait for directories to be created.
-    {
-        //V O I D
-    }
+	while (!std::filesystem::exists(std::filesystem::u8path(destinationDirectoriesPath))) //Wait for directories to be created.
+	{
+		//V O I D
+	}
 
-    //*****
-    if (!std::filesystem::is_directory(givenDestinationPath)) //Don't bother dealing with directories right now.
-    {
-        std::error_code ec; //Create error handler.
-        std::filesystem::copy(givenSourcePath, givenDestinationPath, std::filesystem::copy_options::overwrite_existing, ec); //Copying the file. - If a directory is being looked at, it would have already been made above. This will do nothing.
+	//*****
+	if (!std::filesystem::is_directory(std::filesystem::u8path(givenDestinationPath))) //Don't bother dealing with directories right now.
+	{
+		std::error_code ec; //Create error handler.
+		std::filesystem::copy(std::filesystem::u8path(givenSourcePath), std::filesystem::u8path(givenDestinationPath), std::filesystem::copy_options::overwrite_existing, ec); //Copying the file. - If a directory is being looked at, it would have already been made above. This will do nothing.
 
-        if (ec.value() == 5) //If error value is 5, it is access denied.
-            writeDebugThreadPool.push_task(writeToDebug, std::chrono::system_clock::now(), true, "ERROR. ACCESS DENIED: " + givenSourcePath + " - " + givenDestinationPath); //Log.
-    }
-
+		if (ec.value() == 5) //If error value is 5, it is access denied.
+			writeDebugThreadPool.push_task(writeToDebug, std::chrono::system_clock::now(), true, "ERROR. ACCESS DENIED: " + givenSourcePath + " - " + givenDestinationPath); //Log.
+	}
 }
 
 //Moving file.
 void moveFile(std::string givenSourcePath, std::string givenDestinationPath)
 {
-    //Creating files themselves.
-    std::string destinationDirectoriesPath = givenDestinationPath.substr(0, givenDestinationPath.find_last_of(directorySeparator) + 1); //Obtaining path of the destination until the last backslash.
+	//Creating files themselves.
+	std::string destinationDirectoriesPath = givenDestinationPath.substr(0, givenDestinationPath.find_last_of(directorySeparator) + 1); //Obtaining path of the destination until the last backslash.
 
-    if (!std::filesystem::exists(destinationDirectoriesPath)) //If the directory does not exist, then create it.
-        std::filesystem::create_directories(destinationDirectoriesPath);
+	if (!std::filesystem::exists(std::filesystem::u8path(destinationDirectoriesPath))) //If the directory does not exist, then create it.
+		std::filesystem::create_directories(std::filesystem::u8path(destinationDirectoriesPath));
 
-    while (!std::filesystem::exists(destinationDirectoriesPath)) //Wait for directories to be created.
-    {
-        //V O I D
-    }
+	while (!std::filesystem::exists(std::filesystem::u8path(destinationDirectoriesPath))) //Wait for directories to be created.
+	{
+		//V O I D
+	}
 
-    //*****
-    if (!std::filesystem::is_directory(givenDestinationPath)) //Don't bother dealing with directories right now
-    {
-        std::error_code ec; //Create error handler.
-        std::filesystem::copy(givenSourcePath, givenDestinationPath, std::filesystem::copy_options::overwrite_existing, ec); //Copying the file. - If a directory is being looked at, it would have already been made above. This will do nothing.
+	//*****
+	if (!std::filesystem::is_directory(std::filesystem::u8path(givenDestinationPath))) //Don't bother dealing with directories right now
+	{
+		std::error_code ec; //Create error handler.
+		std::filesystem::copy(std::filesystem::u8path(givenSourcePath), std::filesystem::u8path(givenDestinationPath), std::filesystem::copy_options::overwrite_existing, ec); //Copying the file.
 
-        if (ec.value() == 5) //If error value is 5, it is access denied.
-            writeDebugThreadPool.push_task(writeToDebug, std::chrono::system_clock::now(), true, "ERROR. ACCESS DENIED: " + givenSourcePath + " - " + givenDestinationPath); //Log.
+		if (ec.value() == 5) //If error value is 5, it is access denied.
+			writeDebugThreadPool.push_task(writeToDebug, std::chrono::system_clock::now(), true, "ERROR. ACCESS DENIED: " + givenSourcePath + " - " + givenDestinationPath); //Log.
 
-        removeObject(givenSourcePath, false); //Now that the file is copied, remove the source file.
-    }
+		removeObject(givenSourcePath, false); //Now that the file is copied, remove the source file.
+	}
 
 
 }

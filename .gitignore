@@ -4,11 +4,10 @@
 ## Get latest from https://github.com/github/gitignore/blob/master/VisualStudio.gitignore
 
 
-/Resources
+/Resources/**
 /Sync Application/TEST DIRECTORY
 /Sync Application/TEST DIRECTORY2
-/old code pieces
-/Sync Application/Debug
+Sync Application/*.txt
 
 
 # User-specific files
