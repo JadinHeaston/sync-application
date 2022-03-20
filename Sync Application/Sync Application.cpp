@@ -73,7 +73,6 @@ void performFileOpActionFile(std::vector<std::string>& fileOpAction); //Goes thr
 void performHashActionFile(std::vector<std::string>& hashActions, std::vector<std::string>& firstGivenVectorDB, std::vector<std::string>& secondGivenVectorDB, std::string firstGivenPath, std::string secondGivenPath); //
 void compareHashes(std::vector<std::string>& firstGivenVectorDB, std::vector<std::string>& secondGivenVectorDB, std::vector<std::string>& fileOpAction, std::string firstGivenPath, std::string secondGivenPath); //
 void echoCompareDirectories(std::vector<std::string>& firstGivenVectorDB, std::vector<std::string>& secondGivenVectorDB, std::vector<std::string>& hashActions, std::vector<std::string>& fileOpAction, std::string firstGivenPath, std::string secondGivenPath);
-void synchronizeCompareDirectories(std::vector<std::string>& firstGivenVectorDB, std::vector<std::string>& secondGivenVectorDB, std::vector<std::string>& hashActions, std::vector<std::string>& fileOpAction, std::string firstGivenPath, std::string secondGivenPath);
 void contributeCompareDirectories(std::vector<std::string>& firstGivenVectorDB, std::vector<std::string>& secondGivenVectorDB, std::vector<std::string>& hashActions, std::vector<std::string>& fileOpAction, std::string firstGivenPath, std::string secondGivenPath);
 void writeToFile(std::ofstream& outputFile, std::string inputString);
 
@@ -314,7 +313,7 @@ int main(int argc, char* argv[])
 			{
 				//Display help message.
 				std::cout << "The three required arguments are: --directory-one <DIRECTORY_PATH>' as the source, --directory-two <DIRECTORY_PATH>' as the destination, and '--operation-mode <OPERATION_MODE>' to specifiy the operation mode." << std::endl;
-				std::cout << "The operation mode can either be 'contribute' that only copies files from directory one to directory two, 'echo' that makes directory two look like directory one, or 'synchronize' that will use the newest version from either directory to keep both up to date and in sync." << std::endl;
+				std::cout << "The operation mode can either be 'contribute' that only copies files from directory one to directory two, 'echo' that makes directory two look like directory one." << std::endl;
 				std::cout << "Detailed help can be found by using '--help' or utilizing the readme.md file: https://github.com/JadinHeaston/sync-application" << std::endl;
 				system("PAUSE");
 				writeDebugThreadPool.wait_for_tasks();
@@ -376,7 +375,7 @@ int main(int argc, char* argv[])
 		std::string().swap(temporaryConversionString); //Reclaiming strings memory.
 		
 		//Check that it is a legitimate value.
-		if (argumentVariables["internalObject"]["Operation Mode"].get<std::string>() != "echo" && (argumentVariables["internalObject"]["Operation Mode"].get<std::string>() != "synchronize" && argumentVariables["internalObject"]["Operation Mode"].get<std::string>() != "sync") && (argumentVariables["internalObject"]["Operation Mode"].get<std::string>() != "contribute" && argumentVariables["internalObject"]["Operation Mode"].get<std::string>() != "cont"))
+		if (argumentVariables["internalObject"]["Operation Mode"].get<std::string>() != "echo" && (argumentVariables["internalObject"]["Operation Mode"].get<std::string>() != "contribute" && argumentVariables["internalObject"]["Operation Mode"].get<std::string>() != "cont"))
 		{
 			writeDebugThreadPool.push_task(writeToDebug, std::chrono::system_clock::now(), true, "Error-----");
 			std::cout << "Invalid Operation Mode: " << argumentVariables["internalObject"]["Operation Mode"].get<std::string>() << std::endl;
@@ -431,7 +430,15 @@ int main(int argc, char* argv[])
 
 
 	//FUTURE FEATURE: CHECK WHAT OPERATION IS BEING DONE.
-	if (argumentVariables["internalObject"]["Operation Mode"].get<std::string>() == "echo")
+	if (argumentVariables["internalObject"]["Operation Mode"].get<std::string>() == "contribute" || argumentVariables["internalObject"]["Operation Mode"].get<std::string>() == "cont")
+	{
+		writeDebugThreadPool.push_task(writeToDebug, std::chrono::system_clock::now(), true, "----- DIRECTORY COMPARISON - " + argumentVariables["internalObject"]["Operation Mode"].get<std::string>() + " -----");
+		writeConsoleMessagesPool.push_task(displayConsoleMessage, "Beginning directory comparison function for contribute mode.");
+		contributeCompareDirectories(directoryOneDB, directoryTwoDB, hashActions, fileOpActions, firstGivenDirectoryPath, secondGivenDirectoryPath); //Includes the process of hashing files and comparing again before ending.
+		writeDebugThreadPool.push_task(writeToDebug, std::chrono::system_clock::now(), true, "----- *COMPLETED* DIRECTORY COMPARISON - " + argumentVariables["internalObject"]["Operation Mode"].get<std::string>() + " -----");
+		writeConsoleMessagesPool.push_task(displayConsoleMessage, "Directory comparing finished...");
+	}
+	else if (argumentVariables["internalObject"]["Operation Mode"].get<std::string>() == "echo")
 	{
 		writeDebugThreadPool.push_task(writeToDebug, std::chrono::system_clock::now(), true, "----- DIRECTORY COMPARISON - " + argumentVariables["internalObject"]["Operation Mode"].get<std::string>() + " -----");
 		writeConsoleMessagesPool.push_task(displayConsoleMessage, "Beginning directory comparison function.");
@@ -439,22 +446,7 @@ int main(int argc, char* argv[])
 		writeDebugThreadPool.push_task(writeToDebug, std::chrono::system_clock::now(), true, "----- *COMPLETED* DIRECTORY COMPARISON - " + argumentVariables["internalObject"]["Operation Mode"].get<std::string>() + " -----");
 		writeConsoleMessagesPool.push_task(displayConsoleMessage, "Directory comparing finished...");
 	}
-	else if (argumentVariables["internalObject"]["Operation Mode"].get<std::string>() == "synchronize" || argumentVariables["internalObject"]["Operation Mode"].get<std::string>() == "sync")
-	{
-		writeDebugThreadPool.push_task(writeToDebug, std::chrono::system_clock::now(), true, "----- DIRECTORY COMPARISON - " + argumentVariables["internalObject"]["Operation Mode"].get<std::string>() + " -----");
-		writeConsoleMessagesPool.push_task(displayConsoleMessage, "Beginning directory comparison function for synchronization mode.");
-		synchronizeCompareDirectories(directoryOneDB, directoryTwoDB, hashActions, fileOpActions, firstGivenDirectoryPath, secondGivenDirectoryPath); //Includes the process of hashing files and comparing again before ending.
-		writeDebugThreadPool.push_task(writeToDebug, std::chrono::system_clock::now(), true, "----- *COMPLETED* DIRECTORY COMPARISON - " + argumentVariables["internalObject"]["Operation Mode"].get<std::string>() + " -----");
-		writeConsoleMessagesPool.push_task(displayConsoleMessage, "Directory comparing finished..."); //***
-	}
-	else if (argumentVariables["internalObject"]["Operation Mode"].get<std::string>() == "contribute" || argumentVariables["internalObject"]["Operation Mode"].get<std::string>() == "cont")
-	{
-		writeDebugThreadPool.push_task(writeToDebug, std::chrono::system_clock::now(), true, "----- DIRECTORY COMPARISON - " + argumentVariables["internalObject"]["Operation Mode"].get<std::string>() + " -----");
-		writeConsoleMessagesPool.push_task(displayConsoleMessage, "Beginning directory comparison function for synchronization mode.");
-		contributeCompareDirectories(directoryOneDB, directoryTwoDB, hashActions, fileOpActions, firstGivenDirectoryPath, secondGivenDirectoryPath); //Includes the process of hashing files and comparing again before ending.
-		writeDebugThreadPool.push_task(writeToDebug, std::chrono::system_clock::now(), true, "----- *COMPLETED* DIRECTORY COMPARISON - " + argumentVariables["internalObject"]["Operation Mode"].get<std::string>() + " -----");
-		writeConsoleMessagesPool.push_task(displayConsoleMessage, "Directory comparing finished...");
-	}
+
 	//Performing file operations.
 	writeDebugThreadPool.push_task(writeToDebug, std::chrono::system_clock::now(), true, "----- FILE OPERATIONS -----");
 	writeConsoleMessagesPool.push_task(displayConsoleMessage, "Beginning File Operations...");
@@ -789,10 +781,6 @@ void compareHashes(std::vector<std::string>& firstGivenVectorDB, std::vector<std
 				{
 					std::string currentDB1FilePath = firstGivenVectorDB[iterator].substr(firstGivenPath.length() + 1, nthOccurrence(firstGivenVectorDB[iterator], delimitingCharacter, 1) - firstGivenPath.length() - 1); //Getting path of file.
 					fileOpAction.push_back("COPY - Different hashes" + delimitingCharacter + firstGivenPath + directorySeparator + currentDB1FilePath + delimitingCharacter + secondGivenPath + directorySeparator + currentDB1FilePath + newLine); //Copy first directory file to second directory.
-				}
-				else if (argumentVariables["internalObject"]["Operation Mode"].get<std::string>() == "synchronize" || argumentVariables["internalObject"]["Operation Mode"].get<std::string>() == "sync")
-				{
-					//Alert user that hashes differ, and we do not know which to keep //*****
 				}
 			}
 		}

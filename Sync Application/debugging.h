@@ -6,7 +6,7 @@
 void writeToDebug(std::chrono::system_clock::time_point givenTime, bool writeTime, std::string textToWrite)
 {
 	//Check if we are actually writing to the debug file.
-	if (!argumentVariables["internalObject"]["Verbose Debugging"])
+	if (!argumentVariables["internalObject"]["Verbose Debugging"].get<bool>())
 		return;
 
 	//open the current debug file.
@@ -66,30 +66,21 @@ void showWarningMessage()
 {
 	//Displaying warning information.
 	std::cout << "-------------------------------------------------- WARNING --------------------------------------------------" << std::endl;
-	if (argumentVariables["internalObject"]["Operation Mode"].get<std::string>() == "echo")
-	{
-		std::cout << "The \"ECHO\" operation will take place. This will cause the second directory to look *IDENTICAL* to the first." << std::endl;
-		std::cout << "When a file is found within both directories, the program will compare the size and last modified time. When a difference is found, the first directories file will overwrite the seconds. (Hashes are only used when files, size, and modification time are all the same and the --check-contents argument is provided.)" << std::endl;
-		std::cout << "This option is best used when you are backing up data and want a second directory to match the directory you make changes in." << std::endl;
-		std::cout << "Deletions and file overwrites are possible within the second directory." << std::endl;
-		std::cout << "First Directory: " << firstGivenDirectoryPath << std::endl;
-		std::cout << "Second Directory: " << secondGivenDirectoryPath << std::endl;
-	}
-	else if (argumentVariables["internalObject"]["Operation Mode"].get<std::string>() == "synchronize" || argumentVariables["internalObject"]["Operation Mode"].get<std::string>() == "sync")
-	{
-		std::cout << "The \"SYNCHRONIZE\" operation will take place. This will cause the first and second directories to look identical to each other, with the newest files being kept." << std::endl;
-		std::cout << "When a file is found within both directories, the one with the newest modification time is used and copied to replace the older version." << std::endl;
-		std::cout << "This option is best used when changes can be made within both directories and you want them both to be synced with the newest versions from both." << std::endl;
-		std::cout << "Deletions and file overwrites are possible within both directories." << std::endl;
-		std::cout << "First Directory: " << firstGivenDirectoryPath << std::endl;
-		std::cout << "Second Directory: " << secondGivenDirectoryPath << std::endl;
-	}
-	else if (argumentVariables["internalObject"]["Operation Mode"].get<std::string>() == "contribute" || argumentVariables["internalObject"]["Operation Mode"].get<std::string>() == "cont")
+	if (argumentVariables["internalObject"]["Operation Mode"].get<std::string>() == "contribute" || argumentVariables["internalObject"]["Operation Mode"].get<std::string>() == "cont")
 	{
 		std::cout << "The \"CONTRIBUTE\" operation will take place. This will cause the first directory to contribute any new files or changes to the second directory." << std::endl;
 		std::cout << "When a file is found within both directories, the program will compare the size and last modified time. When a difference is found, the first directories file will overwrite the second directories file. If the file is not present within the second directory, it is copied over to it. (Hashes are only used when files, size, and modification time are all the same and the --check-contents argument is provided.)" << std::endl;
 		std::cout << "This option is best used when you are regularly archiving files and want to keep everything." << std::endl;
 		std::cout << "No deletions are ever made. File overwrites are possible within the second directory." << std::endl;
+		std::cout << "First Directory: " << firstGivenDirectoryPath << std::endl;
+		std::cout << "Second Directory: " << secondGivenDirectoryPath << std::endl;
+	}
+	else if (argumentVariables["internalObject"]["Operation Mode"].get<std::string>() == "echo")
+	{
+		std::cout << "The \"ECHO\" operation will take place. This will cause the second directory to look *IDENTICAL* to the first." << std::endl;
+		std::cout << "When a file is found within both directories, the program will compare the size and last modified time. When a difference is found, the first directories file will overwrite the seconds. (Hashes are only used when files, size, and modification time are all the same and the --check-contents argument is provided.)" << std::endl;
+		std::cout << "This option is best used when you are backing up data and want a second directory to match the directory you make changes in." << std::endl;
+		std::cout << "Deletions and file overwrites are possible within the second directory." << std::endl;
 		std::cout << "First Directory: " << firstGivenDirectoryPath << std::endl;
 		std::cout << "Second Directory: " << secondGivenDirectoryPath << std::endl;
 	}

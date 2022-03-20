@@ -27,7 +27,7 @@ You can also compile your own binaries by downloading the source files, opening 
 (Eventually, I will provide a better in-depth walk-through.)
 
 # Options
-OUTDATED: "Sync Application.exe" [OPTIONS] -o <OPERATION_MODE> -s <DIRECTORY_PATH> -d <DIRECTORY_PATH>  
+OUTDATED: "Sync Application.exe" [OPTIONS] --operation-mode <OPERATION_MODE> --directory-one <DIRECTORY_PATH> --directory-two <DIRECTORY_PATH>  
 
 ## List of Arguments (OUTDATED)
 (An asterisk indicates a required input)
@@ -61,11 +61,11 @@ OUTDATED: "Sync Application.exe" [OPTIONS] -o <OPERATION_MODE> -s <DIRECTORY_PAT
 -l
     Bypasses Windows MAX_PATH limit of 260 characters. It appends "\\?\", which requires utilizing backslashes for directory separators in the backend. (Thanks, Windows!)
 
-* --operation-mode <OPERATION_MODE> | Operation Mode is defined as a string. The available options being "echo", "sync" or "synchronize", and "cont" or "contribute".
+* --operation-mode <OPERATION_MODE> | Operation Mode is defined as a string. The available options being "cont" or "contribute", and "echo".
 
 --no-recursive-one/two
     Defines where a recursive process should NOT be used.
-    Add either "one" or "two" at the end, to correspond with 
+    Add either "one" or "two" at the end, to correspond with which directory shouldn't be recursive.
     You can either use "--no-recursive-one" or "--no-recursive-two".
 
 --no-warning
@@ -77,14 +77,10 @@ OUTDATED: "Sync Application.exe" [OPTIONS] -o <OPERATION_MODE> -s <DIRECTORY_PAT
 --output-verbose-debug <OUTPUT_LOCATION>
     Outputs log as the program runs to assist with debugging. If a log is present, new data is appended to prevent debugging data loss.
 
---perform-sync-conflict-resolution <RESOLUTION_FILEPATH>
-    When a sync operation encounters conflicts that it cannot resolve, a conflict file is created that shows the problem files and the reason it was created.
-    Right now, you have to manually fix these problems. Sorry!
-
 --use-config <PATH_TO_CONFIG_FILE>
     If multiple configurations are within the same file, a --configuration-name <NAME> MUST be specified for the program to know which configuration to use.
 ```
-## Sync Operations
+## Operations
 
 ### Contribute (Cont)
 * Contribute will copy any new changes from directory one to directory two.  
@@ -96,16 +92,11 @@ OUTDATED: "Sync Application.exe" [OPTIONS] -o <OPERATION_MODE> -s <DIRECTORY_PAT
 * Echo will echo any changes made in directory one to directory two.  
 * Changes will only occur within directory two.  
 
-### Synchronize (Sync)
-* Synchronize will take the newest version from a directory and copy it to the other directory.  
-* This results in deletions and changes within BOTH directories.  
-* Conflicts occur when the last modified times are identical, but the file size or hashes differ. There is no way to know which version is the "new" one, and thus no safe changes can be made. 
-* When a conflict occurs program will output a "conflict file" proivdes a list of file pairs that need to be manually fixed.
-
 ## Configuration File
 Multiple pre-made operations can be stored in a configuration file for easy access.  
 The configuration file using the JSON standard.
-A configuration entry can be added by using the "--add-to-config" argument.
+A configuration entry can be added by using the "--add-to-config <PATH>" and the "--configuration-name <NAME>" arguments. Providing the location of the configuration file to add to and the name to assign this configuration that is being added.
+
 # Software Shoutouts
 This appliation uses several incredible open-source pieces of software and code.  
 I want to give thinks, and provide the reasources for other people to utilize their tools and show appreciation to them. Without these libraries, this would never have been made.

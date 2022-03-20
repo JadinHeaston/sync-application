@@ -174,7 +174,7 @@ size_t countDir(std::string pathToDir, bool recursiveLookup)
 //Performs "filesystem::remove_all" on given path.
 void removeObject(std::string destinationFilePath, bool recursiveRemoval)
 {
-	if (!std::filesystem::exists(destinationFilePath)) //Verify it is a normal file. I don't know what other types there are, but I'll avoid deleting them until I know.
+	if (!std::filesystem::exists(std::filesystem::u8path(destinationFilePath))) //Verify it is a normal file. I don't know what other types there are, but I'll avoid deleting them until I know.
 		return;
 
 	std::error_code ec; //Create error handler.
@@ -183,9 +183,9 @@ void removeObject(std::string destinationFilePath, bool recursiveRemoval)
 	//    return; //do nothing
 
 	if (recursiveRemoval) //Determine which remove method we are using.
-		std::filesystem::remove_all(destinationFilePath, ec); //Removing all.
+		std::filesystem::remove_all(std::filesystem::u8path(destinationFilePath), ec); //Removing all.
 	else
-		std::filesystem::remove(destinationFilePath, ec); //Removing.
+		std::filesystem::remove(std::filesystem::u8path(destinationFilePath), ec); //Removing.
 
 	//Sending errors to that error_code seems to fix some problems?
 	//An error was occuring sometimes when deleting destination empty directories, but adding this error part make it just work.
