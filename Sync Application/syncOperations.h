@@ -1,6 +1,5 @@
 #pragma once
 
-
 //Uses unordered maps to compare directory lists and find matches.
 void contributeCompareDirectories(std::vector<std::string>& firstGivenVectorDB, std::vector<std::string>& secondGivenVectorDB, std::vector<std::string>& hashActions, std::vector<std::string>& fileOpAction, std::string firstGivenPath, std::string secondGivenPath)
 {
@@ -91,7 +90,6 @@ void contributeCompareDirectories(std::vector<std::string>& firstGivenVectorDB, 
 
 
 }
-
 
 //Uses unordered maps to compare directory lists and find matches.
 void echoCompareDirectories(std::vector<std::string>& firstGivenVectorDB, std::vector<std::string>& secondGivenVectorDB, std::vector<std::string>& hashActions, std::vector<std::string>& fileOpAction, std::string firstGivenPath, std::string secondGivenPath)

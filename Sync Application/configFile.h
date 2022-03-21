@@ -2,146 +2,159 @@
 //This file holds functions that handle the interactions with the configuration file.
 
 void change_key(json& object, const std::string& old_key, const std::string& new_key);
-std::string filetostring(std::ifstream& givenFile);
 
 void addToConfigurationFile(std::string pathToConfig, json givenArguments, std::string configurationName)
 {
 	if (configurationName == "")
 	{
 		std::cout << "No configuration name given." << std::endl;
+		//Give option to specify configuration name or terminate program. *****
+		std::cout << "Please resolve the issue and try again. Program terminating." << std::endl;
 		system("PAUSE");
 		exit(1);
 	}
 	
-	json configurationFileJSON;
+	json configurationFileJSON; //Holds the full JSON configuration from the file.
 	size_t largestNumericID = NULL;
 	std::vector<std::string> foundConfigIDs;
 
 	//Open configuration file of reading.
-	std::ifstream configFileReading(pathToConfig);
+	std::ifstream configFileReading(std::filesystem::u8path(pathToConfig));
 
-	//Reading each line and storing it in a single string.
-	std::string currentLine;
-	std::string finalString;
-
-	//finalString = configFileReading;
-
-	system("PAUSE");
-	std::cout << finalString << std::endl;
-
-	system("PAUSE");
-	//std::wstring tempString = LR"()";
-	configurationFileJSON = finalString;
-	if (!json::accept(finalString))
+	//Check that the file got opened properly. *****
+	if (!configFileReading.good())
 	{
-		std::cout << "NOT ACCEPTED" << std::endl;
+		std::cout << "Configuration file failed to open: \"" << pathToConfig << "\"" << std::endl;
+		//Maybe add a "Would you like to continue without adding this configuration to the file", or "Please specify a new path". *****
+		std::cout << "Please resolve the issue and try again. Program terminating." << std::endl;
+		system("PAUSE");
+		exit(1);
+	}
+
+	//Fail is the ifstream can't be parsed.
+	if (!json::accept(configFileReading))
+	{
+		//Error with JSON syntax. Notifying user.
+		std::cout << "The given configuration file at: \"" << pathToConfig << "\"" << std::endl;
+		std::cout << "Check your configuration to ensure it is valid JSON." << std::endl;
+		//Maybe add a "Would you like to continue without adding this configuration to the file", or "Please specify a new path". *****
+		std::cout << "Please resolve the issue and try again. Program terminating." << std::endl;
+		system("PAUSE");
+		exit(1);
 	}
 	else
 	{
-		std::cout << "ACCEPTED" << std::endl;
+		//Resetting file seek head for the next parsing.
+		configFileReading.clear();
+		configFileReading.seekg(0);
 	}
 
-	system("PAUSE");
-	std::string failFilePath = "TEST.log";
-	std::ofstream failFile(failFilePath, std::ios::out);
+	configurationFileJSON = json::parse(configFileReading); //Parsing JSON from the file.
 
-	std::string temp = "ここにいる (I'm Here) ft. rionos (Stephen Walking Remix) - Aiob";
-	writeToFile(failFile, temp);
-	//writeUnicodeToFile(failFile, stringToWString(configurationFileJSON.dump(5)));
+	configFileReading.close(); //Closing input file.
 
-
-	configurationFileJSON = givenArguments.dump();
-	std::cout << givenArguments.dump(5) << std::endl;
-	system("PAUSE");
-	std::cout << configurationFileJSON.dump(5) << std::endl;
-	system("PAUSE");
-	//change_key(configurationFileJSON, "cum", configurationName); //Change the top level key to be the configuration ID.
-
-	system("PAUSE"); 
-	writeToFile(failFile, givenArguments.dump(5));
-
-	system("PAUSE");
-	writeToFile(failFile, configurationFileJSON.dump(5));
-	
-
-	failFile.close();
-	system("PAUSE");
-	exit(1);
 	//Iterating through all top level objects. These are the IDs of the configuration.
-	//for (json::iterator JSONiterator = configurationFileJSON.begin(); JSONiterator != configurationFileJSON.end(); ++JSONiterator)
-	//{
-	//    //configurationFileJSON = std::to_string(JSONiterator.value());
-	//    std::wcout << configurationFileJSON.get<std::wstring>() << std::endl;
-	//    system("PAUSE");
-	//    //foundConfigIDs.push_back(JSONiterator.key()); //Store all IDs found.
-	//}
-	//std::cout << foundConfigIDs[0] << std::endl;
+	for (json::iterator JSONiterator = configurationFileJSON.begin(); JSONiterator != configurationFileJSON.end(); ++JSONiterator)
+	    foundConfigIDs.push_back(JSONiterator.key()); //Store all IDs found.
 
+	//Check for duplicate keys. Error out if any are found.
+	for (size_t iterator = 0; iterator < foundConfigIDs.size(); ++iterator)
+	{
+		if (configurationName == foundConfigIDs.at(iterator))
+		{
+			std::cout << "A duplicate top-level object key was found in the configuration file.";
+			std::cout << "Please resolve the issue and try again. Program terminating." << std::endl;
+		    system("PAUSE");
+		    exit(1);
+		}
+	}
 
+	change_key(givenArguments, "internalObject", configurationName); //Change the top level key to be the configuration ID.
+	
+	configurationFileJSON[configurationName] = givenArguments[configurationName]; //Appending internal configuration to the file version.
 
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-	//for (size_t iterator = 0; iterator < foundConfigIDs.size(); ++iterator)
-	//{
-		//if (configurationName == foundConfigIDs.at(iterator))
-		//{
-		//    displayConsoleMessage(L"DUPLICATE CONFIGURATION ID FOUND.");
-		//    system("PAUSE");
-		//    exit(0);
-		//}
-	//}
-	//std::cout << givenArguments.dump(5) << std::endl;
-	//system("PAUSE");
-	//change_key(givenArguments, "internalObject", configurationName); //Change the top level key to be the configuration ID.
-	//change_key(configurationFileJSON, "cum", "newcum");
-	//system("PAUSE");
-
-	//Output to configuration file.
-	//std::ofstream configFileWriting(pathToConfig, std::ios::out | std::ios::app | std::ios::binary);
-	//writeUnicodeToFile(configFileWriting, stringToWString(givenArguments.dump(5))); //Write the serialized json to the file. "5" indicates the indenting amount.
-	//configFileWriting.close();
+	//Outputting full altered configuration to configuration file.
+	std::ofstream configFileWriting(std::filesystem::u8path(pathToConfig), std::ios::out | std::ios::binary);
+	writeToFile(configFileWriting, configurationFileJSON.dump(5)); //Write the serialized json to the file. "5" indicates the indenting amount.
+	configFileWriting.close();
 }
 
 void change_key(json& object, const std::string& old_key, const std::string& new_key)
 {
-	// get iterator to old key; TODO: error handling if key is not present
+	//Get iterator to old key; TODO: error handling if key is not present
 	json::iterator it = object.find(old_key);
-	// create null value for new key and swap value from old key
+	//Create null value for new key and swap value from old key
 	std::swap(object[new_key], it.value());
-	// delete value at old key (cheap, because the value is null after swap)
+	//Delete value at old key (cheap, because the value is null after swap)
 	object.erase(it);
-}
-
-bool is_empty(std::ifstream& pFile)
-{
-	return pFile.peek() == std::ifstream::traits_type::eof();
 }
 
 void readFromConfigurationFile(std::string pathToConfig, json givenArguments, std::string configurationName)
 {
-	change_key(givenArguments, configurationName, "internalObject"); //Change the top level key to be the internal version needed.
-}
+	if (configurationName == "")
+	{
+		std::cout << "No configuration name given." << std::endl;
+		//Give option to specify configuration name or terminate program. *****
+		std::cout << "Please resolve the issue and try again. Program terminating." << std::endl;
+		system("PAUSE");
+		exit(1);
+	}
 
-std::string filetostring(std::ifstream& givenFile) 
-{
-	std::string fileStr;
+	json configurationFileJSON; //Holds the full JSON configuration from the file.
+	std::vector<std::string> foundConfigIDs;
 
-	std::istreambuf_iterator<char> inputIt(givenFile), emptyInputIt;
-	std::back_insert_iterator<std::string> stringInsert(fileStr);
+	//Open configuration file of reading.
+	std::ifstream configFileReading(std::filesystem::u8path(pathToConfig));
 
-	std::copy(inputIt, emptyInputIt, stringInsert);
+	//Check that the file got opened properly. *****
+	if (!configFileReading.good())
+	{
+		std::cout << "Configuration file failed to open: \"" << pathToConfig << "\"" << std::endl;
+		//Maybe add a "Would you like to continue without adding this configuration to the file", or "Please specify a new path". *****
+		std::cout << "Please resolve the issue and try again. Program terminating." << std::endl;
+		system("PAUSE");
+		exit(1);
+	}
 
-	return fileStr;
+	//Fail is the ifstream can't be parsed.
+	if (!json::accept(configFileReading))
+	{
+		//Error with JSON syntax. Notifying user.
+		std::cout << "The given configuration file at: \"" << pathToConfig << "\"" << std::endl;
+		std::cout << "Check your configuration to ensure it is valid JSON." << std::endl;
+		//Maybe add a "Would you like to continue without adding this configuration to the file", or "Please specify a new path". *****
+		std::cout << "Please resolve the issue and try again. Program terminating." << std::endl;
+		system("PAUSE");
+		exit(1);
+	}
+	else
+	{
+		//Resetting file seek head for the next parsing.
+		configFileReading.clear();
+		configFileReading.seekg(0);
+	}
+
+	configurationFileJSON = json::parse(configFileReading); //Parsing JSON from the file.
+
+	configFileReading.close(); //Closing input file.
+
+	//Iterating through all top level objects. These are the IDs of the configuration.
+	for (json::iterator JSONiterator = configurationFileJSON.begin(); JSONiterator != configurationFileJSON.end(); ++JSONiterator)
+		foundConfigIDs.push_back(JSONiterator.key()); //Store all IDs found.
+
+	//Check for duplicate keys. Error out if any are found.
+	for (size_t iterator = 0; iterator < foundConfigIDs.size(); ++iterator)
+	{
+		if (configurationName == foundConfigIDs.at(iterator))
+		{
+			std::cout << "A duplicate top-level object key was found in the configuration file.";
+			std::cout << "Please resolve the issue and try again. Program terminating." << std::endl;
+			system("PAUSE");
+			exit(1);
+		}
+	}
+
+	change_key(configurationFileJSON, configurationName, "internalObject"); //Change the top level object key to be the internal version needed.
+
+	givenArguments["internalObject"] = configurationFileJSON["internalObject"]; //Replacing the internal JSON object with the changed file version.
 }

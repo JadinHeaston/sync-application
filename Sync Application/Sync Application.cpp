@@ -322,6 +322,7 @@ int main(int argc, char* argv[])
 			else if (singleCharArguments['l']) //Windows Max Path Bypass
 				argumentVariables["internalObject"]["Windows Max Path Bypass"] = true;
 		}
+		std::cout << std::endl; //***
 		//ARGS FINISHED.
 
 		//Checking if backslashes need to be used internally to support the max path bypass (UNC)
@@ -331,7 +332,8 @@ int main(int argc, char* argv[])
 		//Add arguments to a configuration file, if needed.
 		if (addToConfigFile)
 			addToConfigurationFile(pathToConfigFile, argumentVariables, configurationName);
-
+		else if (false)
+			addToConfigurationFile(pathToConfigFile, argumentVariables, configurationName);
 	}
 
 	//Creating vectors to hold directory maps.
@@ -387,7 +389,6 @@ int main(int argc, char* argv[])
 	{
 		std::cout << "No operation mode provided. (--operation-mode)" << std::endl;
 		std::cout << "Use --help for more information." << std::endl;
-		system("PAUSE");
 		writeDebugThreadPool.wait_for_tasks();
 		return 1;
 	}
@@ -396,7 +397,6 @@ int main(int argc, char* argv[])
 	if (argumentVariables["internalObject"]["Show Warning"].get<bool>()) showWarningMessage();
 
 	if (!argumentVariables["internalObject"]["Show Console"].get<bool>()) ::ShowWindow(::GetConsoleWindow(), SW_HIDE); //If the console should be displayed, then show it.
-
 
 	//Displaying file locations.
 	writeConsoleMessagesPool.push_task(displayConsoleMessage, "First Directory: " + firstGivenDirectoryPath);
