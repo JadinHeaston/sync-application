@@ -3,7 +3,7 @@
 
 void change_key(json& object, const std::string& old_key, const std::string& new_key);
 
-void addToConfigurationFile(std::string pathToConfig, json givenArguments, std::string configurationName)
+void addToConfigurationFile(std::string pathToConfig, json& givenArguments, std::string configurationName)
 {
 	if (configurationName == "")
 	{
@@ -53,19 +53,24 @@ void addToConfigurationFile(std::string pathToConfig, json givenArguments, std::
 
 	configFileReading.close(); //Closing input file.
 
-	//Iterating through all top level objects. These are the IDs of the configuration.
-	for (json::iterator JSONiterator = configurationFileJSON.begin(); JSONiterator != configurationFileJSON.end(); ++JSONiterator)
-	    foundConfigIDs.push_back(JSONiterator.key()); //Store all IDs found.
-
-	//Check for duplicate keys. Error out if any are found.
-	for (size_t iterator = 0; iterator < foundConfigIDs.size(); ++iterator)
+	if (configurationFileJSON.count(configurationName) > 0)
 	{
-		if (configurationName == foundConfigIDs.at(iterator))
+		if (configurationFileJSON.count(configurationName) == 1) //A configuration already exists. Ask user if they want to update/overwrite it.
 		{
-			std::cout << "A duplicate top-level object key was found in the configuration file.";
+			std::cout << "A duplicate top-level configuration named \"" << configurationName << "\" key was found in the configuration file.";
+			std::cout << "Would you like to overwrite the configuration? (Y/N)" << std::endl;
+			std::cout << "If not, the program will terminate without making any changes." << std::endl;
+			std::cin >> userInput[0]; //Awaiting user input...
+			
+			if (toupper(userInput[0]) != 'Y') //The input is not "Y". The user did not say yes.
+				exit(0);
+		}
+		else
+		{
+			std::cout << "Duplicate top-level configurations named \"" << configurationName << "\" were found in the configuration file.";
 			std::cout << "Please resolve the issue and try again. Program terminating." << std::endl;
-		    system("PAUSE");
-		    exit(1);
+			system("PAUSE");
+			exit(1);
 		}
 	}
 
@@ -75,7 +80,7 @@ void addToConfigurationFile(std::string pathToConfig, json givenArguments, std::
 
 	//Outputting full altered configuration to configuration file.
 	std::ofstream configFileWriting(std::filesystem::u8path(pathToConfig), std::ios::out | std::ios::binary);
-	writeToFile(configFileWriting, configurationFileJSON.dump(5)); //Write the serialized json to the file. "5" indicates the indenting amount.
+	writeToFile(configFileWriting, configurationFileJSON.dump(4)); //Write the serialized json to the file. "5" indicates the indenting amount.
 	configFileWriting.close();
 }
 
@@ -89,15 +94,21 @@ void change_key(json& object, const std::string& old_key, const std::string& new
 	object.erase(it);
 }
 
-void readFromConfigurationFile(std::string pathToConfig, json givenArguments, std::string configurationName)
+void readFromConfigurationFile(std::string pathToConfig, json& givenArguments, std::string configurationName)
 {
-	if (configurationName == "")
+	if (configurationName == "") //No configuration name was given.
 	{
 		std::cout << "No configuration name given." << std::endl;
-		//Give option to specify configuration name or terminate program. *****
-		std::cout << "Please resolve the issue and try again. Program terminating." << std::endl;
-		system("PAUSE");
-		exit(1);
+		
+		//Asking user to provide a configuration name or terminate the program.
+		std::cout << "Please enter a configuration name. (Leave this blank to terminate the program with no changes.)" << std::endl;
+		std::string userInput;
+
+		std::getline(std::cin, configurationName); //Getting user input.
+
+		//User didn't provide an input. Terminating program.
+		if (configurationName == "")
+			exit(1);
 	}
 
 	json configurationFileJSON; //Holds the full JSON configuration from the file.
@@ -153,12 +164,11 @@ void readFromConfigurationFile(std::string pathToConfig, json givenArguments, st
 	{
 		std::cout << "Multiple configurations using the name \"" << configurationName << "\" have been found in the configuration file." << std::endl;
 		std::cout << "Please resolve the issue and try again. Program terminating." << std::endl;
-		//Maybe offer to delete all configurations using this name? *****
 		system("PAUSE");
 		exit(1);
 	}
 
 	change_key(configurationFileJSON, configurationName, "internalObject"); //Change the top level object key to be the internal version needed.
-
+	
 	givenArguments["internalObject"] = configurationFileJSON["internalObject"]; //Replacing the internal JSON object with the changed file version.
 }
