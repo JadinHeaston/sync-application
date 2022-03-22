@@ -1,8 +1,6 @@
 ﻿#pragma once
 //This file holds functions that handle the interactions with the configuration file.
 
-void change_key(json& object, const std::string& old_key, const std::string& new_key);
-
 void addToConfigurationFile(std::string pathToConfig, json& givenArguments, std::string configurationName)
 {
 	if (configurationName == "")

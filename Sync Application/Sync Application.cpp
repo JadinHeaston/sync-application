@@ -70,25 +70,38 @@ std::unordered_map<char, size_t> singleCharArguments;
 void addToConfigurationFile(std::string pathToConfig, json& givenArguments, std::string configurationName);
 void change_key(json& object, const std::string& old_key, const std::string& new_key);
 void readFromConfigurationFile(std::string pathToConfig, json& givenArguments, std::string configurationName);
-
-
-
-size_t nthOccurrence(std::string& givenString, std::string delimitingCharacter, size_t nth); //Provides character location of nthOccurrence of a given character in a given string.
-std::string formatFilePath(std::string givenString, std::string givenDirectorySeparator = ""); //Used to change \\ to /
-void sortVector(std::vector<std::string>& givenVectorDB); //Created to allow multithreading. Simple std::sort on databases. Originally (and currently) only used for directory DB's.
-void performFileOpActionFile(std::vector<std::string>& fileOpAction); //Goes through File Operation Actions vector. Interprets data and assigns task to thread pool.
-void performHashActionFile(std::vector<std::string>& hashActions, std::vector<std::string>& firstGivenVectorDB, std::vector<std::string>& secondGivenVectorDB, std::string firstGivenPath, std::string secondGivenPath); //
-void compareHashes(std::vector<std::string>& firstGivenVectorDB, std::vector<std::string>& secondGivenVectorDB, std::vector<std::string>& fileOpAction, std::string firstGivenPath, std::string secondGivenPath); //
-void echoCompareDirectories(std::vector<std::string>& firstGivenVectorDB, std::vector<std::string>& secondGivenVectorDB, std::vector<std::string>& hashActions, std::vector<std::string>& fileOpAction, std::string firstGivenPath, std::string secondGivenPath);
+//debugging.h
+void displayConsoleMessage(std::string givenMessage);
+void displayHelpMessage();
+void showWarningMessage();
+void writeToDebug(std::chrono::system_clock::time_point givenTime, bool writeTime, std::string textToWrite);
+//fileOperations.h
+void createDirectoryMapDB(std::vector<std::string>& givenVectorDB, std::string givenStartPath, bool recursiveSearch);
+size_t countFiles(std::string pathToDir, bool recursiveLookup);
+size_t countDir(std::string pathToDir, bool recursiveLookup);
+void removeObject(std::string destinationFilePath, bool recursiveRemoval);
+void copyFile(std::string givenSourcePath, std::string givenDestinationPath);
+void moveFile(std::string givenSourcePath, std::string givenDestinationPath);
+//hashing.h
+std::string convertMD5ToHex(unsigned char* givenDigest);
+void MThashGivenFile(std::string givenFilePath, std::vector<std::string>& givenVector, std::string lineLocation);
+//main
+void compareHashes(std::vector<std::string>& firstGivenVectorDB, std::vector<std::string>& secondGivenVectorDB, std::vector<std::string>& fileOpAction, std::string firstGivenPath, std::string secondGivenPath);
 void contributeCompareDirectories(std::vector<std::string>& firstGivenVectorDB, std::vector<std::string>& secondGivenVectorDB, std::vector<std::string>& hashActions, std::vector<std::string>& fileOpAction, std::string firstGivenPath, std::string secondGivenPath);
+void echoCompareDirectories(std::vector<std::string>& firstGivenVectorDB, std::vector<std::string>& secondGivenVectorDB, std::vector<std::string>& hashActions, std::vector<std::string>& fileOpAction, std::string firstGivenPath, std::string secondGivenPath);
+std::string formatFilePath(std::string givenString, std::string givenDirectorySeparator = ""); //Used to change \\ to /
+size_t nthOccurrence(std::string& givenString, std::string delimitingCharacter, size_t nth); //Provides character location of nthOccurrence of a given character in a given string.
+void performHashActionFile(std::vector<std::string>& hashActions, std::vector<std::string>& firstGivenVectorDB, std::vector<std::string>& secondGivenVectorDB, std::string firstGivenPath, std::string secondGivenPath); //
+void performFileOpActionFile(std::vector<std::string>& fileOpAction); //Goes through File Operation Actions vector. Interprets data and assigns task to thread pool.
+void sortVector(std::vector<std::string>& givenVectorDB); //Created to allow multithreading. Simple std::sort on databases. Originally (and currently) only used for directory DB's.
 void writeToFile(std::ofstream& outputFile, std::string inputString);
 
 //Internal header files:
-#include "debugging.h"
 #include "configFile.h"
+#include "debugging.h"
+#include "fileOperations.h"
 #include "hashing.h"
 #include "syncOperations.h"
-#include "fileOperations.h"
 
 int main(int argc, char* argv[])
 {
