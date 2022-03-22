@@ -378,6 +378,13 @@ void handleArguments(int& argc, char* argv[])
 		//Checking if the prefix already exists.
 		firstGivenDirectoryPath = formatFilePath("\\\\?\\" + std::filesystem::absolute(firstGivenDirectoryPath).string());
 		secondGivenDirectoryPath = formatFilePath("\\\\?\\" + std::filesystem::absolute(secondGivenDirectoryPath).string());
+		
+		//Double check that there is no slash.
+		//This was added because running a drive letter ( such as "D:") through absolute adds a slash..
+		if (firstGivenDirectoryPath.back() == '/' || firstGivenDirectoryPath.back() == '\\')
+			firstGivenDirectoryPath.pop_back(); //Remove the slash.
+		if (secondGivenDirectoryPath.back() == '/' || secondGivenDirectoryPath.back() == '\\')
+			secondGivenDirectoryPath.pop_back(); //Remove the slash.
 	}
 		
 	//Add arguments to a configuration file, if needed.

@@ -112,8 +112,8 @@ int main(int argc, char* argv[])
 	//handling arguments.
 	handleArguments(argc, argv);
 
-	std::cout << argumentVariables.dump(4) << std::endl;
-	system("PAUSE");
+	//std::cout << argumentVariables.dump(4) << std::endl;
+	//system("PAUSE");
 
 	//Creating vectors to hold directory maps.
 	std::vector<std::string> directoryOneDB;
@@ -204,6 +204,18 @@ int main(int argc, char* argv[])
 		writeDebugThreadPool.push_task(writeToDebug, std::chrono::system_clock::now(), true, "----- *COMPLETED* DIRECTORY COMPARISON - " + argumentVariables["internalObject"]["Operation Mode"].get<std::string>() + " -----");
 		writeConsoleMessagesPool.push_task(displayConsoleMessage, "Directory comparing finished...");
 	}
+
+	//If matching files need to be hashed, do so now.
+	if (argumentVariables["internalObject"]["Check File Contents"].get<bool>())
+	{
+		writeConsoleMessagesPool.push_task(displayConsoleMessage, "Beginning hash process. " + std::to_string(hashActions.size() * 2) + " Files to be hashed...");
+		performHashActionFile(hashActions, directoryOneDB, directoryTwoDB, firstGivenDirectoryPath, secondGivenDirectoryPath);
+		writeConsoleMessagesPool.push_task(displayConsoleMessage, "Hashing finished!");
+		writeConsoleMessagesPool.push_task(displayConsoleMessage, "Comparing file hashes...");
+		compareHashes(directoryOneDB, directoryTwoDB, fileOpActions, firstGivenDirectoryPath, secondGivenDirectoryPath);
+		writeConsoleMessagesPool.push_task(displayConsoleMessage, "Hash comparison finished!"); //
+	}
+
 
 	//Performing file operations.
 	writeDebugThreadPool.push_task(writeToDebug, std::chrono::system_clock::now(), true, "----- FILE OPERATIONS -----");
@@ -312,7 +324,7 @@ int main(int argc, char* argv[])
 	writeDebugThreadPool.push_task(writeToDebug, std::chrono::system_clock::now(), true, "File Operation Actions Vector Capacity - " + std::to_string(fileOpActions.capacity()));
 
 	//Console displaying final stats.
-	writeConsoleMessagesPool.push_task(displayConsoleMessage, "FINISHED! - " + std::chrono::duration_cast<std::chrono::milliseconds>(end - start).count()); //Display clock results.
+	writeConsoleMessagesPool.push_task(displayConsoleMessage, "FINISHED! - " + std::to_string(std::chrono::duration_cast<std::chrono::milliseconds>(end - start).count()) + "ms"); //Display clock results.
 
 
 	writeConsoleMessagesPool.push_task(displayConsoleMessage, "Directory One size: " + std::to_string(directoryOneDB.size()));

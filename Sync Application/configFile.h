@@ -68,13 +68,23 @@ void addToConfigurationFile(std::string pathToConfig, json& givenArguments, std:
 	{
 		if (configurationFileJSON.count(configurationName) == 1) //A configuration already exists. Ask user if they want to update/overwrite it.
 		{
-			std::cout << "A duplicate top-level configuration named \"" << configurationName << "\" key was found in the configuration file.";
+			std::cout << "A duplicate configuration named \"" << configurationName << "\" key was found in the configuration file." << std::endl;
 			std::cout << "Would you like to overwrite the configuration? (Y/N)" << std::endl;
-			std::cout << "If not, the program will terminate without making any changes." << std::endl;
 			std::cin >> userInput[0]; //Awaiting user input...
-			
-			if (toupper(userInput[0]) != 'Y') //The input is not "Y". The user did not say yes.
-				exit(0);
+
+			if (toupper(userInput[0]) == 'Y')
+			{
+				//Continue!
+			}
+			else //The input is not "Y". The user did not say yes.
+			{
+				std::cout << "Would you like to terminate the program? (Y/N)" << std::endl;
+				std::cin >> userInput[0]; //Awaiting user input...
+
+				if (toupper(userInput[0]) == 'Y') //The input is not "Y". The user did not say yes.
+					exit(0);
+			}
+
 		}
 		else
 		{
@@ -85,10 +95,10 @@ void addToConfigurationFile(std::string pathToConfig, json& givenArguments, std:
 		}
 	}
 
-	change_key(givenArguments, "internalObject", configurationName); //Change the top level key to be the configuration ID.
-	
-	configurationFileJSON[configurationName] = givenArguments[configurationName]; //Appending internal configuration to the file version.
+	configurationFileJSON["internalObject"] = givenArguments["internalObject"]; //Appending internal configuration to the file version.
 
+	change_key(configurationFileJSON, "internalObject", configurationName); //Change the newly added top level internalObject key to be the configuration ID.
+	
 	//Outputting full altered configuration to configuration file.
 	std::ofstream configFileWriting(std::filesystem::u8path(pathToConfig), std::ios::out | std::ios::binary);
 	writeToFile(configFileWriting, configurationFileJSON.dump(4)); //Write the serialized json to the file. "5" indicates the indenting amount.

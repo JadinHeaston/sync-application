@@ -55,14 +55,17 @@ void createDirectoryMapDB(std::vector<std::string>& givenVectorDB, std::string g
 
 				//writeDebugThreadPool.push_task(writeToDebug, std::chrono::system_clock::now(), true, L"7 Pushing data back: " + formatFilePath(current_file));
 
-				//Append to DB.
-				givenVectorDB.push_back(testStream.str());
 				//writeDebugThreadPool.push_task(writeToDebug, std::chrono::system_clock::now(), true, L"8 Reseting streamstring: " + formatFilePath(current_file));
 
 
 				//writeDebugThreadPool.push_task(writeToDebug, std::chrono::system_clock::now(), true, "9 finished streamstring: " + formatFilePath(current_file));
 			}
-			
+			else
+				testStream << delimitingCharacter + delimitingCharacter + delimitingCharacter + delimitingCharacter + newLine;
+
+			//Append to DB.
+			givenVectorDB.push_back(testStream.str());
+
 			//Clearing stringstream for next iteration.
 			testStream.str(std::string());
 		}
@@ -192,31 +195,35 @@ void removeObject(std::string destinationFilePath, bool recursiveRemoval)
 	if (ec.value() == 5) //If error value is 5, it is access denied.
 		writeDebugThreadPool.push_task(writeToDebug, std::chrono::system_clock::now(), true, "ERROR. ACCESS DENIED: " + destinationFilePath); //Log.
 
+	ec.clear();
+
 }
 
 //Copying file.
 void copyFile(std::string givenSourcePath, std::string givenDestinationPath)
 {
+	if (std::filesystem::is_directory(std::filesystem::u8path(givenDestinationPath)))
+		return;
+
 	//Creating files themselves.
 	std::string destinationDirectoriesPath = givenDestinationPath.substr(0, givenDestinationPath.find_last_of(directorySeparator) + 1); //Obtaining path of the destination until the last backslash.
 
 	if (!std::filesystem::exists(std::filesystem::u8path(destinationDirectoriesPath))) //If the directory does not exist, then create it.
 		std::filesystem::create_directories(std::filesystem::u8path(destinationDirectoriesPath));
 
+
+
 	while (!std::filesystem::exists(std::filesystem::u8path(destinationDirectoriesPath))) //Wait for directories to be created.
 	{
 		//V O I D
 	}
 
-	//*****
-	if (!std::filesystem::is_directory(std::filesystem::u8path(givenDestinationPath))) //Don't bother dealing with directories right now.
-	{
-		std::error_code ec; //Create error handler.
-		std::filesystem::copy(std::filesystem::u8path(givenSourcePath), std::filesystem::u8path(givenDestinationPath), std::filesystem::copy_options::overwrite_existing, ec); //Copying the file. - If a directory is being looked at, it would have already been made above. This will do nothing.
 
-		if (ec.value() == 5) //If error value is 5, it is access denied.
-			writeDebugThreadPool.push_task(writeToDebug, std::chrono::system_clock::now(), true, "ERROR. ACCESS DENIED: " + givenSourcePath + " - " + givenDestinationPath); //Log.
-	}
+	std::error_code ec; //Create error handler.
+	std::filesystem::copy(std::filesystem::u8path(givenSourcePath), std::filesystem::u8path(givenDestinationPath), std::filesystem::copy_options::overwrite_existing, ec); //Copying the file. - If a directory is being looked at, it would have already been made above. This will do nothing.
+
+	if (ec.value() == 5) //If error value is 5, it is access denied.
+		writeDebugThreadPool.push_task(writeToDebug, std::chrono::system_clock::now(), true, "ERROR. ACCESS DENIED: " + givenSourcePath + " - " + givenDestinationPath); //Log.
 }
 
 //Moving file.

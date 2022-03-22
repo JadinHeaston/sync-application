@@ -76,19 +76,6 @@ void contributeCompareDirectories(std::vector<std::string>& firstGivenVectorDB, 
 	}
 
 	DB2Map.clear();
-
-	//If matching files need to be hashed, do so.
-	if (argumentVariables["internalObject"]["Check File Contents"].get<bool>())
-	{
-		writeConsoleMessagesPool.push_task(displayConsoleMessage, "Beginning hash process. " + std::to_string(hashActions.size() * 2) + " Files to be hashed..."); //FIX ME
-		performHashActionFile(hashActions, firstGivenVectorDB, secondGivenVectorDB, firstGivenPath, secondGivenPath);
-		writeConsoleMessagesPool.push_task(displayConsoleMessage, "Hashing finished!");
-		writeConsoleMessagesPool.push_task(displayConsoleMessage, "Comparing file hashes...");
-		compareHashes(firstGivenVectorDB, secondGivenVectorDB, fileOpAction, firstGivenPath, secondGivenPath);
-		writeConsoleMessagesPool.push_task(displayConsoleMessage, "Hash comparison finished!"); //
-	}
-
-
 }
 
 //Uses unordered maps to compare directory lists and find matches.
@@ -123,8 +110,8 @@ void echoCompareDirectories(std::vector<std::string>& firstGivenVectorDB, std::v
 	for (size_t iteratorTwo = 0; iteratorTwo < secondDBSize; ++iteratorTwo)
 	{
 		//Not adding directories.
-		if (std::filesystem::is_directory(std::filesystem::u8path(secondGivenVectorDB[iteratorTwo].substr(0, nthOccurrence(secondGivenVectorDB[iteratorTwo], delimitingCharacter, 1)))))
-			continue;
+		//if (std::filesystem::is_directory(std::filesystem::u8path(secondGivenVectorDB[iteratorTwo].substr(0, nthOccurrence(secondGivenVectorDB[iteratorTwo], delimitingCharacter, 1)))))
+		//	continue;
 
 		DB2Map.insert(std::make_pair(secondGivenVectorDB[iteratorTwo].substr(secondGivenPath.length() + 1, nthOccurrence(secondGivenVectorDB[iteratorTwo], delimitingCharacter, 1) - secondGivenPath.length() - 1), iteratorTwo));
 	}
@@ -144,8 +131,8 @@ void echoCompareDirectories(std::vector<std::string>& firstGivenVectorDB, std::v
 			secondGivenVectorDB[DB2Line].insert(secondGivenVectorDB[DB2Line].length() - 1, "MATCHED" + delimitingCharacter + iter1); //Add match marker and line.
 			
 			//If the path not a directory, skip this iteration.
-			if (std::filesystem::is_directory(firstGivenVectorDB[iterator].substr(0, nthOccurrence(firstGivenVectorDB[iterator], delimitingCharacter, 1))))
-				continue;
+			//if (std::filesystem::is_directory(firstGivenVectorDB[iterator].substr(0, nthOccurrence(firstGivenVectorDB[iterator], delimitingCharacter, 1))))
+			//	continue;
 
 			workingDateMod = firstGivenVectorDB[iterator].substr(nthOccurrence(firstGivenVectorDB[iterator], delimitingCharacter, 2) + 3, nthOccurrence(firstGivenVectorDB[iterator], delimitingCharacter, 3) - nthOccurrence(firstGivenVectorDB[iterator], delimitingCharacter, 2) - 3); //Third column
 			workingDateModTwo = secondGivenVectorDB[DB2Line].substr(nthOccurrence(secondGivenVectorDB[DB2Line], delimitingCharacter, 2) + 3, nthOccurrence(secondGivenVectorDB[DB2Line], delimitingCharacter, 3) - nthOccurrence(secondGivenVectorDB[DB2Line], delimitingCharacter, 2) - 3); //Third column
@@ -160,7 +147,8 @@ void echoCompareDirectories(std::vector<std::string>& firstGivenVectorDB, std::v
 
 				if (workingSize == workingSizeTwo) //Check if the file sizes match.
 				{
-					if (argumentVariables["internalObject"]["Check File Contents"].get<bool>()) hashActions.push_back(workingPath + delimitingCharacter + iter1 + delimitingCharacter + iter2 + newLine); //If everything matches, these files need hashed and compared.
+					if (argumentVariables["internalObject"]["Check File Contents"].get<bool>())
+						hashActions.push_back(workingPath + delimitingCharacter + iter1 + delimitingCharacter + iter2 + newLine); //If everything matches, these files need hashed and compared.
 				}
 				else
 					fileOpAction.push_back("COPY - Different file sizes" + delimitingCharacter + firstGivenPath + directorySeparator + workingPath + delimitingCharacter + secondGivenPath + directorySeparator + workingPath + newLine); //Copy directory one file to directory two.
@@ -189,24 +177,11 @@ void echoCompareDirectories(std::vector<std::string>& firstGivenVectorDB, std::v
 		//writeDebugThreadPool.push_task(writeToDebug, std::chrono::system_clock::now(), false, secondGivenVectorDB[iterator].substr(secondGivenPath.length() + 1, nthOccurrence(secondGivenVectorDB[iterator], delimitingCharacter, 1) - secondGivenPath.length() - 1)); //Log.
 
 		//Skipping directories.
-		if (std::filesystem::is_directory(std::filesystem::u8path(secondGivenVectorDB[iterator].substr(0, nthOccurrence(secondGivenVectorDB[iterator], delimitingCharacter, 1)))))
-			continue;
+		//if (std::filesystem::is_directory(std::filesystem::u8path(secondGivenVectorDB[iterator].substr(0, nthOccurrence(secondGivenVectorDB[iterator], delimitingCharacter, 1)))))
+		//	continue;
 
 		//Checking for a match.
 		if (secondGivenVectorDB[iterator].substr(nthOccurrence(secondGivenVectorDB[iterator], delimitingCharacter, 5) + 3, 7) != "MATCHED")
 			fileOpAction.push_back("DELETE - No source found" + delimitingCharacter + secondGivenVectorDB[iterator].substr(0, nthOccurrence(secondGivenVectorDB[iterator], delimitingCharacter, 1)) + newLine); //Delete directory two file. No directory one file found that matches.
 	}
-
-	//If matching files need to be hashed, do so.
-	if (argumentVariables["internalObject"]["Check File Contents"].get<bool>())
-	{
-		writeConsoleMessagesPool.push_task(displayConsoleMessage, "Beginning hash process. " + std::to_string(hashActions.size() * 2) + " Files to be hashed...");
-		performHashActionFile(hashActions, firstGivenVectorDB, secondGivenVectorDB, firstGivenPath, secondGivenPath);
-		writeConsoleMessagesPool.push_task(displayConsoleMessage, "Hashing finished!");
-		writeConsoleMessagesPool.push_task(displayConsoleMessage, "Comparing file hashes...");
-		compareHashes(firstGivenVectorDB, secondGivenVectorDB, fileOpAction, firstGivenPath, secondGivenPath);
-		writeConsoleMessagesPool.push_task(displayConsoleMessage, "Hash comparison finished!"); //
-	}
-
-
 }
