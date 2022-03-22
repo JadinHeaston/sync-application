@@ -101,9 +101,9 @@ A configuration entry can be added by using the "--add-to-config <PATH>" and the
 # Usage Examples
 
 
-# Software Shoutouts
-This appliation uses several incredible open-source pieces of software and code.  
-I want to give thinks, and provide the reasources for other people to utilize their tools and show appreciation to them. Without these libraries, this would never have been made.
+# Software Shout-outs
+This application uses several incredible open-source pieces of software and code.  
+I want to give thinks, and provide the resources for other people to utilize their tools and show appreciation to them. Without these libraries, this would never have been made.
 * [Boost](https://www.boost.org/) - Filesystem
 	* I initially used the Boost Filesystem library handle all filesystem interactions, but have since moved to the built-in filesystem utilities (which were taken from Boost!). I currently use Boost to obtain file metadata times (last modification and creation times). I find the data returned a little easier to work with.
 * [libcurl](https://curl.se/libcurl/)

@@ -148,7 +148,7 @@ int main(int argc, char* argv[])
 	writeConsoleMessagesPool.push_task(displayConsoleMessage, "Second Directory: " + secondGivenDirectoryPath);
 
 	
-	writeDebugThreadPool.push_task(writeToDebug, std::chrono::system_clock::now(), false, argumentVariables.dump(5));
+	writeDebugThreadPool.push_task(writeToDebug, std::chrono::system_clock::now(), false, argumentVariables.dump(4));
 	
 	writeDebugThreadPool.push_task(writeToDebug, std::chrono::system_clock::now(), true, "----- DIRECTORY CRAWLING -----");
 	writeConsoleMessagesPool.push_task(displayConsoleMessage, "Creating directory maps...");
