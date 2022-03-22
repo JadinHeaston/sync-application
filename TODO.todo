@@ -72,7 +72,12 @@ Other features:
 	☐ Allow specifying where "internal" files get output to when using --output-files.
 		It probably should be a bool, but instead a string that stores the output directory.
 	☐ Ability to specify which file(s) to export.
-	
+	☐ Add argument that skips all "inline" command prompt stuff.
+		Maybe piggy-back off of the --no-warning argument?
+		"Inline command prompt stuff" refers to the ability to fix some issues via prompts from the program.
+			The alternative is to just notify the user of what went wrong and terminate the program immediately.
+		This may not be necessary, but might be nice for automated runnings.
+
 General Bugs/Fixes:
 	☐ Look into how the program acts when one directory is nested within another.
 		This may just need to be prevented.
