@@ -293,6 +293,11 @@ int main(int argc, char* argv[])
 					}
 					verboseDebugOutput.close();
 				}
+				else if (strcmp(argv[i], "--use-config") == 0) //Output debug file in running directory.
+				{
+					pathToConfigFile = formatFilePath(argv[i + 1]); //Getting provided configuration file location.
+					useConfigurationFile = true;
+				}
 			}
 			else if (strncmp(argv[i], "-", 1) == 0) //Check for single dash.
 			{
@@ -332,9 +337,14 @@ int main(int argc, char* argv[])
 		//Add arguments to a configuration file, if needed.
 		if (addToConfigFile)
 			addToConfigurationFile(pathToConfigFile, argumentVariables, configurationName);
-		else if (false)
-			addToConfigurationFile(pathToConfigFile, argumentVariables, configurationName);
+		else if (useConfigurationFile)
+			readFromConfigurationFile(pathToConfigFile, argumentVariables, configurationName);
 	}
+
+
+
+	std::cout << argumentVariables.dump(5) << std::endl;
+	system("PAUSE");
 
 	//Creating vectors to hold directory maps.
 	std::vector<std::string> directoryOneDB;
