@@ -6,36 +6,49 @@ void addToConfigurationFile(std::string pathToConfig, json& givenArguments, std:
 	if (configurationName == "")
 	{
 		std::cout << "No configuration name given." << std::endl;
-		//Give option to specify configuration name or terminate program. *****
-		std::cout << "Please resolve the issue and try again. Program terminating." << std::endl;
-		system("PAUSE");
-		exit(1);
+
+		//Asking user to provide a configuration name or terminate the program.
+		std::cout << "Please enter a configuration name. (Leave this blank to terminate the program with no changes.)" << std::endl;
+		std::getline(std::cin, configurationName); //Getting user input.
+
+		//User didn't provide an input. Terminating program.
+		if (configurationName == "")
+			exit(1);
 	}
 	
 	json configurationFileJSON; //Holds the full JSON configuration from the file.
 	size_t largestNumericID = NULL;
 	std::vector<std::string> foundConfigIDs;
 
-	//Open configuration file of reading.
+	//Open configuration file for reading.
 	std::ifstream configFileReading(std::filesystem::u8path(pathToConfig));
 
-	//Check that the file got opened properly. *****
+	//Check that the file got opened properly.
 	if (!configFileReading.good())
 	{
 		std::cout << "Configuration file failed to open: \"" << pathToConfig << "\"" << std::endl;
-		//Maybe add a "Would you like to continue without adding this configuration to the file", or "Please specify a new path". *****
-		std::cout << "Please resolve the issue and try again. Program terminating." << std::endl;
-		system("PAUSE");
-		exit(1);
+		std::cout << "Please specify a new path to a configuration file to use, or enter nothing to terminate the program." << std::endl;
+		std::getline(std::cin, pathToConfig); //Getting user input.
+		if (pathToConfig == "")
+			exit(1);
+
+		//Trying to open configuration file for reading again.
+		std::ifstream configFileReading(std::filesystem::u8path(pathToConfig));
+
+		if (!configFileReading.good())
+		{
+			std::cout << "File failed to open again: " << std::endl;
+			std::cout << "Please try again. Program terminating." << std::endl;
+			exit(1);
+		}
 	}
 
 	//Fail is the ifstream can't be parsed.
 	if (!json::accept(configFileReading))
 	{
 		//Error with JSON syntax. Notifying user.
-		std::cout << "The given configuration file at: \"" << pathToConfig << "\"" << std::endl;
+		std::cout << "JSON syntax error: \"" << pathToConfig << "\"" << std::endl;
 		std::cout << "Check your configuration to ensure it is valid JSON." << std::endl;
-		//Maybe add a "Would you like to continue without adding this configuration to the file", or "Please specify a new path". *****
 		std::cout << "Please resolve the issue and try again. Program terminating." << std::endl;
 		system("PAUSE");
 		exit(1);
@@ -112,26 +125,35 @@ void readFromConfigurationFile(std::string pathToConfig, json& givenArguments, s
 	json configurationFileJSON; //Holds the full JSON configuration from the file.
 	std::vector<std::string> foundConfigIDs;
 
-	//Open configuration file of reading.
+	//Open configuration file for reading.
 	std::ifstream configFileReading(std::filesystem::u8path(pathToConfig));
 
-	//Check that the file got opened properly. *****
+	//Check that the file got opened properly.
 	if (!configFileReading.good())
 	{
 		std::cout << "Configuration file failed to open: \"" << pathToConfig << "\"" << std::endl;
-		//Maybe add a "Would you like to continue without adding this configuration to the file", or "Please specify a new path". *****
-		std::cout << "Please resolve the issue and try again. Program terminating." << std::endl;
-		system("PAUSE");
-		exit(1);
+		std::cout << "Please specify a new path to a configuration file to use, or enter nothing to terminate the program." << std::endl;
+		std::getline(std::cin, pathToConfig); //Getting user input.
+		if (pathToConfig == "")
+			exit(1);
+
+		//Trying to open configuration file for reading again.
+		std::ifstream configFileReading(std::filesystem::u8path(pathToConfig));
+
+		if (!configFileReading.good())
+		{
+			std::cout << "File failed to open again: " << std::endl;
+			std::cout << "Please try again. Program terminating." << std::endl;
+			exit(1);
+		}
 	}
 
 	//Fail is the ifstream can't be parsed.
 	if (!json::accept(configFileReading))
 	{
 		//Error with JSON syntax. Notifying user.
-		std::cout << "The given configuration file at: \"" << pathToConfig << "\"" << std::endl;
+		std::cout << "JSON syntax error: \"" << pathToConfig << "\"" << std::endl;
 		std::cout << "Check your configuration to ensure it is valid JSON." << std::endl;
-		//Maybe add a "Would you like to continue without adding this configuration to the file", or "Please specify a new path". *****
 		std::cout << "Please resolve the issue and try again. Program terminating." << std::endl;
 		system("PAUSE");
 		exit(1);
