@@ -32,7 +32,7 @@ json argumentVariables;
 std::string directorySeparator = "/";
 std::string pathToConfigFile;
 
-char userInput[1]; //Holds user input, when needed.
+char userInput; //Holds user input, when needed.
 
 //Sets global delimiter used for reading and writing DB files. Tilde typically works well. (CONSIDER USING MULTIPLE CHARACTER DELIMITER FOR SAFETY)
 std::string delimitingCharacter = "▼";
@@ -359,7 +359,7 @@ int main(int argc, char* argv[])
 	return 0; //Program finished!
 }
 
-//returns the position of the nth occurance of a given character. - This could easily be made a string.
+//returns the position of the nth occurrence of a given character. - This could easily be made a string.
 //Asks for a string to be searched, character to find, and what count you desire.
 size_t nthOccurrence(std::string& givenString, std::string delimitingCharacter, size_t nth)
 {

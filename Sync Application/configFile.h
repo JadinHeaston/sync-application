@@ -70,21 +70,16 @@ void addToConfigurationFile(std::string pathToConfig, json& givenArguments, std:
 		{
 			std::cout << "A duplicate configuration named \"" << configurationName << "\" key was found in the configuration file." << std::endl;
 			std::cout << "Would you like to overwrite the configuration? (Y/N)" << std::endl;
-			std::cin >> userInput[0]; //Awaiting user input...
+			std::cin >> userInput; //Awaiting user input...
 
-			if (toupper(userInput[0]) == 'Y')
-			{
-				//Continue!
-			}
-			else //The input is not "Y". The user did not say yes.
+			if (toupper(userInput) != 'Y') //The input is not "Y". The user did not say yes.
 			{
 				std::cout << "Would you like to terminate the program? (Y/N)" << std::endl;
-				std::cin >> userInput[0]; //Awaiting user input...
+				std::cin >> userInput; //Awaiting user input...
 
-				if (toupper(userInput[0]) == 'Y') //The input is not "Y". The user did not say yes.
+				if (toupper(userInput) == 'Y') //The input is not "Y". The user did not say yes.
 					exit(0);
 			}
-
 		}
 		else
 		{

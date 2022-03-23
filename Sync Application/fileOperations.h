@@ -185,16 +185,39 @@ void removeObject(std::string destinationFilePath, bool recursiveRemoval)
 	//if (std::filesystem::is_directory(destinationFilePath))
 	//    return; //do nothing
 
+
+
+
 	if (recursiveRemoval) //Determine which remove method we are using.
-		std::filesystem::remove_all(std::filesystem::u8path(destinationFilePath), ec); //Removing all.
+	{
+		try
+		{
+			std::filesystem::remove_all(std::filesystem::u8path(destinationFilePath));
+		}
+		catch (std::filesystem::filesystem_error& ec)
+		{
+			//This is untested.
+			//This hopefully solves the issue of not being able to delete read-only files/folders.
+			//I hope it would remove
+			std::this_thread::sleep_for(std::chrono::milliseconds(250));
+			std::string f(ec.what());
+			int p = f.find("[");
+			p = f.find("[", p + 1);
+			f = f.substr(p + 1);
+			f = f.substr(0, f.length() - 1);
+			std::filesystem::permissions(
+				f, std::filesystem::perms::owner_write);
+		}
+		//std::filesystem::remove_all(std::filesystem::u8path(destinationFilePath), ec); //Removing all.
+	}
 	else
 		std::filesystem::remove(std::filesystem::u8path(destinationFilePath), ec); //Removing.
-
+	
 	//Sending errors to that error_code seems to fix some problems?
 	//An error was occuring sometimes when deleting destination empty directories, but adding this error part make it just work.
 	if (ec.value() == 5) //If error value is 5, it is access denied.
 		writeDebugThreadPool.push_task(writeToDebug, std::chrono::system_clock::now(), true, "ERROR. ACCESS DENIED: " + destinationFilePath); //Log.
-
+	
 	ec.clear();
 
 }
@@ -221,7 +244,7 @@ void copyFile(std::string givenSourcePath, std::string givenDestinationPath)
 
 	std::error_code ec; //Create error handler.
 	std::filesystem::copy(std::filesystem::u8path(givenSourcePath), std::filesystem::u8path(givenDestinationPath), std::filesystem::copy_options::overwrite_existing, ec); //Copying the file. - If a directory is being looked at, it would have already been made above. This will do nothing.
-
+	
 	if (ec.value() == 5) //If error value is 5, it is access denied.
 		writeDebugThreadPool.push_task(writeToDebug, std::chrono::system_clock::now(), true, "ERROR. ACCESS DENIED: " + givenSourcePath + " - " + givenDestinationPath); //Log.
 }

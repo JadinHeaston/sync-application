@@ -21,7 +21,7 @@ void writeToDebug(std::chrono::system_clock::time_point givenTime, bool writeTim
 			debugFileName = debugFileName.insert(debugFileName.find("."), " - " + debugFileCount);
 		else
 			debugFileName = debugFileName.append(" - " + debugFileCount);
-		++debugFileCount; //Incrememnt debug file count.
+		++debugFileCount; //Increment debug file count.
 	}
 
 	verboseDebugOutput.open(debugFilePath + debugFileName, std::ios::out | std::ios::binary | std::ios::app); //Open the debug file for writing.
@@ -89,10 +89,10 @@ void showWarningMessage()
 	std::cout << "(This warning can be disabled by adding the \"--no-warning\" argument)" << std::endl;
 	std::cout << "File operations are permenant (ESPECIALLY DELETIONS). Do you wish to proceed, knowing what files are potentially at risk? (Y/N)" << std::endl;
 	
-	std::cin >> userInput[0]; //Awaiting user input...
+	std::cin >> userInput; //Awaiting user input...
 
 	//Verify if the user is okay with continuing.
-	if (toupper(userInput[0]) != 'Y') //The input is NOT a "Y".
+	if (toupper(userInput) != 'Y') //The input is NOT a "Y".
 	{
 		std::cout << "Terminating Program. No changes have been made." << std::endl;
 		exit(0);
@@ -106,7 +106,7 @@ void showWarningMessage()
 void displayHelpMessage()
 {
 	//Display help message.
-	std::cout << "The three required arguments are: --directory-one <DIRECTORY_PATH>' as the source, --directory-two <DIRECTORY_PATH>' as the destination, and '--operation-mode <OPERATION_MODE>' to specifiy the operation mode." << std::endl;
+	std::cout << "The three required arguments are: --directory-one <DIRECTORY_PATH>' as the source, --directory-two <DIRECTORY_PATH>' as the destination, and '--operation-mode <OPERATION_MODE>' to specify the operation mode." << std::endl;
 	std::cout << "The operation mode can either be 'contribute' that only copies files from directory one to directory two, 'echo' that makes directory two look like directory one." << std::endl;
 	std::cout << "Detailed help can be found by using '--help' or utilizing the readme.md file: https://github.com/JadinHeaston/sync-application" << std::endl;
 	system("PAUSE");
@@ -121,7 +121,7 @@ void handleArguments(int& argc, char* argv[])
 	bool useConfigurationFile = false;
 	bool showHelpMessage = false;
 	std::string configurationName;
-	bool addToConfigFile = false; //Recieved from argument --add-to-config
+	bool addToConfigFile = false; //Received from argument --add-to-config
 
 	//Reading args
 	if (argc == 1) //No arguments provided. Notify. Close program.
@@ -167,16 +167,16 @@ void handleArguments(int& argc, char* argv[])
 		singleCharArguments.clear(); //Clearing single character arguments for future use.
 
 		//Defining default arguments.
-		argumentVariables["internalObject"]["Check File Contents"] = false; ////Recieved from arg: --check-content | Defaults to false.
-		argumentVariables["internalObject"]["Output Files"] = false; //Recieved from arg: --output-files | Defaults to false.
-		argumentVariables["internalObject"]["Show Console"] = true; //Recieved from arg: --hide-console | defaults to false | Defines whether things are output to the console or not.
+		argumentVariables["internalObject"]["Check File Contents"] = false; ////Received from arg: --check-content | Defaults to false.
+		argumentVariables["internalObject"]["Output Files"] = false; //Received from arg: --output-files | Defaults to false.
+		argumentVariables["internalObject"]["Show Console"] = true; //Received from arg: --hide-console | defaults to false | Defines whether things are output to the console or not.
 
-		argumentVariables["internalObject"]["Directory One"]["Recursive Search"] = true; //Recieved from arg: --no-recursive | defaults to true.
-		argumentVariables["internalObject"]["Directory Two"]["Recursive Search"] = true; //Recieved from arg: --no-recursive | defaults to true.
+		argumentVariables["internalObject"]["Directory One"]["Recursive Search"] = true; //Received from arg: --no-recursive | defaults to true.
+		argumentVariables["internalObject"]["Directory Two"]["Recursive Search"] = true; //Received from arg: --no-recursive | defaults to true.
 
 		argumentVariables["internalObject"]["Verbose Debugging"] = false; //Defines if verbose debugging is enabled.
 		argumentVariables["internalObject"]["Windows Max Path Bypass"] = false; //Determines whether "\\?\" is prepended to path and backslashes are used as directory separators.
-		argumentVariables["internalObject"]["Show Warning"] = true; //Recieved from arg: --no-warning | defaults to true | Defines whether things are output to the console or not.
+		argumentVariables["internalObject"]["Show Warning"] = true; //Received from arg: --no-warning | defaults to true | Defines whether things are output to the console or not.
 		argumentVariables["internalObject"]["Operation Mode"] = ""; //Holds operation mode to perform.
 
 
@@ -227,10 +227,10 @@ void handleArguments(int& argc, char* argv[])
 						std::cout << "The '--directory-one' path provided was NOT found. (" << firstGivenDirectoryPath << ")" << std::endl;
 						std::cout << "Would you like to create this directory?" << std::endl;
 
-						std::cin >> userInput[0]; //Awaiting user input...
+						std::cin >> userInput; //Awaiting user input...
 
 						//Verify if the user is okay with continuing.
-						if (toupper(userInput[0]) != 'Y') //The input is NOT a "Y".
+						if (toupper(userInput) != 'Y') //The input is NOT a "Y".
 							std::filesystem::create_directories(firstGivenDirectoryPath); //Creating directory.
 						else //The user gave the okay. Continue.
 						{
@@ -271,10 +271,10 @@ void handleArguments(int& argc, char* argv[])
 						std::cout << "The '--directory-two' path provided was NOT found. (" << secondGivenDirectoryPath << ")" << std::endl;
 						std::cout << "Would you like to create this directory?" << std::endl;
 
-						std::cin >> userInput[0]; //Awaiting user input...
+						std::cin >> userInput; //Awaiting user input...
 
 						//Verify if the user is okay with continuing.
-						if (toupper(userInput[0]) == 'Y') //The input is a "Y".
+						if (toupper(userInput) == 'Y') //The input is a "Y".
 							std::filesystem::create_directories(secondGivenDirectoryPath); //Creating directory.
 						else //The does not want to create a directory. Ending program.
 						{
