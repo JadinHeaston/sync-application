@@ -64,6 +64,7 @@ size_t debugFileCount = 1;
 //Holds an array of single letter arguments that need to be applied.
 std::unordered_map<char, size_t> singleCharArguments;
 
+
 //FUNCTION PROTOTYPES
 //configFile.h
 void addToConfigurationFile(std::string pathToConfig, json& givenArguments, std::string configurationName);
