@@ -1,21 +1,49 @@
-# Configuration File
-A configuration file can be created that contains several configurations that can be accessed with identifiable names.
+# Configuration File <!-- omit in toc -->
+A configuration file can be created that contains several configurations that can be accessed with identifiable names.  
+The topics below will help document the system and how to utilize built-in commands to manage configurations, while also providing a better understanding of how the internal code works.
 
+Note: There is no issue with manually editing a configuration file. It is important to ensure that the JSON formatting is valid and that there is no duplicate configuration names. If you are manually editing the configuration file, I recommend using an online JSON validator to check your work.
+
+
+# Table of Contents <!-- omit in toc -->
+- [Formatting](#formatting)
+- [Available Properties](#available-properties)
+- [Utilizing Built-In Commands](#utilizing-built-in-commands)
+	- [--add-to-config <PATH_TO_CONFIG_FILE>](#--add-to-config-path_to_config_file)
+	- [--export-config-to-command <PATH_TO_CONFIG_FILE>](#--export-config-to-command-path_to_config_file)
+	- [--use-config <PATH_TO_CONFIG_FILE>](#--use-config-path_to_config_file)
 
 # Formatting
+The configuration file uses the [JSON standard](https://www.json.org/json-en.html).  
+For simplicity and consistency, this way of handling arguments is also used internally by using [JSON by Niels Lohmann](https://github.com/nlohmann/json).
 
 # Available Properties
-Check Files Contents - T/F
-Debug File Path - ""
+
+```
+Check Files Contents - [true] | [false]
+Debug File Path - "file_path"
 Directory One
-	Directory Path - ""
-	Recursive Search - T/F
+	Directory Path - "file_path"
+	Recursive Search - [true] | [false]
 Directory Two
-	Directory Path - ""
-	Recursive Search - T/F
+	Directory Path - "file_path"
+	Recursive Search - [true] | [false]
 Operation Mode - "echo" | "cont" | "contribute"
-Output Files - T/F
-Show Console - T/F
-Show Warning - T/F
-Verbose Debugging - T/F
-Windows Max Path Bypass - T/F
+Output Files - [true] | [false]
+Show Console - [true] | [false]
+Show Warning - [true] | [false]
+Verbose Debugging - [true] | [false]
+Windows Max Path Bypass - [true] | [false]
+```
+
+# Utilizing Built-In Commands
+Note: Each command shown below requires "--configuration-name <NAME>" to be used as an identifier for which config to utilize in the file.
+
+## --add-to-config <PATH_TO_CONFIG_FILE>  
+	When adding a configuration to the file, you must specify the full argument that you want stored.
+	The argument will go through most, if not all, of the programs validation before allowing it to be stored.
+## --export-config-to-command <PATH_TO_CONFIG_FILE> 
+	This will convert your configuration to a command that can be run. 
+	Note: The resulting command might need some tweaking, especially in regards to file path formatting.
+## --use-config <PATH_TO_CONFIG_FILE>  
+	As stated, it will use a configuration from the file.

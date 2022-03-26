@@ -49,6 +49,7 @@ Main tasks:
 		☐ Also, create the text for the "-h/--help" arguments.
 			✔ -h writing. @done (1/29/2022, 2:05:14 PM)
 			☐ --help writing. - Maybe just copy the readme.md?
+		✔ Fill out config.md file. @done (3/26/2022, 10:23:09 AM)
 	☐ Allow excluding and including of additional folders, files. @high
 		☐ Mask implementation
 			Maybe just use regex?
