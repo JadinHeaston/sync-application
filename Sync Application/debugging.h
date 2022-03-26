@@ -117,12 +117,31 @@ void displayHelpMessage()
 //Handles all incoming arguments.
 void handleArguments(int& argc, char* argv[])
 {
+	//Holds an array of single letter arguments that need to be applied.
+	std::unordered_map<char, size_t> singleCharArguments;
+
 	//Default arguments that don't need stored in a configuration.
 	bool useConfigurationFile = false;
 	bool showHelpMessage = false;
 	std::string configurationName;
 	bool addToConfigFile = false; //Received from argument --add-to-config
 
+	//Defining default arguments.
+	argumentVariables["internalObject"]["Check File Contents"] = false; ////Received from arg: --check-content | Defaults to false.
+	argumentVariables["internalObject"]["Debug File Path"] = "";
+	argumentVariables["internalObject"]["Output Files"] = false; //Received from arg: --output-files | Defaults to false.
+	argumentVariables["internalObject"]["Show Console"] = true; //Received from arg: --hide-console | defaults to false | Defines whether things are output to the console or not.
+	argumentVariables["internalObject"]["Directory One"]["Directory Path"] = "";
+	argumentVariables["internalObject"]["Directory Two"]["Directory Path"] = "";
+	argumentVariables["internalObject"]["Directory One"]["Recursive Search"] = true; //Received from arg: --no-recursive | defaults to true.
+	argumentVariables["internalObject"]["Directory Two"]["Recursive Search"] = true; //Received from arg: --no-recursive | defaults to true.
+	argumentVariables["internalObject"]["Verbose Debugging"] = false; //Defines if verbose debugging is enabled.
+	argumentVariables["internalObject"]["Windows Max Path Bypass"] = false; //Determines whether "\\?\" is prepended to path and backslashes are used as directory separators.
+	argumentVariables["internalObject"]["Show Warning"] = true; //Received from arg: --no-warning | defaults to true | Defines whether things are output to the console or not.
+	argumentVariables["internalObject"]["Operation Mode"] = ""; //Holds operation mode to perform.
+	argumentVariables["internalObject"]["Output Location"] = "\\";
+	argumentVariables["internalObject"]["Windows Max Path Bypass"] = false;
+	
 	//Reading args
 	if (argc == 1) //No arguments provided. Notify. Close program.
 	{
@@ -161,24 +180,15 @@ void handleArguments(int& argc, char* argv[])
 		exit(0);
 	}
 	else if (useConfigurationFile)
+	{
 		readFromConfigurationFile(pathToConfigFile, argumentVariables, configurationName);
+		//Placing JSON arguments into proper variables.
+		firstGivenDirectoryPath = argumentVariables["internalObject"]["Directory One"]["Directory Path"].get<std::string>();
+		secondGivenDirectoryPath = argumentVariables["internalObject"]["Directory Two"]["Directory Path"].get<std::string>();
+	}
 	else //There is no help message or configuration file being used.
 	{
 		singleCharArguments.clear(); //Clearing single character arguments for future use.
-
-		//Defining default arguments.
-		argumentVariables["internalObject"]["Check File Contents"] = false; ////Received from arg: --check-content | Defaults to false.
-		argumentVariables["internalObject"]["Output Files"] = false; //Received from arg: --output-files | Defaults to false.
-		argumentVariables["internalObject"]["Show Console"] = true; //Received from arg: --hide-console | defaults to false | Defines whether things are output to the console or not.
-
-		argumentVariables["internalObject"]["Directory One"]["Recursive Search"] = true; //Received from arg: --no-recursive | defaults to true.
-		argumentVariables["internalObject"]["Directory Two"]["Recursive Search"] = true; //Received from arg: --no-recursive | defaults to true.
-
-		argumentVariables["internalObject"]["Verbose Debugging"] = false; //Defines if verbose debugging is enabled.
-		argumentVariables["internalObject"]["Windows Max Path Bypass"] = false; //Determines whether "\\?\" is prepended to path and backslashes are used as directory separators.
-		argumentVariables["internalObject"]["Show Warning"] = true; //Received from arg: --no-warning | defaults to true | Defines whether things are output to the console or not.
-		argumentVariables["internalObject"]["Operation Mode"] = ""; //Holds operation mode to perform.
-
 
 		//Verifying that no \ escaped " exist in the path string.
 		for (size_t i = 0; i < argc; i++)
@@ -195,8 +205,6 @@ void handleArguments(int& argc, char* argv[])
 
 		for (size_t i = 0; i < argc; i++) // Cycle through all arguments.
 		{
-			//std::cout << argv[i] << " : " << strncmp(argv[i], "--", 2) << std::endl;
-
 			//Check if the argument contains a single or double slash
 			if (strncmp(argv[i], "--", 2) == 0) //Check for double slash
 			{
@@ -262,7 +270,7 @@ void handleArguments(int& argc, char* argv[])
 					{
 						if (std::filesystem::exists(firstGivenDirectoryPath))
 						{
-							std::cout << "The '--directory-one' path provided is NOT a directory, and a directory can not be created. Please try again. (" << firstGivenDirectoryPath << ")" << std::endl;
+							std::cout << "The '--directory-two' path provided is NOT a directory, and a directory can not be created. Please try again. (" << secondGivenDirectoryPath << ")" << std::endl;
 							system("PAUSE");
 							writeDebugThreadPool.wait_for_tasks();
 							exit(1);
@@ -308,45 +316,12 @@ void handleArguments(int& argc, char* argv[])
 					argumentVariables["internalObject"]["Operation Mode"] = argv[i + 1];
 				else if ((strcmp(argv[i], "--output-files") == 0)) //Enable file output.
 					argumentVariables["internalObject"]["Output Files"] = true;
+				else if ((strcmp(argv[i], "--output-location") == 0))
+					argumentVariables["internalObject"]["Output Location"] = formatFilePath(argv[i + 1]);
 				else if (strcmp(argv[i], "--output-verbose-debug") == 0) //Output debug file in running directory.
 				{
 					argumentVariables["internalObject"]["Verbose Debugging"] = true; //Set global verbose debug variable to true.
-
 					argumentVariables["internalObject"]["Debug File Path"] = formatFilePath(std::string(argv[i + 1])); //Get next argument.
-					debugFilePath = formatFilePath(argv[i + 1]);
-					if (debugFilePath.find("/")) //Search for a slash to determine if the given text is a full path or a name. If a slash is found, it is a path.
-					{
-						//Checking that a file name exists. Continuing with default name appended to the given path if it doesn't.
-						if (debugFilePath.substr(debugFilePath.find_last_of("/") + 1, std::string::npos) != "")
-						{
-							debugFileName = debugFilePath.substr(debugFilePath.find_last_of("/") + 1, std::string::npos);
-							debugFilePath = debugFilePath.substr(0, debugFilePath.find_last_of("/") + 1); //Remove filename from path.
-						}
-					}
-					else if (debugFilePath.find("\\"))
-					{
-						//Checking that a file name exists. Continuing with default name appended to the given path if it doesn't.
-						if (debugFilePath.substr(debugFilePath.find_last_of("\\") + 1, std::string::npos) != "")
-						{
-							debugFileName = debugFilePath.substr(debugFilePath.find_last_of("\\") + 1, std::string::npos);
-							debugFilePath = debugFilePath.substr(0, debugFilePath.find_last_of("\\") + 1); //Remove filename from path.
-						}
-					}
-					else //If there is no slash, then a name was given.
-					{
-						debugFileName = debugFilePath; //Set the given item to be the name.
-						debugFilePath = ""; //Set the path to nothing. The name will be appended to this and cause the file to be created in the same location as the running application.
-					}
-
-					verboseDebugOutput.open(debugFilePath + debugFileName, std::ios::out | std::ios::binary | std::ios::app); //Open the file.
-					if (!verboseDebugOutput.is_open())
-					{
-						std::cout << "Debug file path not usable: " + debugFilePath + debugFileName << std::endl;
-						system("PAUSE");
-						writeDebugThreadPool.wait_for_tasks();
-						exit(1);
-					}
-					verboseDebugOutput.close();
 				}
 			}
 			else if (strncmp(argv[i], "-", 1) == 0) //Check for single dash.
@@ -386,6 +361,43 @@ void handleArguments(int& argc, char* argv[])
 		if (secondGivenDirectoryPath.back() == '/' || secondGivenDirectoryPath.back() == '\\')
 			secondGivenDirectoryPath.pop_back(); //Remove the slash.
 	}
+
+	debugFilePath = argumentVariables["internalObject"]["Debug File Path"];
+	if (debugFilePath.find("/")) //Search for a slash to determine if the given text is a full path or a name. If a slash is found, it is a path.
+	{
+		//Checking that a file name exists. Continuing with default name appended to the given path if it doesn't.
+		if (debugFilePath.substr(debugFilePath.find_last_of("/") + 1, std::string::npos) != "")
+		{
+			debugFileName = debugFilePath.substr(debugFilePath.find_last_of("/") + 1, std::string::npos);
+			debugFilePath = debugFilePath.substr(0, debugFilePath.find_last_of("/") + 1); //Remove filename from path.
+		}
+	}
+	else if (debugFilePath.find("\\"))
+	{
+		//Checking that a file name exists. Continuing with default name appended to the given path if it doesn't.
+		if (debugFilePath.substr(debugFilePath.find_last_of("\\") + 1, std::string::npos) != "")
+		{
+			debugFileName = debugFilePath.substr(debugFilePath.find_last_of("\\") + 1, std::string::npos);
+			debugFilePath = debugFilePath.substr(0, debugFilePath.find_last_of("\\") + 1); //Remove filename from path.
+		}
+	}
+	else //If there is no slash, then a name was given.
+	{
+		debugFileName = debugFilePath; //Set the given item to be the name.
+		debugFilePath = ""; //Set the path to nothing. The name will be appended to this and cause the file to be created in the same location as the running application.
+	}
+
+	verboseDebugOutput.open(debugFilePath + debugFileName, std::ios::out | std::ios::binary | std::ios::app); //Open the file.
+	if (!verboseDebugOutput.is_open())
+	{
+		std::cout << "Debug file path not usable: " + debugFilePath + debugFileName << std::endl;
+		system("PAUSE");
+		writeDebugThreadPool.wait_for_tasks();
+		exit(1);
+	}
+	verboseDebugOutput.close();
+
+
 		
 	//Add arguments to a configuration file, if needed.
 	if (addToConfigFile)

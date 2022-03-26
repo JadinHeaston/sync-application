@@ -74,6 +74,9 @@ OUTDATED: "Sync Application.exe" [OPTIONS] --operation-mode <OPERATION_MODE> --d
 --output-files
 	Dumps all internal database vectors to .log files in the same directory as the application.
 
+--output-location <PATH>
+	Determines where output files are put.
+
 --output-verbose-debug <OUTPUT_LOCATION>
 	Outputs log as the program runs to assist with debugging. If a log is present, new data is appended to prevent debugging data loss.
 

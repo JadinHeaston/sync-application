@@ -61,10 +61,6 @@ std::string debugFilePath = "";
 std::string debugFileName = "debug.log";
 size_t debugFileCount = 1;
 
-//Holds an array of single letter arguments that need to be applied.
-std::unordered_map<char, size_t> singleCharArguments;
-
-
 //FUNCTION PROTOTYPES
 //configFile.h
 void addToConfigurationFile(std::string pathToConfig, json& givenArguments, std::string configurationName);
@@ -111,9 +107,9 @@ int main(int argc, char* argv[])
 
 	//handling arguments.
 	handleArguments(argc, argv);
-
-	//std::cout << argumentVariables.dump(4) << std::endl;
-	//system("PAUSE");
+	std::cout << convertJSONtoCommand(argumentVariables) << std::endl;
+	std::cout << argumentVariables.dump(4) << std::endl;
+	system("PAUSE");
 
 	//Creating vectors to hold directory maps.
 	std::vector<std::string> directoryOneDB;
@@ -227,7 +223,17 @@ int main(int argc, char* argv[])
 	//Outputting files!
 	if (argumentVariables["internalObject"]["Output Files"].get<bool>())
 	{
+		if (argumentVariables["internalObject"]["Output Location"].get<std::string>() != "")
+		{
+			if (!std::filesystem::is_directory(argumentVariables["internalObject"]["Output Location"].get<std::string>()))
+			{
+				writeDebugThreadPool.push_task(writeToDebug, std::chrono::system_clock::now(), true, "ERROR: Provided output path: \"" + argumentVariables["internalObject"]["Output Location"].get<std::string>() + "\"");
+				argumentVariables["internalObject"]["Output Location"].get<std::string>() = "";
+			}
+		}
+
 		writeDebugThreadPool.push_task(writeToDebug, std::chrono::system_clock::now(), true, "----- OUTPUTING INTERNAL FILES -----");
+		
 		//Holds output of hashAction reading, allows for manipulation.
 		std::string currentReadLine;
 
@@ -250,8 +256,8 @@ int main(int argc, char* argv[])
 
 		//Define log locations
 		//***** This needs work. The user should be able to specify where the log directory is located.
-		std::string firstDirectoryDB = "DB1.log";
-		std::string secondDirectoryDB = "DB2.log";
+		std::string firstDirectoryDB = argumentVariables["internalObject"]["Output Location"].get<std::string>() + "DirectoryOne.log";
+		std::string secondDirectoryDB = argumentVariables["internalObject"]["Output Location"].get<std::string>() + "DirectoryTWo.log";
 		
 
 		//Creating files themselves.
@@ -260,13 +266,13 @@ int main(int argc, char* argv[])
 
 		//Creating hash action file
 		//Contains a list of file paths of files that need to be hashed.
-		std::string hashActionFileCreationPath = "hashActionFile.log";
+		std::string hashActionFileCreationPath = argumentVariables["internalObject"]["Output Location"].get<std::string>() + "hashActionFile.log";
 		std::ofstream hashActionFile(hashActionFileCreationPath, std::ios::out | std::ios::binary);
 
 		//Creating file operations action file.
 		//Contains a list of operations, and paths to do so, of files.
 		//Such as "Copy this file here". "delete this file".
-		std::string fileOpActionFileCreationPath = "fileOpActionFile.log";
+		std::string fileOpActionFileCreationPath = argumentVariables["internalObject"]["Output Location"].get<std::string>() + "fileOpActionFile.log";
 		std::ofstream fileOpActionFile(fileOpActionFileCreationPath, std::ios::out | std::ios::binary);
 
 

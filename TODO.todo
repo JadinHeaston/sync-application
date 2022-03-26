@@ -77,19 +77,19 @@ Other features:
 		"Inline command prompt stuff" refers to the ability to fix some issues via prompts from the program.
 			The alternative is to just notify the user of what went wrong and terminate the program immediately.
 		This may not be necessary, but might be nice for automated runnings.
-	☐ I noticed an issue with files that have an invalid date modified time.
-		I had a few files with their last modified time set to 01/01/2098.
-			These files did NOT copy properly.
-		Modifying the files to update the time fixed the issue.
-		Should there be a check for this? It could prompt the user and ask if they want to update X files last modified times.
-			By default, maybe it just fails and logs it in an error file.
+	☐ Allow configurations to be converted into a command string.
 General Bugs/Fixes:
 	☐ Look into how the program acts when one directory is nested within another.
 		This may just need to be prevented.
 	☐ Windows Max Path Bypass should be able to get applied to each directory independently.
 	independently
 	☐ Add more debug logging to the argument handling and configuration file related things.
-
+	☐ I noticed an issue with files that have an invalid date modified time.
+		I had a few files with their last modified time set to 01/01/2098.
+			These files did NOT copy properly.
+		Modifying the files to update the time fixed the issue.
+		Should there be a check for this? It could prompt the user and ask if they want to update X files last modified times.
+			By default, maybe it just fails and logs it in an error file.
 
 
 

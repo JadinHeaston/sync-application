@@ -246,7 +246,10 @@ void copyFile(std::string givenSourcePath, std::string givenDestinationPath)
 	std::filesystem::copy(std::filesystem::u8path(givenSourcePath), std::filesystem::u8path(givenDestinationPath), std::filesystem::copy_options::overwrite_existing, ec); //Copying the file. - If a directory is being looked at, it would have already been made above. This will do nothing.
 	
 	if (ec.value() == 5) //If error value is 5, it is access denied.
+	{
 		writeDebugThreadPool.push_task(writeToDebug, std::chrono::system_clock::now(), true, "ERROR. ACCESS DENIED: " + givenSourcePath + " - " + givenDestinationPath); //Log.
+		//std::filesystem::last_write_time(std::filesystem::u8path(givenSourcePath), std::chrono::system_clock::now());
+	}
 }
 
 //Moving file.

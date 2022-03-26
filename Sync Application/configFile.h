@@ -197,3 +197,80 @@ void readFromConfigurationFile(std::string pathToConfig, json& givenArguments, s
 	
 	givenArguments["internalObject"] = configurationFileJSON["internalObject"]; //Replacing the internal JSON object with the changed file version.
 }
+
+std::string convertJSONtoCommand(json& givenArguments)
+{
+	std::string finalString = ""; //Initializing string.
+
+	//Creating associative array of JSON values and the corresponding command.
+	json JSONArguments;
+	JSONArguments["Check File Contents"] = "--check-file-content"; //T|F
+	JSONArguments["Directory One"]["Directory Path"] = "--directory-one";
+	JSONArguments["Directory Two"]["Directory Path"] = "--directory-two";
+	JSONArguments["Directory One"]["Recursive Search"] = "--no-recursive-one";
+	JSONArguments["Directory Two"]["Recursive Search"] = "--no-recursive-two";
+	JSONArguments["Debug File Path"] = "--output-verbose-debug";
+	JSONArguments["Output Files"] = "--output-files";
+	JSONArguments["Output Location"] = "--output-location";
+	JSONArguments["Operation Mode"] = "--operation-mode";
+	JSONArguments["Show Console"] = "--hide-console"; //T|F
+	JSONArguments["Show Warning"] = "--no-warning"; //T|F
+	JSONArguments["Verbose Debugging"] = "";
+	JSONArguments["Windows Max Path Bypass"] = "-l";
+
+	//Iterating through the current argument JSON.
+	for (json::iterator iterator = givenArguments["internalObject"].begin(); iterator != givenArguments["internalObject"].end(); ++iterator)
+	{
+
+		//if (!givenArguments.contains(JSONArguments))
+		//{
+		//	std::cout << "Argument not populated!" << std::endl;
+		//}
+
+
+		std::cout << iterator.key() << " " << iterator.value() << std::endl;
+		if (iterator.key() == "Directory One" || iterator.key() == "Directory Two")
+		{
+			for (json::iterator directorySpecificIterator = givenArguments["internalObject"][iterator.key()].begin(); directorySpecificIterator != givenArguments["internalObject"][iterator.key()].end(); ++directorySpecificIterator)
+			{
+				if (givenArguments["internalObject"][iterator.key()][directorySpecificIterator.key()].is_boolean())
+				{
+					finalString.append(" " + JSONArguments[iterator.key()][directorySpecificIterator.key()].get<std::string>()); //Get the argument.
+				}
+				else
+				{
+					finalString.append(" " + JSONArguments[iterator.key()][directorySpecificIterator.key()].get<std::string>()); //Get the argument.
+					finalString.append(" \"" + directorySpecificIterator.value().get<std::string>()); //Get the value.
+					finalString.append("\"");
+				}
+			}
+			
+		}
+		else if (givenArguments["internalObject"][iterator.key()].is_boolean()) //Handles boolians.
+		{
+			if (JSONArguments[iterator.key()].get<std::string>() != "")
+			{
+				//system("PAUSE");
+				//std::cout << iterator.key() << std::endl;
+				//std::cout << JSONArguments[iterator.key()] << std::endl;
+				//std::cout << JSONArguments[iterator.key()].get<std::string>() << std::endl;
+
+				finalString.append(" " + JSONArguments[iterator.key()].get<std::string>()); //Get the argument.
+				//system("PAUSE");
+			}
+		}
+		else //Handles all strings.
+		{
+			if (JSONArguments[iterator.key()].get<std::string>() != "")
+			{
+				finalString.append(" " + JSONArguments[iterator.key()].get<std::string>()); //Get the argument.
+				finalString.append(" \"" + iterator.value().get<std::string>()); //Get the value.
+				finalString.append("\"");
+			}
+		}
+	}
+	
+	finalString = finalString.substr(1, std::string::npos); //Removing leading space.
+
+	return finalString;
+}
