@@ -68,6 +68,9 @@ Main tasks:
 			This would help debugging things and potentially allow users to identify when issues go wrong.
 			Maybe a flag can be passed that says "re-run the program until it is what it expects".
 				This feels potentially dangerous, and wasteful. Especially if a bug were to occur or something else is changing the files.
+		☐ Add other hashing options.
+			MD5 will be the default. I believe it's the best for this use-case, as others will require more time/processing while offering little to nothing in accuracy.
+			This should be relatively easy to implement.
 Other features:
 	☐ Allow specifying where "internal" files get output to when using --output-files.
 		It probably should be a bool, but instead a string that stores the output directory.
@@ -77,7 +80,7 @@ Other features:
 		"Inline command prompt stuff" refers to the ability to fix some issues via prompts from the program.
 			The alternative is to just notify the user of what went wrong and terminate the program immediately.
 		This may not be necessary, but might be nice for automated runnings.
-	☐ Allow configurations to be converted into a command string.
+	✔ Allow configurations to be converted into a command string. @done (3/25/2022, 7:45:20 PM)
 General Bugs/Fixes:
 	☐ Look into how the program acts when one directory is nested within another.
 		This may just need to be prevented.

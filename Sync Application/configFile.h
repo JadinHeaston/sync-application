@@ -207,41 +207,34 @@ std::string convertJSONtoCommand(json& givenArguments)
 	JSONArguments["Check File Contents"] = "--check-file-content"; //T|F
 	JSONArguments["Directory One"]["Directory Path"] = "--directory-one";
 	JSONArguments["Directory Two"]["Directory Path"] = "--directory-two";
-	JSONArguments["Directory One"]["Recursive Search"] = "--no-recursive-one";
-	JSONArguments["Directory Two"]["Recursive Search"] = "--no-recursive-two";
-	JSONArguments["Debug File Path"] = "--output-verbose-debug";
-	JSONArguments["Output Files"] = "--output-files";
-	JSONArguments["Output Location"] = "--output-location";
-	JSONArguments["Operation Mode"] = "--operation-mode";
+	JSONArguments["Directory One"]["Recursive Search"] = "--no-recursive-one"; //T|F
+	JSONArguments["Directory Two"]["Recursive Search"] = "--no-recursive-two"; //T|F
+	JSONArguments["Debug File Path"] = "--output-verbose-debug"; //String
+	JSONArguments["Output Files"] = "--output-files"; //T|F
+	JSONArguments["Output Location"] = "--output-location"; //String
+	JSONArguments["Operation Mode"] = "--operation-mode"; //String
 	JSONArguments["Show Console"] = "--hide-console"; //T|F
 	JSONArguments["Show Warning"] = "--no-warning"; //T|F
-	JSONArguments["Verbose Debugging"] = "";
+	JSONArguments["Verbose Debugging"] = ""; //T|F - This is created when --output-verbose-debug is used.
 	JSONArguments["Windows Max Path Bypass"] = "-l";
 
 	//Iterating through the current argument JSON.
 	for (json::iterator iterator = givenArguments["internalObject"].begin(); iterator != givenArguments["internalObject"].end(); ++iterator)
 	{
-
-		//if (!givenArguments.contains(JSONArguments))
-		//{
-		//	std::cout << "Argument not populated!" << std::endl;
-		//}
-
-
-		std::cout << iterator.key() << " " << iterator.value() << std::endl;
 		if (iterator.key() == "Directory One" || iterator.key() == "Directory Two")
 		{
 			for (json::iterator directorySpecificIterator = givenArguments["internalObject"][iterator.key()].begin(); directorySpecificIterator != givenArguments["internalObject"][iterator.key()].end(); ++directorySpecificIterator)
 			{
-				if (givenArguments["internalObject"][iterator.key()][directorySpecificIterator.key()].is_boolean())
+				if (JSONArguments[iterator.key()].get<std::string>() != "")
 				{
-					finalString.append(" " + JSONArguments[iterator.key()][directorySpecificIterator.key()].get<std::string>()); //Get the argument.
-				}
-				else
-				{
-					finalString.append(" " + JSONArguments[iterator.key()][directorySpecificIterator.key()].get<std::string>()); //Get the argument.
-					finalString.append(" \"" + directorySpecificIterator.value().get<std::string>()); //Get the value.
-					finalString.append("\"");
+					if (givenArguments["internalObject"][iterator.key()][directorySpecificIterator.key()].is_boolean())
+						finalString.append(" " + JSONArguments[iterator.key()][directorySpecificIterator.key()].get<std::string>()); //Get the argument.
+					else
+					{
+						finalString.append(" " + JSONArguments[iterator.key()][directorySpecificIterator.key()].get<std::string>()); //Get the argument.
+						finalString.append(" \"" + directorySpecificIterator.value().get<std::string>()); //Get the value.
+						finalString.append("\"");
+					}
 				}
 			}
 			
@@ -249,15 +242,7 @@ std::string convertJSONtoCommand(json& givenArguments)
 		else if (givenArguments["internalObject"][iterator.key()].is_boolean()) //Handles boolians.
 		{
 			if (JSONArguments[iterator.key()].get<std::string>() != "")
-			{
-				//system("PAUSE");
-				//std::cout << iterator.key() << std::endl;
-				//std::cout << JSONArguments[iterator.key()] << std::endl;
-				//std::cout << JSONArguments[iterator.key()].get<std::string>() << std::endl;
-
 				finalString.append(" " + JSONArguments[iterator.key()].get<std::string>()); //Get the argument.
-				//system("PAUSE");
-			}
 		}
 		else //Handles all strings.
 		{
