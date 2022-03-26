@@ -129,7 +129,6 @@ void handleArguments(int& argc, char* argv[])
 	//Defining default arguments.
 	argumentVariables["internalObject"]["Check File Contents"] = false; ////Received from arg: --check-content | Defaults to false.
 	argumentVariables["internalObject"]["Debug File Path"] = "";
-	argumentVariables["internalObject"]["Output Files"] = false; //Received from arg: --output-files | Defaults to false.
 	argumentVariables["internalObject"]["Show Console"] = true; //Received from arg: --hide-console | defaults to false | Defines whether things are output to the console or not.
 	argumentVariables["internalObject"]["Directory One"]["Directory Path"] = "";
 	argumentVariables["internalObject"]["Directory Two"]["Directory Path"] = "";
@@ -138,8 +137,8 @@ void handleArguments(int& argc, char* argv[])
 	argumentVariables["internalObject"]["Verbose Debugging"] = false; //Defines if verbose debugging is enabled.
 	argumentVariables["internalObject"]["Windows Max Path Bypass"] = false; //Determines whether "\\?\" is prepended to path and backslashes are used as directory separators.
 	argumentVariables["internalObject"]["Show Warning"] = true; //Received from arg: --no-warning | defaults to true | Defines whether things are output to the console or not.
+	argumentVariables["internalObject"]["Output Files"] = "/"; //Received from arg: --output-files | Defaults to false.
 	argumentVariables["internalObject"]["Operation Mode"] = ""; //Holds operation mode to perform.
-	argumentVariables["internalObject"]["Output Location"] = "\\";
 	argumentVariables["internalObject"]["Windows Max Path Bypass"] = false;
 	
 	//Reading args
@@ -215,6 +214,8 @@ void handleArguments(int& argc, char* argv[])
 				}
 				else if ((strcmp(argv[i], "--check-content") == 0) || (strncmp(argv[i], "--check-contents", 32) == 0)) //Enable file hashing.
 					argumentVariables["internalObject"]["Check File Contents"] = true; //Set hashing to true.
+				else if ((strcmp(argv[i], "--clean-config") == 0)) //Removes unused properties.
+					cleanConfigurationFile(formatFilePath(argv[i + 1]), argumentVariables);
 				else if (strcmp(argv[i], "--directory-one") == 0) //Directory one path switch.
 				{
 					firstGivenDirectoryPath = formatFilePath(argv[i + 1]);
@@ -315,9 +316,7 @@ void handleArguments(int& argc, char* argv[])
 				else if (strcmp(argv[i], "--operation-mode") == 0) //Operation mode switch.
 					argumentVariables["internalObject"]["Operation Mode"] = argv[i + 1];
 				else if ((strcmp(argv[i], "--output-files") == 0)) //Enable file output.
-					argumentVariables["internalObject"]["Output Files"] = true;
-				else if ((strcmp(argv[i], "--output-location") == 0))
-					argumentVariables["internalObject"]["Output Location"] = formatFilePath(argv[i + 1]);
+					argumentVariables["internalObject"]["Output Files"] = formatFilePath(argv[i + 1]);
 				else if (strcmp(argv[i], "--output-verbose-debug") == 0) //Output debug file in running directory.
 				{
 					argumentVariables["internalObject"]["Verbose Debugging"] = true; //Set global verbose debug variable to true.

@@ -221,15 +221,12 @@ int main(int argc, char* argv[])
 	writeConsoleMessagesPool.push_task(displayConsoleMessage, "File Operations finished!");
 
 	//Outputting files!
-	if (argumentVariables["internalObject"]["Output Files"].get<bool>())
+	if (argumentVariables["internalObject"]["Output Files"].get<std::string>() != "")
 	{
-		if (argumentVariables["internalObject"]["Output Location"].get<std::string>() != "")
+		if (!std::filesystem::is_directory(argumentVariables["internalObject"]["Output Files"].get<std::string>()))
 		{
-			if (!std::filesystem::is_directory(argumentVariables["internalObject"]["Output Location"].get<std::string>()))
-			{
-				writeDebugThreadPool.push_task(writeToDebug, std::chrono::system_clock::now(), true, "ERROR: Provided output path: \"" + argumentVariables["internalObject"]["Output Location"].get<std::string>() + "\"");
-				argumentVariables["internalObject"]["Output Location"].get<std::string>() = "";
-			}
+			writeDebugThreadPool.push_task(writeToDebug, std::chrono::system_clock::now(), true, "ERROR: Provided output path: \"" + argumentVariables["internalObject"]["Output Files"].get<std::string>() + "\". Writing to root directory: ");
+			argumentVariables["internalObject"]["Output Files"].get<std::string>() = "";
 		}
 
 		writeDebugThreadPool.push_task(writeToDebug, std::chrono::system_clock::now(), true, "----- OUTPUTING INTERNAL FILES -----");
@@ -256,8 +253,8 @@ int main(int argc, char* argv[])
 
 		//Define log locations
 		//***** This needs work. The user should be able to specify where the log directory is located.
-		std::string firstDirectoryDB = argumentVariables["internalObject"]["Output Location"].get<std::string>() + "DirectoryOne.log";
-		std::string secondDirectoryDB = argumentVariables["internalObject"]["Output Location"].get<std::string>() + "DirectoryTWo.log";
+		std::string firstDirectoryDB = argumentVariables["internalObject"]["Output Files"].get<std::string>() + "DirectoryOne.log";
+		std::string secondDirectoryDB = argumentVariables["internalObject"]["Output Files"].get<std::string>() + "DirectoryTWo.log";
 		
 
 		//Creating files themselves.
@@ -266,13 +263,13 @@ int main(int argc, char* argv[])
 
 		//Creating hash action file
 		//Contains a list of file paths of files that need to be hashed.
-		std::string hashActionFileCreationPath = argumentVariables["internalObject"]["Output Location"].get<std::string>() + "hashActionFile.log";
+		std::string hashActionFileCreationPath = argumentVariables["internalObject"]["Output Files"].get<std::string>() + "hashActionFile.log";
 		std::ofstream hashActionFile(hashActionFileCreationPath, std::ios::out | std::ios::binary);
 
 		//Creating file operations action file.
 		//Contains a list of operations, and paths to do so, of files.
 		//Such as "Copy this file here". "delete this file".
-		std::string fileOpActionFileCreationPath = argumentVariables["internalObject"]["Output Location"].get<std::string>() + "fileOpActionFile.log";
+		std::string fileOpActionFileCreationPath = argumentVariables["internalObject"]["Output Files"].get<std::string>() + "fileOpActionFile.log";
 		std::ofstream fileOpActionFile(fileOpActionFileCreationPath, std::ios::out | std::ios::binary);
 
 

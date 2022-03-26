@@ -40,6 +40,10 @@ OUTDATED: "Sync Application.exe" [OPTIONS] --operation-mode <OPERATION_MODE> --d
 	
 --check-content(s)
 
+--clean-config <PATH_TO_CONFIG_FILE>
+	Note: Please create a backup your configuration prior to doing this.
+	Removes all properties that are not legitimate. This can be useful to do when using a newer version of this software as 
+
 --configuration-name <NAME>
 	This is only necessary when using the "--add-to-configuration" argument.
 	Provides a configuration ID that is used for using this configuration.

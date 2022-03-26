@@ -17,8 +17,6 @@ void addToConfigurationFile(std::string pathToConfig, json& givenArguments, std:
 	}
 	
 	json configurationFileJSON; //Holds the full JSON configuration from the file.
-	size_t largestNumericID = NULL;
-	std::vector<std::string> foundConfigIDs;
 
 	//Open configuration file for reading.
 	std::ifstream configFileReading(std::filesystem::u8path(pathToConfig));
@@ -96,7 +94,7 @@ void addToConfigurationFile(std::string pathToConfig, json& givenArguments, std:
 	
 	//Outputting full altered configuration to configuration file.
 	std::ofstream configFileWriting(std::filesystem::u8path(pathToConfig), std::ios::out | std::ios::binary);
-	writeToFile(configFileWriting, configurationFileJSON.dump(4)); //Write the serialized json to the file. "5" indicates the indenting amount.
+	writeToFile(configFileWriting, configurationFileJSON.dump(4)); //Write the serialized json to the file. "4" indicates the indenting amount.
 	configFileWriting.close();
 }
 
@@ -128,7 +126,6 @@ void readFromConfigurationFile(std::string pathToConfig, json& givenArguments, s
 	}
 
 	json configurationFileJSON; //Holds the full JSON configuration from the file.
-	std::vector<std::string> foundConfigIDs;
 
 	//Open configuration file for reading.
 	std::ifstream configFileReading(std::filesystem::u8path(pathToConfig));
@@ -210,8 +207,7 @@ std::string convertJSONtoCommand(json& givenArguments)
 	JSONArguments["Directory One"]["Recursive Search"] = "--no-recursive-one"; //T|F
 	JSONArguments["Directory Two"]["Recursive Search"] = "--no-recursive-two"; //T|F
 	JSONArguments["Debug File Path"] = "--output-verbose-debug"; //String
-	JSONArguments["Output Files"] = "--output-files"; //T|F
-	JSONArguments["Output Location"] = "--output-location"; //String
+	JSONArguments["Output Files"] = "--output-files"; //String | <BLANK>
 	JSONArguments["Operation Mode"] = "--operation-mode"; //String
 	JSONArguments["Show Console"] = "--hide-console"; //T|F
 	JSONArguments["Show Warning"] = "--no-warning"; //T|F
@@ -223,18 +219,18 @@ std::string convertJSONtoCommand(json& givenArguments)
 	{
 		if (iterator.key() == "Directory One" || iterator.key() == "Directory Two")
 		{
+			
 			for (json::iterator directorySpecificIterator = givenArguments["internalObject"][iterator.key()].begin(); directorySpecificIterator != givenArguments["internalObject"][iterator.key()].end(); ++directorySpecificIterator)
 			{
-				if (JSONArguments[iterator.key()].get<std::string>() != "")
+				//JSONArguments[givenArguments["internalObject"][iterator.key()][directorySpecificIterator.key()].get<std::string>()].get<std::string>()
+
+				if (givenArguments["internalObject"][iterator.key()][directorySpecificIterator.key()].is_boolean())
+					finalString.append(" " + JSONArguments[iterator.key()][directorySpecificIterator.key()].get<std::string>()); //Get the argument.
+				else if (givenArguments["internalObject"][iterator.key()][directorySpecificIterator.key()].is_string())
 				{
-					if (givenArguments["internalObject"][iterator.key()][directorySpecificIterator.key()].is_boolean())
-						finalString.append(" " + JSONArguments[iterator.key()][directorySpecificIterator.key()].get<std::string>()); //Get the argument.
-					else
-					{
-						finalString.append(" " + JSONArguments[iterator.key()][directorySpecificIterator.key()].get<std::string>()); //Get the argument.
-						finalString.append(" \"" + directorySpecificIterator.value().get<std::string>()); //Get the value.
-						finalString.append("\"");
-					}
+					finalString.append(" " + JSONArguments[iterator.key()][directorySpecificIterator.key()].get<std::string>()); //Get the argument.
+					finalString.append(" \"" + directorySpecificIterator.value().get<std::string>()); //Get the value.
+					finalString.append("\"");
 				}
 			}
 			
@@ -258,4 +254,72 @@ std::string convertJSONtoCommand(json& givenArguments)
 	finalString = finalString.substr(1, std::string::npos); //Removing leading space.
 
 	return finalString;
+}
+
+void cleanConfigurationFile(std::string pathToConfig, json& givenArguments)
+{
+	json configurationFileJSON; //Holds the full JSON configuration from the file.
+
+	//Open configuration file for reading.
+	std::ifstream configFileReading(std::filesystem::u8path(pathToConfig));
+
+	//Check that the file got opened properly.
+	if (!configFileReading.good())
+	{
+		std::cout << "Configuration file failed to open: \"" << pathToConfig << "\"" << std::endl;
+		std::cout << "Please specify a new path to a configuration file to use, or enter nothing to terminate the program." << std::endl;
+		std::getline(std::cin, pathToConfig); //Getting user input.
+		if (pathToConfig == "")
+			exit(1);
+
+		//Trying to open configuration file for reading again.
+		std::ifstream configFileReading(std::filesystem::u8path(pathToConfig));
+
+		if (!configFileReading.good())
+		{
+			std::cout << "File failed to open again: " << std::endl;
+			std::cout << "Please try again. Program terminating." << std::endl;
+			system("PAUSE");
+			exit(1);
+		}
+	}
+
+	//Fail is the ifstream can't be parsed.
+	if (!json::accept(configFileReading))
+	{
+		//Error with JSON syntax. Notifying user.
+		std::cout << "JSON syntax error: \"" << pathToConfig << "\"" << std::endl;
+		std::cout << "Check your configuration to ensure it is valid JSON." << std::endl;
+		std::cout << "Please resolve the issue and try again. Program terminating." << std::endl;
+		system("PAUSE");
+		exit(1);
+	}
+	else
+	{
+		//Resetting file seek head for the next parsing.
+		configFileReading.clear();
+		configFileReading.seekg(0);
+	}
+
+	configurationFileJSON = json::parse(configFileReading); //Parsing JSON from the file.
+
+	configFileReading.close(); //Closing input file.
+
+	json patched;
+	json configurationFileJSON_patched;
+
+	for (json::iterator iterator = configurationFileJSON.begin(); iterator != configurationFileJSON.end(); ++iterator)
+	{
+		//Creating the patch
+		patched = json::diff(configurationFileJSON, givenArguments["internalObject"]);
+
+		//Saving the patched version.
+		configurationFileJSON_patched[iterator.key()] = configurationFileJSON.patch(patched);
+	}
+	
+
+	//Outputting full altered configuration to configuration file.
+	std::ofstream configFileWriting(std::filesystem::u8path(pathToConfig), std::ios::out | std::ios::binary);
+	writeToFile(configFileWriting, configurationFileJSON_patched.dump(4)); //Write the serialized json to the file. "4" indicates the indenting amount.
+	configFileWriting.close();
 }
