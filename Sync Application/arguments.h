@@ -106,8 +106,6 @@ void handleArguments(int& argc, char* argv[])
 	if (pathToConfigFile != "")
 		addToConfigurationFile(pathToConfigFile, argumentVariables, configurationName);
 
-
-
 	return;
 }
 
@@ -191,25 +189,35 @@ void readArguments(int& argc, char* argv[], std::string& pathToConfigFile)
 
 void processArguments(int& argc, char* argv[], std::string& pathToConfigFile)
 {
-	//Checking if backslashes need to be used internally to support the max path bypass (UNC)
-	if (argumentVariables["internalObject"]["Windows Max Path Bypass"].get<bool>())
-		directorySeparator = '\\'; //Set directory separator appropriately.
-
 	//MAX_PATH bypass.
 	//Also ensuring that path is an absolute path.
 	if (argumentVariables["internalObject"]["Windows Max Path Bypass"].get<bool>())
 	{
-		//Checking if the prefix already exists.
-		argumentVariables["internalObject"]["Directory One"]["Directory Path"] = formatFilePath("\\\\?\\" + std::filesystem::absolute(argumentVariables["internalObject"]["Directory One"]["Directory Path"]).string());
-		argumentVariables["internalObject"]["Directory Two"]["Directory Path"] = formatFilePath("\\\\?\\" + std::filesystem::absolute(argumentVariables["internalObject"]["Directory Two"]["Directory Path"]).string());
+		directorySeparator = '\\'; //Set directory separator appropriately.
 
-		//Double check that there is no slash.
-		//This was added because running a drive letter ( such as "D:") through absolute adds a slash..
-		if (argumentVariables["internalObject"]["Directory One"]["Directory Path"].back() == directorySeparator)
-			argumentVariables["internalObject"]["Directory One"]["Directory Path"].get<std::string>().pop_back(); //Remove the slash.
-		if (argumentVariables["internalObject"]["Directory Two"]["Directory Path"].back() == directorySeparator)
-			argumentVariables["internalObject"]["Directory Two"]["Directory Path"].get<std::string>().pop_back(); //Remove the slash.
+		//Checking if the prefix already exists.
+		if (argumentVariables["internalObject"]["Directory One"]["Directory Path"].get<std::string>().find("\\\\?\\") == std::string::npos)
+			argumentVariables["internalObject"]["Directory One"]["Directory Path"] = formatFilePath("\\\\?\\" + std::filesystem::absolute(argumentVariables["internalObject"]["Directory One"]["Directory Path"]).string());
+		if (argumentVariables["internalObject"]["Directory Two"]["Directory Path"].get<std::string>().find("\\\\?\\") == std::string::npos)
+			argumentVariables["internalObject"]["Directory Two"]["Directory Path"] = formatFilePath("\\\\?\\" + std::filesystem::absolute(argumentVariables["internalObject"]["Directory Two"]["Directory Path"]).string());
 	}
+	else 
+	{
+		//Checking if the prefix already exists.
+		if (argumentVariables["internalObject"]["Directory One"]["Directory Path"].get<std::string>().find("\\\\?\\") != -1) //Removing prefix.
+			argumentVariables["internalObject"]["Directory One"]["Directory Path"] = formatFilePath(std::filesystem::absolute(argumentVariables["internalObject"]["Directory One"]["Directory Path"].get<std::string>().erase(argumentVariables["internalObject"]["Directory One"]["Directory Path"].get<std::string>().find("\\\\?\\"), std::string("\\\\?\\").length())).string());
+		if (argumentVariables["internalObject"]["Directory Two"]["Directory Path"].get<std::string>().find("\\\\?\\") != -1) //Removing prefix.
+			argumentVariables["internalObject"]["Directory Two"]["Directory Path"] = formatFilePath(std::filesystem::absolute(argumentVariables["internalObject"]["Directory Two"]["Directory Path"].get<std::string>().erase(argumentVariables["internalObject"]["Directory Two"]["Directory Path"].get<std::string>().find("\\\\?\\"), std::string("\\\\?\\").length())).string());
+	}
+
+
+
+	//Double check that there is no ending slash.
+	//This was added because running a drive letter ( such as "D:") through absolute adds a slash..
+	if (argumentVariables["internalObject"]["Directory One"]["Directory Path"].back() == directorySeparator)
+		argumentVariables["internalObject"]["Directory One"]["Directory Path"].get<std::string>().pop_back(); //Remove the slash.
+	if (argumentVariables["internalObject"]["Directory Two"]["Directory Path"].back() == directorySeparator)
+		argumentVariables["internalObject"]["Directory Two"]["Directory Path"].get<std::string>().pop_back(); //Remove the slash.
 
 	//Specific Argument Processing
 
