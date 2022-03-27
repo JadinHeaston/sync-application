@@ -90,7 +90,7 @@ void handleArguments(int& argc, char* argv[])
 	if (argumentVariables["internalObject"]["Show Warning"].is_null())
 		argumentVariables["internalObject"]["Show Warning"] = true; //Received from arg: --no-warning | defaults to true | Defines whether things are output to the console or not.
 	if (argumentVariables["internalObject"]["Output Files"].is_null())
-		argumentVariables["internalObject"]["Output Files"] = "/"; //Received from arg: --output-files | Defaults to false.
+		argumentVariables["internalObject"]["Output Files"] = ""; //Received from arg: --output-files | Defaults to false.
 	if (argumentVariables["internalObject"]["Operation Mode"].is_null())
 		argumentVariables["internalObject"]["Operation Mode"] = ""; //Holds operation mode to perform.
 	if (argumentVariables["internalObject"]["Windows Max Path Bypass"].is_null())
@@ -160,7 +160,8 @@ void readArguments(int& argc, char* argv[], std::string& pathToConfigFile)
 			else if ((strcmp(argv[i], "--output-files") == 0)) //Enable file output.
 			{
 				argumentVariables["internalObject"]["Output Files"] = ""; //Setting it to true by default, regardless of if a path is provided after.
-				if (checkArgumentValue(i, argc, argv, true)) //Seeing if next argument is potentially a path.
+				
+				if (!checkArgumentValue(i, argc, argv, true)) //Seeing if next argument is potentially a path.
 					argumentVariables["internalObject"]["Output Files"] = argv[i + 1]; //Adding path.
 			}
 			else if (strcmp(argv[i], "--output-verbose-debug") == 0) //Output debug file in running directory.
@@ -359,16 +360,13 @@ void processArguments(int& argc, char* argv[], std::string& pathToConfigFile)
 
 bool checkArgumentValue(size_t& position, int& argc, char* argv[], bool failSafe)
 {
-	if (position + 1 <= (argc - 1) && argv[position + 1][0] == '-')
+	if (position + 1 <= argc && argv[position + 1][0] == '-')
 	{
-		if (argv[position + 1][0] == '-')
-		{
-			if (failSafe)
-				return true;
-			std::cout << "Error parsing arguments: " << argv[position] << " found another argument following it (" << argv[position + 1] << ")" << std::endl;
-			system("PAUSE");
-			exit(1);
-		}
+		if (failSafe)
+			return true;
+		std::cout << "Error parsing arguments: " << argv[position] << " found another argument following it (" << argv[position + 1] << ")" << std::endl;
+		system("PAUSE");
+		exit(1);
 	}
 
 	return false;

@@ -113,7 +113,6 @@ int main(int argc, char* argv[])
 
 	//handling arguments.
 	handleArguments(argc, argv);
-	std::cout << convertJSONtoCommand(argumentVariables) << std::endl;
 	std::cout << argumentVariables.dump(4) << std::endl;
 	system("PAUSE");
 
