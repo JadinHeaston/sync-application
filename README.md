@@ -1,12 +1,25 @@
 # Sync Application
 (No. The name is not finalized.)
 
+- [Sync Application](#sync-application)
 - [Description](#description)
 - [Requirements](#requirements)
 - [Installation](#installation)
+- [What's New?](#whats-new)
 - [Options](#options)
-- [Licensing](#Licensing)
+	- [List of Arguments (OUTDATED)](#list-of-arguments-outdated)
+	- [Operations](#operations)
+		- [Contribute (Cont)](#contribute-cont)
+		- [Echo](#echo)
+	- [Configuration File](#configuration-file)
+- [Sample Usage](#sample-usage)
+- [Software Shout-outs](#software-shout-outs)
+- [Licensing](#licensing)
+	- [Sync Application License](#sync-application-license)
+	- [What is required?](#what-is-required)
+	- [Other Used Software Licenses](#other-used-software-licenses)
 - [Contact](#contact)
+	- [Website](#website)
 
 # Description
 Sync Application is a command-line driven project created out of frustration with other free file backup tools. I found that other free tools wouldn't consistently copy files, or folders, and weren't byte-for-byte copies of the data I provided. I was also dissatisfied by the performance of these tools, with backups sometimes taking 12+ hours when dealing with only ~500GB of data.
@@ -15,7 +28,9 @@ Additionally, I found that some features that I desired simply did not exist.
 
 
 This is a passion project, and it's only a plus if others can find some use from it.  
-My main focus is making something that works for myself, and learning new stuff as I go about it.
+My main focus is making something that works for myself, and learning new stuff as I go about it.  
+<br/>
+All future tasks are generally tracked within the [TODO.todo](TODO.todo) file.  
 
 # Requirements
 This application is compiled to include as many dependencies as possible.
@@ -26,8 +41,15 @@ You can download the pre-configured release binaries from this GitHub page. As o
 You can also compile your own binaries by downloading the source files, opening the .sln file, and building it.
 (Eventually, I will provide a better in-depth walk-through.)
 
+# What's New?
+The newest version adds:
+* Configuration files.
+  * Allows you to add, use, and export configurations from a JSON file.
+* Proper UTF-8 Support.
+* Changed how arguments are handled (twice).
+  * 
+
 # Options
-OUTDATED: "Sync Application.exe" [OPTIONS] --operation-mode <OPERATION_MODE> --directory-one <DIRECTORY_PATH> --directory-two <DIRECTORY_PATH>  
 
 ## List of Arguments (OUTDATED)
 (An asterisk indicates a required input)
@@ -39,25 +61,27 @@ OUTDATED: "Sync Application.exe" [OPTIONS] --operation-mode <OPERATION_MODE> --d
 	This should also likely be used with the "--configuration-name" argument to avoid having gross numbered configurations.
 	
 --check-content(s)
+	Enables hashing of files when the last modified time, relative location, and size are all the same.
 
 --clean-config <PATH_TO_CONFIG_FILE>
 	Note: Please create a backup your configuration prior to doing this.
-	Removes all properties that are not legitimate. This can be useful to do when using a newer version of this software as 
+	Removes all properties that are not legitimate. This can be useful to do when using a newer version of this software as arguments change over time.
 
 --configuration-name <NAME>
 	This is only necessary when using the "--add-to-configuration" argument.
 	Provides a configuration ID that is used for using this configuration.
 	If a configuration name is not provided, then a number ID will be assigned one higher than the largest number ID found. 
 
-* --directory-one <DIRECTORY_PATH>
+--directory-one <DIRECTORY_PATH>
+	The first directory. ("Left")
+--directory-two <DIRECTORY_PATH>
+	The second directory. ("Right")
 
-* --directory-two <DIRECTORY_PATH>
-
--h
-	Displays a short help message.
+-h <ARGUMENT>
+	Displays a short help message about the argument provided.
 
 --help
-	Displays extended help.
+	Displays extended help. This will likely end up being this document section.
 
 --hide-console
 	Hides console.
@@ -65,21 +89,19 @@ OUTDATED: "Sync Application.exe" [OPTIONS] --operation-mode <OPERATION_MODE> --d
 -l
 	Bypasses Windows MAX_PATH limit of 260 characters. It appends "\\?\", which requires utilizing backslashes for directory separators in the backend. (Thanks, Windows!)
 
-* --operation-mode <OPERATION_MODE> | Operation Mode is defined as a string. The available options being "cont" or "contribute", and "echo".
-
 --no-recursive-one/two
-	Defines where a recursive process should NOT be used.
+	Defines where a recursive process should NOT be used for the respective directory.
 	Add either "one" or "two" at the end, to correspond with which directory shouldn't be recursive.
 	You can either use "--no-recursive-one" or "--no-recursive-two".
 
 --no-warning
-	Disables warning that explains the operation and outlines what files are potentially at risk. This should probably only be used when automating the run process.
+	Disables the warning that explains the operation and outlines what files are potentially at risk. This should probably only be used when automating the run process.
+
+--operation-mode <OPERATION_MODE>
+	Operation Mode specifies how the program decides which files go where. The available options being "contribute" or "cont", and "echo".
 
 --output-files
-	Dumps all internal database vectors to .log files in the same directory as the application.
-
---output-location <PATH>
-	Determines where output files are put.
+	Dumps all internal database vectors to .log files in the specified directory.
 
 --output-verbose-debug <OUTPUT_LOCATION>
 	Outputs log as the program runs to assist with debugging. If a log is present, new data is appended to prevent debugging data loss.
@@ -104,7 +126,14 @@ Multiple pre-made operations can be stored in a configuration file for easy acce
 More information can be found in the [config.md](config.md)
 
 
-# Usage Examples
+# Sample Usage
+Create a backup copy of an external drive that can be run with a batch file. This requires disabling all console input and enabling logging.
+
+	"Sync Application.exe" --operation-mode "echo" --directory-one "D:" --directory-two "T:\Archives\SSD Backup" --hide-console --no-warning -l --output-verbose "T:\Archives\debug.txt" --output-files "T:\Archives"	
+Alternatively, we can save this as a configuration and do this:
+
+	"Sync Application.exe" --use-config "CONFIG_PATH" --configuration-name "CONFIG_NAME"
+More documentation for configuration files can be found in the [config.md](config.md) file.
 
 
 # Software Shout-outs

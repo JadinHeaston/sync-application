@@ -65,8 +65,6 @@ Main tasks:
 			MD5 will be the default. I believe it's the best for this use-case, as others will require more time/processing while offering little to nothing in accuracy.
 			This should be relatively easy to implement.
 Other features:
-	✔ Allow specifying where "internal" files get output to when using --output-files. @done (3/26/2022, 10:37:16 AM)
-		☐ It probably shouldn't be it's own argument as a bool, but instead changing --output-files into a string that stores the output directory.
 	☐ Ability to specify which file(s) to export.
 	☐ Add argument that skips all command line prompt stuff and just fail with an error message.
 		Maybe piggy-back off of the --no-warning argument?
@@ -74,7 +72,7 @@ Other features:
 			The alternative is to just notify the user of what went wrong and terminate the program immediately.
 		This may not be necessary, but might be nice for automated runnings.
 General Bugs/Fixes:
-	☐ Create --clean-config <CONFIG> that iterates through all items and removes all properties that don't exist.
+	✔ Create --clean-config <PATH_TO_CONFIG_FILE> that iterates through all items and removes all properties that don't exist. @done (3/26/2022, 2:07:27 PM)
 	☐ Better input validation for the configuration section.
 	☐ Look into how the program acts when one directory is nested within another.
 		This may just need to be prevented.
@@ -108,6 +106,8 @@ Completed:
 				✔ This should probably pause the output at the end of running. - Maybe an arg mutation for this? - No mutation. If the console is shown, pause at the end. @done (1/23/2022, 2:16:35 PM)
 	Other Features:
 		✔ Allow configurations to be converted into a command string. @done (3/25/2022, 7:45:20 PM)
+		✔ Allow specifying where "internal" files get output to when using --output-files. @done (3/26/2022, 10:37:16 AM)
+			✔ It probably shouldn't be it's own argument as a bool, but instead changing --output-files into a string that stores the output directory. @done (3/26/2022, 2:07:50 PM)
 	General Bugs/Fixes:
 
 

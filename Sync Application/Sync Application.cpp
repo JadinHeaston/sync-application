@@ -386,7 +386,7 @@ std::string formatFilePath(std::string givenString, std::string givenDirectorySe
 {
 	if (givenDirectorySeparator == "\\" || givenString.find("\\\\?\\") != std::string::npos) //If the windows max_path bypass is in the path, then all separators must be backslashes.
 	{
-		//Formating givenFile to have the slashes ALL be \.
+		//Formatting givenFile to have the slashes ALL be \.
 		for (size_t i = 0; i < (size_t)givenString.length(); ++i)
 		{
 			if (givenString[i] == '/')
@@ -395,7 +395,7 @@ std::string formatFilePath(std::string givenString, std::string givenDirectorySe
 	}
 	else
 	{
-		//Formating givenFile to have the slashes ALL be /.
+		//Formatting givenFile to have the slashes ALL be /.
 		for (size_t i = 0; i < (size_t)givenString.length(); ++i)
 		{
 			if (givenString[i] == '\\')

@@ -103,15 +103,35 @@ void showWarningMessage()
 	std::cout << "Permission to continue granted. Moving forward with program.\n" << std::endl;
 }
 
-void displayHelpMessage()
+void displayHelpMessage(bool longHelpMessage, int& argc, char* argv[])
 {
-	//Display help message.
-	std::cout << "The three required arguments are: --directory-one <DIRECTORY_PATH>' as the source, --directory-two <DIRECTORY_PATH>' as the destination, and '--operation-mode <OPERATION_MODE>' to specify the operation mode." << std::endl;
-	std::cout << "The operation mode can either be 'contribute' that only copies files from directory one to directory two, 'echo' that makes directory two look like directory one." << std::endl;
-	std::cout << "Detailed help can be found by using '--help' or utilizing the readme.md file: https://github.com/JadinHeaston/sync-application" << std::endl;
-	system("PAUSE");
+	//Long message provides the help text.
+	//Use the link below to maintain formatting easily.
+	//https://onlinestringtools.com/escape-string
+
+	//Short message will look at what arguments have been provided and provide their section from the full list.
+
+	if (longHelpMessage) 
+		std::cout << "--add-to-config <PATH_TO_CONFIG_FILE>\n\tThis requires a fully functional set of arguments, as well as a --name <NAME> to identify the configuration.\n\tThis should also likely be used with the \"--configuration-name\" argument to avoid having gross numbered configurations.\n\t\n--check-content(s)\n\n--clean-config <PATH_TO_CONFIG_FILE>\n\tNote: Please create a backup your configuration prior to doing this.\n\tRemoves all properties that are not legitimate. This can be useful to do when using a newer version of this software as \n\n--configuration-name <NAME>\n\tThis is only necessary when using the \"--add-to-configuration\" argument.\n\tProvides a configuration ID that is used for using this configuration.\n\tIf a configuration name is not provided, then a number ID will be assigned one higher than the largest number ID found. \n\n--directory-one <DIRECTORY_PATH>\n\n--directory-two <DIRECTORY_PATH>\n\n-h <ARGUMENT>\n\tDisplays a short help message about the argument provided.\n\n--help\n\tDisplays extended help. This will likely end up being this document section.\n\n--hide-console\n\tHides console.\n\n-l\n\tBypasses Windows MAX_PATH limit of 260 characters. It appends \"\\\\?\\\", which requires utilizing backslashes for directory separators in the backend. (Thanks, Windows!)\n\n--no-recursive-one/two\n\tDefines where a recursive process should NOT be used.\n\tAdd either \"one\" or \"two\" at the end, to correspond with which directory shouldn\'t be recursive.\n\tYou can either use \"--no-recursive-one\" or \"--no-recursive-two\".\n\n--no-warning\n\tDisables warning that explains the operation and outlines what files are potentially at risk. This should probably only be used when automating the run process.\n\n--operation-mode <OPERATION_MODE>\n\tOperation Mode is defined as a string. The available options being \"contribute\" or \"cont\", and \"echo\".\n\n--output-files\n\tDumps all internal database vectors to .log files in the same directory as the application.\n\n--output-location <PATH>\n\tDetermines where output files are put.\n\n--output-verbose-debug <OUTPUT_LOCATION>\n\tOutputs log as the program runs to assist with debugging. If a log is present, new data is appended to prevent debugging data loss.\n\n--use-config <PATH_TO_CONFIG_FILE>\n\tIf multiple configurations are within the same file, a --configuration-name <NAME> MUST be specified for the program to know which configuration to use." << std::endl;
+	else
+	{
+		//std::unordered_map<std::string, std::string> argumentHelp = 
+		//{
+		//	{}
+		//};
+
+		std::cout << "--add-to-config <PATH_TO_CONFIG_FILE>\n\tThis requires a fully functional set of arguments, as well as a --name <NAME> to identify the configuration.\n\tThis should also likely be used with the \"--configuration-name\" argument to avoid having gross numbered configurations.\n\t\n--check-content(s)\n\n--clean-config <PATH_TO_CONFIG_FILE>\n\tNote: Please create a backup your configuration prior to doing this.\n\tRemoves all properties that are not legitimate. This can be useful to do when using a newer version of this software as \n\n--configuration-name <NAME>\n\tThis is only necessary when using the \"--add-to-configuration\" argument.\n\tProvides a configuration ID that is used for using this configuration.\n\tIf a configuration name is not provided, then a number ID will be assigned one higher than the largest number ID found. \n\n--directory-one <DIRECTORY_PATH>\n\n--directory-two <DIRECTORY_PATH>\n\n-h <ARGUMENT>\n\tDisplays a short help message about the argument provided.\n\n--help\n\tDisplays extended help. This will likely end up being this document section.\n\n--hide-console\n\tHides console.\n\n-l\n\tBypasses Windows MAX_PATH limit of 260 characters. It appends \"\\\\?\\\", which requires utilizing backslashes for directory separators in the backend. (Thanks, Windows!)\n\n--no-recursive-one/two\n\tDefines where a recursive process should NOT be used.\n\tAdd either \"one\" or \"two\" at the end, to correspond with which directory shouldn\'t be recursive.\n\tYou can either use \"--no-recursive-one\" or \"--no-recursive-two\".\n\n--no-warning\n\tDisables warning that explains the operation and outlines what files are potentially at risk. This should probably only be used when automating the run process.\n\n--operation-mode <OPERATION_MODE>\n\tOperation Mode is defined as a string. The available options being \"contribute\" or \"cont\", and \"echo\".\n\n--output-files\n\tDumps all internal database vectors to .log files in the same directory as the application.\n\n--output-location <PATH>\n\tDetermines where output files are put.\n\n--output-verbose-debug <OUTPUT_LOCATION>\n\tOutputs log as the program runs to assist with debugging. If a log is present, new data is appended to prevent debugging data loss.\n\n--use-config <PATH_TO_CONFIG_FILE>\n\tIf multiple configurations are within the same file, a --configuration-name <NAME> MUST be specified for the program to know which configuration to use." << std::endl;
+		//for (size_t i = 0; i < argc; i++) // Cycle through all arguments.
+		//{
+		//	if (argumentHelp[argv[i]])
+		//}
+
+		//std::cout << "\nUse \"--help\" to view the full help list. You can also visit https://github.com/JadinHeaston/sync-application/ for more information." << std::endl;
+	}
+
 	writeDebugThreadPool.wait_for_tasks();
-	return;
+	system("PAUSE");
+	exit(0);
 }
 
 //Handles all incoming arguments.
@@ -122,8 +142,8 @@ void handleArguments(int& argc, char* argv[])
 
 	//Default arguments that don't need stored in a configuration.
 	bool useConfigurationFile = false;
-	bool showHelpMessage = false;
-	std::string configurationName;
+	bool showHelpMessage = false; 
+	std::string configurationName; // --configuration-name
 	bool addToConfigFile = false; //Received from argument --add-to-config
 
 	//Defining default arguments.
@@ -154,7 +174,7 @@ void handleArguments(int& argc, char* argv[])
 	for (size_t i = 0; i < argc; i++) // Cycle through all arguments.
 	{
 		if (strcmp(argv[1], "--help") == 0) //Checking second argument for if it is "-h" or "-help".
-			showHelpMessage = true;
+			displayHelpMessage(true, argc, argv);
 		else if (strcmp(argv[i], "--use-config") == 0) //Use an external configuration
 		{
 			pathToConfigFile = formatFilePath(argv[i + 1]); //Getting provided configuration file location.
@@ -168,17 +188,12 @@ void handleArguments(int& argc, char* argv[])
 				singleCharArguments[tolower(argv[i][iterator])] = 1; //Ensuring keys are lowercase for easy use later.
 
 			if (singleCharArguments['h']) //Short help message.
-				showHelpMessage = true;
+				displayHelpMessage(false, argc, argv);
 		}
 	}
 
 	//Check results of previous iteration.
-	if (showHelpMessage)
-	{
-		displayHelpMessage();
-		exit(0);
-	}
-	else if (useConfigurationFile)
+	if (useConfigurationFile)
 	{
 		readFromConfigurationFile(pathToConfigFile, argumentVariables, configurationName);
 		//Placing JSON arguments into proper variables.

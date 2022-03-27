@@ -41,14 +41,14 @@ Windows Max Path Bypass - [true] | [false]
 Note: Each command shown below requires "--configuration-name <NAME>" to be used as an identifier for which config to utilize in the file.
 
 ## --add-to-config <PATH_TO_CONFIG_FILE>  
-	When adding a configuration to the file, you must specify the full argument that you want stored.
-	The argument will go through most, if not all, of the programs validation before allowing it to be stored.
+When adding a configuration to the file, you must specify the full argument that you want stored.
+The argument will go through most, if not all, of the programs validation before allowing it to be stored.
 ## --clean-config <PATH_TO_CONFIG_FILE>  
-	Removes all invalid/unused properties.
-	This could be useful to run after changing software versions.
-	Note: I highly encourage creating a backup of the file before using this since it destructively edits the configuration file. It is also recommended to manually verify that everything seems to be configured as intended.
+Removes all invalid/unused properties.
+This could be useful to run after changing software versions.
+Note: I highly encourage creating a backup of the file before using this since it destructively edits the configuration file. It is also recommended to manually verify that everything seems to be configured as intended.
 ## --export-config-to-command <PATH_TO_CONFIG_FILE> 
-	This will convert your configuration to a command that can be run. 
-	Note: The resulting command might need some tweaking, especially in regards to file path formatting.
+This will convert your configuration to a command that can be run. 
+Note: The resulting command might need some tweaking, especially in regards to file path formatting.
 ## --use-config <PATH_TO_CONFIG_FILE>  
-	As stated, it will use a configuration from the file.
+As stated, it will use a configuration from the file.
