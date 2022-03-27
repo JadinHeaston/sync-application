@@ -29,8 +29,7 @@ std::mutex coutMutex; //Lock for cout to prevent errors when displaying console 
 using json = nlohmann::json; //Setting json namespace to a simgler term.
 json argumentVariables;
 
-std::string directorySeparator = "/";
-std::string pathToConfigFile;
+char directorySeparator = '/';
 
 char userInput; //Holds user input, when needed.
 
@@ -62,13 +61,19 @@ std::string debugFileName = "debug.log";
 size_t debugFileCount = 1;
 
 //FUNCTION PROTOTYPES
+//arguments.h
+void handleArguments(int& argc, char* argv[]);
+void readArguments(int& argc, char* argv[], std::string& pathToConfigFile);
+void processArguments(int& argc, char* argv[], std::string& pathToConfigFile);
+bool checkArgumentValue(size_t& position, int& argc, char* argv[], bool failSafe = false);
 //configFile.h
 void addToConfigurationFile(std::string pathToConfig, json& givenArguments, std::string configurationName);
 void change_key(json& object, const std::string& old_key, const std::string& new_key);
+void cleanConfigurationFile(std::string pathToConfig, json& givenArguments);
 void readFromConfigurationFile(std::string pathToConfig, json& givenArguments, std::string configurationName);
 //debugging.h
 void displayConsoleMessage(std::string givenMessage);
-void displayHelpMessage();
+void displayHelpMessage(bool longHelpMessage, int& argc, char* argv[]);
 void showWarningMessage();
 void writeToDebug(std::chrono::system_clock::time_point givenTime, bool writeTime, std::string textToWrite);
 //fileOperations.h
@@ -93,6 +98,7 @@ void sortVector(std::vector<std::string>& givenVectorDB); //Created to allow mul
 void writeToFile(std::ofstream& outputFile, std::string inputString);
 
 //Internal header files:
+#include "arguments.h"
 #include "configFile.h"
 #include "debugging.h"
 #include "fileOperations.h"

@@ -161,6 +161,7 @@
     <ClCompile Include="Sync Application.cpp" />
   </ItemGroup>
   <ItemGroup>
+    <ClInclude Include="arguments.h" />
     <ClInclude Include="configFile.h" />
     <ClInclude Include="debugging.h" />
     <ClInclude Include="fileOperations.h" />

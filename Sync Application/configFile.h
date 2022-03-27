@@ -41,22 +41,20 @@ void addToConfigurationFile(std::string pathToConfig, json& givenArguments, std:
 		}
 	}
 
-	//Fail is the ifstream can't be parsed.
-	if (!json::accept(configFileReading))
+	//Check if the file is empty or has invalid JSON.
+	if (configFileReading.peek() != std::ifstream::traits_type::eof() && !json::accept(configFileReading))
 	{
 		//Error with JSON syntax. Notifying user.
 		std::cout << "JSON syntax error: \"" << pathToConfig << "\"" << std::endl;
 		std::cout << "Check your configuration to ensure it is valid JSON." << std::endl;
+		std::cout << "It could be that the file is empty. If so, deleting the file and trying again should work." << std::endl;
 		std::cout << "Please resolve the issue and try again. Program terminating." << std::endl;
 		system("PAUSE");
 		exit(1);
 	}
-	else
-	{
-		//Resetting file seek head for the next parsing.
-		configFileReading.clear();
-		configFileReading.seekg(0);
-	}
+	//Resetting file seek head for the next parsing.
+	configFileReading.clear();
+	configFileReading.seekg(0);
 
 	configurationFileJSON = json::parse(configFileReading); //Parsing JSON from the file.
 
@@ -106,6 +104,74 @@ void change_key(json& object, const std::string& old_key, const std::string& new
 	std::swap(object[new_key], it.value());
 	//Delete value at old key (cheap, because the value is null after swap)
 	object.erase(it);
+}
+
+void cleanConfigurationFile(std::string pathToConfig, json& givenArguments)
+{
+	json configurationFileJSON; //Holds the full JSON configuration from the file.
+
+	//Open configuration file for reading.
+	std::ifstream configFileReading(std::filesystem::u8path(pathToConfig));
+
+	//Check that the file got opened properly.
+	if (!configFileReading.good())
+	{
+		std::cout << "Configuration file failed to open: \"" << pathToConfig << "\"" << std::endl;
+		std::cout << "Please specify a new path to a configuration file to use, or enter nothing to terminate the program." << std::endl;
+		std::getline(std::cin, pathToConfig); //Getting user input.
+		if (pathToConfig == "")
+			exit(1);
+
+		//Trying to open configuration file for reading again.
+		std::ifstream configFileReading(std::filesystem::u8path(pathToConfig));
+
+		if (!configFileReading.good())
+		{
+			std::cout << "File failed to open again: " << std::endl;
+			std::cout << "Please try again. Program terminating." << std::endl;
+			system("PAUSE");
+			exit(1);
+		}
+	}
+
+	//Fail is the ifstream can't be parsed.
+	if (!json::accept(configFileReading))
+	{
+		//Error with JSON syntax. Notifying user.
+		std::cout << "JSON syntax error: \"" << pathToConfig << "\"" << std::endl;
+		std::cout << "Check your configuration to ensure it is valid JSON." << std::endl;
+		std::cout << "Please resolve the issue and try again. Program terminating." << std::endl;
+		system("PAUSE");
+		exit(1);
+	}
+	else
+	{
+		//Resetting file seek head for the next parsing.
+		configFileReading.clear();
+		configFileReading.seekg(0);
+	}
+
+	configurationFileJSON = json::parse(configFileReading); //Parsing JSON from the file.
+
+	configFileReading.close(); //Closing input file.
+
+	json patched;
+	json configurationFileJSON_patched;
+
+	for (json::iterator iterator = configurationFileJSON.begin(); iterator != configurationFileJSON.end(); ++iterator)
+	{
+		//Creating the patch
+		patched = json::diff(configurationFileJSON, givenArguments["internalObject"]);
+
+		//Saving the patched version.
+		configurationFileJSON_patched[iterator.key()] = configurationFileJSON.patch(patched);
+	}
+
+
+	//Outputting full altered configuration to configuration file.
+	std::ofstream configFileWriting(std::filesystem::u8path(pathToConfig), std::ios::out | std::ios::binary);
+	writeToFile(configFileWriting, configurationFileJSON_patched.dump(4)); //Write the serialized json to the file. "4" indicates the indenting amount.
+	configFileWriting.close();
 }
 
 void readFromConfigurationFile(std::string pathToConfig, json& givenArguments, std::string configurationName)
@@ -254,72 +320,4 @@ std::string convertJSONtoCommand(json& givenArguments)
 	finalString = finalString.substr(1, std::string::npos); //Removing leading space.
 
 	return finalString;
-}
-
-void cleanConfigurationFile(std::string pathToConfig, json& givenArguments)
-{
-	json configurationFileJSON; //Holds the full JSON configuration from the file.
-
-	//Open configuration file for reading.
-	std::ifstream configFileReading(std::filesystem::u8path(pathToConfig));
-
-	//Check that the file got opened properly.
-	if (!configFileReading.good())
-	{
-		std::cout << "Configuration file failed to open: \"" << pathToConfig << "\"" << std::endl;
-		std::cout << "Please specify a new path to a configuration file to use, or enter nothing to terminate the program." << std::endl;
-		std::getline(std::cin, pathToConfig); //Getting user input.
-		if (pathToConfig == "")
-			exit(1);
-
-		//Trying to open configuration file for reading again.
-		std::ifstream configFileReading(std::filesystem::u8path(pathToConfig));
-
-		if (!configFileReading.good())
-		{
-			std::cout << "File failed to open again: " << std::endl;
-			std::cout << "Please try again. Program terminating." << std::endl;
-			system("PAUSE");
-			exit(1);
-		}
-	}
-
-	//Fail is the ifstream can't be parsed.
-	if (!json::accept(configFileReading))
-	{
-		//Error with JSON syntax. Notifying user.
-		std::cout << "JSON syntax error: \"" << pathToConfig << "\"" << std::endl;
-		std::cout << "Check your configuration to ensure it is valid JSON." << std::endl;
-		std::cout << "Please resolve the issue and try again. Program terminating." << std::endl;
-		system("PAUSE");
-		exit(1);
-	}
-	else
-	{
-		//Resetting file seek head for the next parsing.
-		configFileReading.clear();
-		configFileReading.seekg(0);
-	}
-
-	configurationFileJSON = json::parse(configFileReading); //Parsing JSON from the file.
-
-	configFileReading.close(); //Closing input file.
-
-	json patched;
-	json configurationFileJSON_patched;
-
-	for (json::iterator iterator = configurationFileJSON.begin(); iterator != configurationFileJSON.end(); ++iterator)
-	{
-		//Creating the patch
-		patched = json::diff(configurationFileJSON, givenArguments["internalObject"]);
-
-		//Saving the patched version.
-		configurationFileJSON_patched[iterator.key()] = configurationFileJSON.patch(patched);
-	}
-	
-
-	//Outputting full altered configuration to configuration file.
-	std::ofstream configFileWriting(std::filesystem::u8path(pathToConfig), std::ios::out | std::ios::binary);
-	writeToFile(configFileWriting, configurationFileJSON_patched.dump(4)); //Write the serialized json to the file. "4" indicates the indenting amount.
-	configFileWriting.close();
 }

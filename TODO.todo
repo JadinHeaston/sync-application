@@ -72,7 +72,6 @@ Other features:
 			The alternative is to just notify the user of what went wrong and terminate the program immediately.
 		This may not be necessary, but might be nice for automated runnings.
 General Bugs/Fixes:
-	✔ Create --clean-config <PATH_TO_CONFIG_FILE> that iterates through all items and removes all properties that don't exist. @done (3/26/2022, 2:07:27 PM)
 	☐ Better input validation for the configuration section.
 	☐ Look into how the program acts when one directory is nested within another.
 		This may just need to be prevented.
@@ -85,7 +84,6 @@ General Bugs/Fixes:
 		Modifying the files to update the time fixed the issue.
 		Should there be a check for this? It could prompt the user and ask if they want to update X files last modified times.
 			By default, maybe it just fails and logs it in an error file.
-
 
 Completed:
 	Main Features:	
@@ -109,6 +107,8 @@ Completed:
 		✔ Allow specifying where "internal" files get output to when using --output-files. @done (3/26/2022, 10:37:16 AM)
 			✔ It probably shouldn't be it's own argument as a bool, but instead changing --output-files into a string that stores the output directory. @done (3/26/2022, 2:07:50 PM)
 	General Bugs/Fixes:
+		✔ Create --clean-config <PATH_TO_CONFIG_FILE> that iterates through all items and removes all properties that don't exist. @done (3/26/2022, 2:07:27 PM)
+		✔ The --use-config option should allow the user to manually specify commands that override what is in the configuration. @done (3/26/2022, 8:46:59 PM)
 
 
 

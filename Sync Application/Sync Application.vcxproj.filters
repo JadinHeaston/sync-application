@@ -35,5 +35,8 @@
     <ClInclude Include="syncOperations.h">
       <Filter>Header Files</Filter>
     </ClInclude>
+    <ClInclude Include="arguments.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
   </ItemGroup>
 </Project>
