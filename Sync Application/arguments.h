@@ -324,6 +324,36 @@ void processArguments(int& argc, char* argv[], std::string& pathToConfigFile)
 	//Adding path to JSON.
 	argumentVariables["internalObject"]["Directory Two"]["Directory Path"] = secondGivenDirectoryPath;
 
+
+
+	std::cout << firstGivenDirectoryPath.find(secondGivenDirectoryPath + directorySeparator) << std::endl;
+	std::cout << secondGivenDirectoryPath.find(firstGivenDirectoryPath + directorySeparator) << std::endl;
+	system("PAUSE");
+
+	//Checking that the two given paths do not overlap. That one is not within another.
+	if (firstGivenDirectoryPath.find(secondGivenDirectoryPath + directorySeparator) != std::string::npos)
+	{
+		std::cout << "The given directories are nested within eachother." << std::endl;
+		std::cout << firstGivenDirectoryPath << std::endl;
+		std::cout << secondGivenDirectoryPath << std::endl;
+		std::cout << "Please fix this and try again." << std::endl;
+		system("PAUSE");
+		writeDebugThreadPool.wait_for_tasks();
+		exit(1);
+	}
+	else if (secondGivenDirectoryPath.find(firstGivenDirectoryPath + directorySeparator) != std::string::npos)
+	{
+		std::cout << "The given directories are nested within eachother." << std::endl;
+		std::cout << firstGivenDirectoryPath << std::endl;
+		std::cout << secondGivenDirectoryPath << std::endl;
+		std::cout << "Please fix this and try again." << std::endl;
+		system("PAUSE");
+		writeDebugThreadPool.wait_for_tasks();
+		exit(1);
+	}
+
+
+
 	// ----- //
 	//Debug Files
 	debugFilePath = formatFilePath(argumentVariables["internalObject"]["Debug File Path"]);
