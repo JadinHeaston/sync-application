@@ -190,28 +190,9 @@ void readArguments(int& argc, char* argv[], std::string& pathToConfigFile)
 
 void processArguments(int& argc, char* argv[], std::string& pathToConfigFile)
 {
-	//MAX_PATH bypass.
-	//Also ensuring that path is an absolute path.
+	//MAX_PATH bypass. Setting directory separator.
 	if (argumentVariables["internalObject"]["Windows Max Path Bypass"].get<bool>())
-	{
 		directorySeparator = '\\'; //Set directory separator appropriately.
-
-		//Checking if the prefix already exists.
-		if (argumentVariables["internalObject"]["Directory One"]["Directory Path"].get<std::string>().find("\\\\?\\") == std::string::npos)
-			argumentVariables["internalObject"]["Directory One"]["Directory Path"] = formatFilePath("\\\\?\\" + std::filesystem::absolute(argumentVariables["internalObject"]["Directory One"]["Directory Path"]).string());
-		if (argumentVariables["internalObject"]["Directory Two"]["Directory Path"].get<std::string>().find("\\\\?\\") == std::string::npos)
-			argumentVariables["internalObject"]["Directory Two"]["Directory Path"] = formatFilePath("\\\\?\\" + std::filesystem::absolute(argumentVariables["internalObject"]["Directory Two"]["Directory Path"]).string());
-	}
-	else 
-	{
-		//Checking if the prefix already exists.
-		if (argumentVariables["internalObject"]["Directory One"]["Directory Path"].get<std::string>().find("\\\\?\\") != -1) //Removing prefix.
-			argumentVariables["internalObject"]["Directory One"]["Directory Path"] = formatFilePath(std::filesystem::absolute(argumentVariables["internalObject"]["Directory One"]["Directory Path"].get<std::string>().erase(argumentVariables["internalObject"]["Directory One"]["Directory Path"].get<std::string>().find("\\\\?\\"), std::string("\\\\?\\").length())).string());
-		if (argumentVariables["internalObject"]["Directory Two"]["Directory Path"].get<std::string>().find("\\\\?\\") != -1) //Removing prefix.
-			argumentVariables["internalObject"]["Directory Two"]["Directory Path"] = formatFilePath(std::filesystem::absolute(argumentVariables["internalObject"]["Directory Two"]["Directory Path"].get<std::string>().erase(argumentVariables["internalObject"]["Directory Two"]["Directory Path"].get<std::string>().find("\\\\?\\"), std::string("\\\\?\\").length())).string());
-	}
-
-
 
 	//Double check that there is no ending slash.
 	//This was added because running a drive letter ( such as "D:") through absolute adds a slash..
@@ -268,6 +249,7 @@ void processArguments(int& argc, char* argv[], std::string& pathToConfigFile)
 			exit(1);
 		}
 	}
+
 	//Getting absolute path.
 	firstGivenDirectoryPath = formatFilePath(std::filesystem::absolute(firstGivenDirectoryPath).string());
 
@@ -325,10 +307,54 @@ void processArguments(int& argc, char* argv[], std::string& pathToConfigFile)
 	argumentVariables["internalObject"]["Directory Two"]["Directory Path"] = secondGivenDirectoryPath;
 
 
+	//MAX_PATH bypass. Adding prefixes.
+	//Also ensuring that path is an absolute path.
+	if (argumentVariables["internalObject"]["Windows Max Path Bypass"].get<bool>())
+	{
+		//Checking if the prefix already exists for both paths. Adding it, if it is missing.
+		if (argumentVariables["internalObject"]["Directory One"]["Directory Path"].get<std::string>().find("\\\\?\\") == std::string::npos)
+		{
+			firstGivenDirectoryPath = formatFilePath("\\\\?\\" + std::filesystem::absolute(argumentVariables["internalObject"]["Directory One"]["Directory Path"].get<std::string>()).string());
 
-	std::cout << firstGivenDirectoryPath.find(secondGivenDirectoryPath + directorySeparator) << std::endl;
-	std::cout << secondGivenDirectoryPath.find(firstGivenDirectoryPath + directorySeparator) << std::endl;
-	system("PAUSE");
+			if (firstGivenDirectoryPath.back() == directorySeparator)
+				firstGivenDirectoryPath.pop_back(); //Remove the slash.
+
+			argumentVariables["internalObject"]["Directory One"]["Directory Path"] = firstGivenDirectoryPath;
+		}
+		
+		if (argumentVariables["internalObject"]["Directory Two"]["Directory Path"].get<std::string>().find("\\\\?\\") == std::string::npos)
+		{
+			secondGivenDirectoryPath = formatFilePath("\\\\?\\" + std::filesystem::absolute(argumentVariables["internalObject"]["Directory Two"]["Directory Path"].get<std::string>()).string());
+
+			if (secondGivenDirectoryPath.back() == directorySeparator)
+				secondGivenDirectoryPath.pop_back(); //Remove the slash.
+
+			argumentVariables["internalObject"]["Directory Two"]["Directory Path"] = secondGivenDirectoryPath;
+		}
+	}
+	else
+	{
+		//Checking if the prefix already exists for both paths. Removing it if it does.
+		if (argumentVariables["internalObject"]["Directory One"]["Directory Path"].get<std::string>().find("\\\\?\\") != -1) //Removing prefix.
+		{
+			firstGivenDirectoryPath = formatFilePath(std::filesystem::absolute(argumentVariables["internalObject"]["Directory One"]["Directory Path"].get<std::string>().erase(argumentVariables["internalObject"]["Directory One"]["Directory Path"].get<std::string>().find("\\\\?\\"), std::string("\\\\?\\").length())).string());
+
+			if (firstGivenDirectoryPath.back() == directorySeparator)
+				firstGivenDirectoryPath.pop_back(); //Remove the slash.
+			
+			argumentVariables["internalObject"]["Directory One"]["Directory Path"] = firstGivenDirectoryPath;
+		}
+		
+		if (argumentVariables["internalObject"]["Directory Two"]["Directory Path"].get<std::string>().find("\\\\?\\") != -1) //Removing prefix.
+		{
+			secondGivenDirectoryPath = formatFilePath(std::filesystem::absolute(argumentVariables["internalObject"]["Directory Two"]["Directory Path"].get<std::string>().erase(argumentVariables["internalObject"]["Directory Two"]["Directory Path"].get<std::string>().find("\\\\?\\"), std::string("\\\\?\\").length())).string());
+			
+			if (secondGivenDirectoryPath.back() == directorySeparator)
+				secondGivenDirectoryPath.pop_back(); //Remove the slash.
+
+			argumentVariables["internalObject"]["Directory Two"]["Directory Path"] = secondGivenDirectoryPath;
+		}
+	}
 
 	//Checking that the two given paths do not overlap. That one is not within another.
 	if (firstGivenDirectoryPath.find(secondGivenDirectoryPath + directorySeparator) != std::string::npos)
@@ -351,8 +377,6 @@ void processArguments(int& argc, char* argv[], std::string& pathToConfigFile)
 		writeDebugThreadPool.wait_for_tasks();
 		exit(1);
 	}
-
-
 
 	// ----- //
 	//Debug Files

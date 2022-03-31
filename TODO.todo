@@ -57,7 +57,7 @@ Main tasks:
 			Should this be done by providing a text file or receiving several inputs.
 				Potentially a mutation to the argument could let you choose, in case your exclusions are simple.
 		All of this should be allowed to live within the config file *OR* their own separate files.
-	✘ Have the program check the folder count, file count, and size (bytes) of the directories and return if they are what is expect. @cancelled (3/22/2022, 10:33:08 AM)
+	☐ Have the program check the folder count, file count, and size (bytes) of the directories and return if they are what is expect.
 			This would help debugging things and potentially allow users to identify when issues go wrong.
 			Maybe a flag can be passed that says "re-run the program until it is what it expects".
 				This feels potentially dangerous, and wasteful. Especially if a bug were to occur or something else is changing the files.
@@ -73,8 +73,6 @@ Other features:
 		This may not be necessary, but might be nice for automated runnings.
 General Bugs/Fixes:
 	☐ Better input validation for the configuration section.
-	☐ Look into how the program acts when one directory is nested within another.
-		This may just need to be prevented.
 	☐ Windows Max Path Bypass should be able to get applied to each directory independently.
 	independently
 	☐ Add more debug logging to the argument handling and configuration file related things.
@@ -109,7 +107,8 @@ Completed:
 	General Bugs/Fixes:
 		✔ Create --clean-config <PATH_TO_CONFIG_FILE> that iterates through all items and removes all properties that don't exist. @done (3/26/2022, 2:07:27 PM)
 		✔ The --use-config option should allow the user to manually specify commands that override what is in the configuration. @done (3/26/2022, 8:46:59 PM)
-
+		✔ Look into how the program acts when one directory is nested within another. @done (3/30/2022, 6:20:36 PM)
+			This has been prevented.
 
 
 
