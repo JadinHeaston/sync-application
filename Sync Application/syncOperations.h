@@ -21,10 +21,11 @@ void contributeCompareDirectories(std::vector<std::string>& firstGivenVectorDB, 
 	//Column variables to avoid streamline calls on vectors.
 	std::string workingPath;
 	std::string workingPathTwo;
-	std::string workingSize;
-	std::string workingSizeTwo;
-	std::string workingDateMod;
-	std::string workingDateModTwo;
+	size_t workingSize;
+	size_t workingSizeTwo;
+	size_t workingDateMod;
+	size_t workingDateModTwo;
+	size_t modifyWindow = argumentVariables["internalObject"]["Modify Window"].get<size_t>();
 	std::string workingHash;
 	std::string workingHashTwo;
 
@@ -50,15 +51,16 @@ void contributeCompareDirectories(std::vector<std::string>& firstGivenVectorDB, 
 			if (std::filesystem::is_directory(firstGivenVectorDB[iterator].substr(0, nthOccurrence(firstGivenVectorDB[iterator], delimitingCharacter, 1)))) //If the path not a directory, skip the iteration.
 				continue;
 
-			workingDateMod = firstGivenVectorDB[iterator].substr(nthOccurrence(firstGivenVectorDB[iterator], delimitingCharacter, 2) + 1, nthOccurrence(firstGivenVectorDB[iterator], delimitingCharacter, 3) - nthOccurrence(firstGivenVectorDB[iterator], delimitingCharacter, 2) - 1); //Third column
-			workingDateModTwo = secondGivenVectorDB[DB2Line].substr(nthOccurrence(secondGivenVectorDB[DB2Line], delimitingCharacter, 2) + 1, nthOccurrence(secondGivenVectorDB[DB2Line], delimitingCharacter, 3) - nthOccurrence(secondGivenVectorDB[DB2Line], delimitingCharacter, 2) - 1); //Third column
-			if (workingDateMod == workingDateModTwo) //If the file paths match, check the last modified times.
+			workingDateMod = stoull(firstGivenVectorDB[iterator].substr(nthOccurrence(firstGivenVectorDB[iterator], delimitingCharacter, 2) + 1, nthOccurrence(firstGivenVectorDB[iterator], delimitingCharacter, 3) - nthOccurrence(firstGivenVectorDB[iterator], delimitingCharacter, 2) - 1)); //Third column
+			workingDateModTwo = stoull(secondGivenVectorDB[DB2Line].substr(nthOccurrence(secondGivenVectorDB[DB2Line], delimitingCharacter, 2) + 1, nthOccurrence(secondGivenVectorDB[DB2Line], delimitingCharacter, 3) - nthOccurrence(secondGivenVectorDB[DB2Line], delimitingCharacter, 2) - 1)); //Third column
+			if (workingDateMod % workingDateModTwo <= modifyWindow || workingDateModTwo % workingDateMod <= modifyWindow) //If the file paths match, check the last modified times.
 			{
-				workingSize = firstGivenVectorDB[iterator].substr(nthOccurrence(firstGivenVectorDB[iterator], delimitingCharacter, 1) + 1, nthOccurrence(firstGivenVectorDB[iterator], delimitingCharacter, 2) - nthOccurrence(firstGivenVectorDB[iterator], delimitingCharacter, 1) - 1); //Second column
-				workingSizeTwo = secondGivenVectorDB[DB2Line].substr(nthOccurrence(secondGivenVectorDB[DB2Line], delimitingCharacter, 1) + 1, nthOccurrence(secondGivenVectorDB[DB2Line], delimitingCharacter, 2) - nthOccurrence(secondGivenVectorDB[DB2Line], delimitingCharacter, 1) - 1); //Second column
+				workingSize = stoull(firstGivenVectorDB[iterator].substr(nthOccurrence(firstGivenVectorDB[iterator], delimitingCharacter, 1) + 1, nthOccurrence(firstGivenVectorDB[iterator], delimitingCharacter, 2) - nthOccurrence(firstGivenVectorDB[iterator], delimitingCharacter, 1) - 1)); //Second column
+				workingSizeTwo = stoull(secondGivenVectorDB[DB2Line].substr(nthOccurrence(secondGivenVectorDB[DB2Line], delimitingCharacter, 1) + 1, nthOccurrence(secondGivenVectorDB[DB2Line], delimitingCharacter, 2) - nthOccurrence(secondGivenVectorDB[DB2Line], delimitingCharacter, 1) - 1)); //Second column
 				if (workingSize == workingSizeTwo) //Check if the file sizes match.
 				{
-					if (argumentVariables["internalObject"]["Check File Contents"].get<bool>()) hashActions.push_back(workingPath + delimitingCharacter + iter1 + delimitingCharacter + iter2 + newLine); //If everything matches, these files need hashed and compared.
+					if (argumentVariables["internalObject"]["Check File Contents"].get<bool>()) 
+						hashActions.push_back(workingPath + delimitingCharacter + iter1 + delimitingCharacter + iter2 + newLine); //If everything matches, these files need hashed and compared.
 				}
 				else
 					fileOpAction.push_back("COPY - Different file sizes" + delimitingCharacter + firstGivenPath + directorySeparator + workingPath + delimitingCharacter + secondGivenPath + directorySeparator + workingPath + newLine); //Copy directory one file to directory two.

@@ -81,18 +81,25 @@ void createDirectoryMapDB(std::vector<std::string>& givenVectorDB, std::string g
 		// cycle through the directory
 		for (std::filesystem::directory_iterator itr(givenStartPath); itr != end_itr; ++itr)
 		{
+			//Setting current file equal to the full path of the file.
+			current_file = dir->path().u8string();
+
+			//Putting path into array.
+			testStream << formatFilePath(current_file) << delimitingCharacter;
+
 			// If it's not a directory, list it. If you want to list directories too, just remove this check.
-			if (std::filesystem::is_regular_file(itr->path()))
+			if (std::filesystem::is_regular_file(std::filesystem::u8path(current_file)))
 			{
 				//writeDebugThreadPool.push_task(writeToDebug, std::chrono::system_clock::now(), true, L"2 Is not a directory: " + formatFilePath(current_file));
 				testStream << std::filesystem::file_size(std::filesystem::u8path(current_file)) << delimitingCharacter;
 				//writeDebugThreadPool.push_task(writeToDebug, std::chrono::system_clock::now(), true, L"3 Got File Size: " + formatFilePath(current_file));
 
 				//Getting last modified time. In 'seconds from 1970 EPOCH' format.
-				//lastModifiedTime = std::filesystem::last_write_time(std::filesystem::u8path(current_file));
-				//testStream << std::chrono::duration_cast<std::chrono::minutes>(lastModifiedTime.time_since_epoch()).count() << delimitingCharacter;
-				//lastModifiedTime = boost::filesystem::last_write_time(current_file);
-				//testStream << lastModifiedTime << delimitingCharacter;
+				lastModifiedTime = std::filesystem::last_write_time(std::filesystem::u8path(current_file));
+				testStream << std::chrono::duration_cast<std::chrono::seconds>(lastModifiedTime.time_since_epoch()).count() << delimitingCharacter;
+				//lastModifiedTime = boost::filesystem::last_write_time(std::filesystem::u8path(current_file));
+				//testStream << std::chrono::duration_cast<std::chrono::seconds>(lastModifiedTime.time_since_epoch()).count() << delimitingCharacter;
+
 				//writeDebugThreadPool.push_task(writeToDebug, std::chrono::system_clock::now(), true, L"4 Got last write time: " + formatFilePath(current_file));
 				//Getting date created time. In 'seconds from 1970 EPOCH' format.
 				//dateCreatedTime = std::filesystem::(current_file);
@@ -114,7 +121,14 @@ void createDirectoryMapDB(std::vector<std::string>& givenVectorDB, std::string g
 
 				//writeDebugThreadPool.push_task(writeToDebug, std::chrono::system_clock::now(), true, "9 finished streamstring: " + formatFilePath(current_file));
 			}
+			else
+				testStream << delimitingCharacter + delimitingCharacter + delimitingCharacter + delimitingCharacter + newLine;
 
+			//Append to DB.
+			givenVectorDB.push_back(testStream.str());
+
+			//Clearing stringstream for next iteration.
+			testStream.str(std::string());
 		}
 	}
 
