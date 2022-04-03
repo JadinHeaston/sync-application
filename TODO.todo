@@ -71,6 +71,7 @@ Other features:
 		"Inline command prompt stuff" refers to the ability to fix some issues via prompts from the program.
 			The alternative is to just notify the user of what went wrong and terminate the program immediately.
 		This may not be necessary, but might be nice for automated runnings.
+	☐ Add an argument that specifies a description for a configuration. This is displayed when using the configuration.
 General Bugs/Fixes:
 	☐ Better input validation for the configuration section.
 	☐ Windows Max Path Bypass should be able to get applied to each directory independently.
@@ -105,7 +106,7 @@ Completed:
 		✔ Allow specifying where "internal" files get output to when using --output-files. @done (3/26/2022, 10:37:16 AM)
 			✔ It probably shouldn't be it's own argument as a bool, but instead changing --output-files into a string that stores the output directory. @done (3/26/2022, 2:07:50 PM)
 	General Bugs/Fixes:
-		✔ Create --clean-config <PATH_TO_CONFIG_FILE> that iterates through all items and removes all properties that don't exist. @done (3/26/2022, 2:07:27 PM)
+		✔ Create --clean-config <PATH_TO_CONFIG_FILE> that iterates through all items and removes all properties that don't exist anymore. @done (3/26/2022, 2:07:27 PM)
 		✔ The --use-config option should allow the user to manually specify commands that override what is in the configuration. @done (3/26/2022, 8:46:59 PM)
 		✔ Look into how the program acts when one directory is nested within another. @done (3/30/2022, 6:20:36 PM)
 			This has been prevented.

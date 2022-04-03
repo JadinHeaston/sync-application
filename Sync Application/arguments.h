@@ -83,6 +83,10 @@ void handleArguments(int& argc, char* argv[])
 		argumentVariables["internalObject"]["Directory One"]["Recursive Search"] = true; //Received from arg: --no-recursive | defaults to true.
 	if (argumentVariables["internalObject"]["Directory Two"]["Recursive Search"].is_null())
 		argumentVariables["internalObject"]["Directory Two"]["Recursive Search"] = true; //Received from arg: --no-recursive | defaults to true.
+	if (argumentVariables["internalObject"]["No File Operations"].is_null())
+		argumentVariables["internalObject"]["No File Operations"] = false;
+	if (argumentVariables["internalObject"]["Modify Window"].is_null())
+		argumentVariables["internalObject"]["Modify Window"] = 0;
 	if (argumentVariables["internalObject"]["Verbose Debugging"].is_null())
 		argumentVariables["internalObject"]["Verbose Debugging"] = false; //Defines if verbose debugging is enabled.
 	if (argumentVariables["internalObject"]["Windows Max Path Bypass"].is_null())
@@ -95,7 +99,8 @@ void handleArguments(int& argc, char* argv[])
 		argumentVariables["internalObject"]["Operation Mode"] = ""; //Holds operation mode to perform.
 	if (argumentVariables["internalObject"]["Windows Max Path Bypass"].is_null())
 		argumentVariables["internalObject"]["Windows Max Path Bypass"] = false;
-
+	//if (argumentVariables["internalObject"]["Thread Pool Assignment"].is_null())
+	
 	//Reading for additional arguments.
 	readArguments(argc, argv, pathToConfigFile);
 
@@ -146,12 +151,19 @@ void readArguments(int& argc, char* argv[], std::string& pathToConfigFile)
 			}
 			else if (strncmp(argv[i], "--hide-console", 32) == 0) //Defines if anything is output to the console.
 				argumentVariables["internalObject"]["Show Console"] = false;
+			else if (strcmp(argv[i], "--no-file-operations") == 0) //Disables the file transfering portion of the program.
+				argumentVariables["internalObject"]["No File Operations"] = true;
 			else if (strcmp(argv[i], "--no-recursive-one") == 0) //Disable recursive operation for directory one.
 				argumentVariables["internalObject"]["Directory One"]["Recursive Search"] = false;
 			else if (strcmp(argv[i], "--no-recursive-two") == 0) //Disable recursive operation for directory one.
 				argumentVariables["internalObject"]["Directory Two"]["Recursive Search"] = false;
 			else if (strcmp(argv[i], "--no-warning") == 0) //Disable deletion warning.
 				argumentVariables["internalObject"]["Show Warning"] = false;
+			else if (strcmp(argv[i], "--modify-window") == 0) //Allows the user to provide a window that the last modification time must be outside.
+			{
+				checkArgumentValue(i, argc, argv);
+				argumentVariables["internalObject"]["Modify Window"] = std::stoull(argv[i + 1]);
+			}
 			else if (strcmp(argv[i], "--operation-mode") == 0) //Operation mode switch.
 			{
 				checkArgumentValue(i, argc, argv);
@@ -190,9 +202,26 @@ void readArguments(int& argc, char* argv[], std::string& pathToConfigFile)
 
 void processArguments(int& argc, char* argv[], std::string& pathToConfigFile)
 {
+	// ----- //
+	//Thread assignments
+	//if (!argumentVariables["internalObject"]["Thread Pool Assignment"].is_null())
+	//{
+	//	if (argumentVariables["internalObject"]["Main"].is_number())
+	//		threadPool.reset(argumentVariables["internalObject"]["Main Pool"].get<size_t>());
+	//	if (argumentVariables["internalObject"]["Hashing Pool"].is_number())
+	//		threadPool.reset(argumentVariables["internalObject"]["Hashing Pool"].get<size_t>());
+	//	if (argumentVariables["internalObject"]["File Operations"].is_number())
+	//		threadPool.reset(argumentVariables["internalObject"]["File Operations"].get<size_t>());
+	//}
+	
+
+
+
 	//MAX_PATH bypass. Setting directory separator.
 	if (argumentVariables["internalObject"]["Windows Max Path Bypass"].get<bool>())
 		directorySeparator = '\\'; //Set directory separator appropriately.
+	else
+		directorySeparator = '/';
 
 	//Double check that there is no ending slash.
 	//This was added because running a drive letter ( such as "D:") through absolute adds a slash..
@@ -262,7 +291,7 @@ void processArguments(int& argc, char* argv[], std::string& pathToConfigFile)
 	argumentVariables["internalObject"]["Directory One"]["Directory Path"] = firstGivenDirectoryPath;
 
 	// ----- //
-	//Directory TWo
+	//Directory Two
 	secondGivenDirectoryPath = argumentVariables["internalObject"]["Directory Two"]["Directory Path"].get<std::string>();
 	secondGivenDirectoryPath = formatFilePath(secondGivenDirectoryPath);
 
@@ -406,6 +435,16 @@ void processArguments(int& argc, char* argv[], std::string& pathToConfigFile)
 	}
 	verboseDebugOutput.close();
 
+	// ----- //
+	//Modify Window
+	if (!argumentVariables["internalObject"]["Modify Window"].is_number())
+	{
+		std::cout << "Invalid Modify Window (" << argumentVariables["internalObject"]["Modify Window"] << ")." << std::endl;
+		std::cout << "Please try again and specify a number of seconds after this argument." << std::endl;
+		system("PAUSE");
+		writeDebugThreadPool.wait_for_tasks();
+		exit(1);
+	}
 
 	// ----- //
 	//Output Files

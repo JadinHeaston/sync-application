@@ -273,6 +273,8 @@ std::string convertJSONtoCommand(json& givenArguments)
 	JSONArguments["Directory One"]["Recursive Search"] = "--no-recursive-one"; //T|F
 	JSONArguments["Directory Two"]["Recursive Search"] = "--no-recursive-two"; //T|F
 	JSONArguments["Debug File Path"] = "--output-verbose-debug"; //String
+	JSONArguments["Modify Window"] = "--modify-window"; //Integer (size_t)
+	JSONArguments["No File Operations"] = "--no-files-operations"; //T|F
 	JSONArguments["Output Files"] = "--output-files"; //String | <BLANK>
 	JSONArguments["Operation Mode"] = "--operation-mode"; //String
 	JSONArguments["Show Console"] = "--hide-console"; //T|F
@@ -305,6 +307,15 @@ std::string convertJSONtoCommand(json& givenArguments)
 		{
 			if (JSONArguments[iterator.key()].get<std::string>() != "")
 				finalString.append(" " + JSONArguments[iterator.key()].get<std::string>()); //Get the argument.
+		}
+		else if (givenArguments["internalObject"][iterator.key()].is_number_unsigned())
+		{
+			if (JSONArguments[iterator.key()].get<size_t>() != 0)
+			{
+				finalString.append(" " + JSONArguments[iterator.key()].get<size_t>()); //Get the argument.
+				finalString.append(" \"" + iterator.value().get<size_t>()); //Get the value.
+				finalString.append("\"");
+			}
 		}
 		else //Handles all strings.
 		{

@@ -40,6 +40,8 @@ std::string newLine = "\n";
 //Buffer size for hashing
 const size_t hashBufferSize = 4096;
 
+//argumentVariables["internalObject"]["Thread Pools"]["Main Pool"] = std::thread::hardware_concurrency();
+
 //Creating threadpools.
 thread_pool threadPool(std::thread::hardware_concurrency()); //"Default" pool
 
@@ -90,7 +92,7 @@ void MThashGivenFile(std::string givenFilePath, std::vector<std::string>& givenV
 void compareHashes(std::vector<std::string>& firstGivenVectorDB, std::vector<std::string>& secondGivenVectorDB, std::vector<std::string>& fileOpAction, std::string firstGivenPath, std::string secondGivenPath);
 void contributeCompareDirectories(std::vector<std::string>& firstGivenVectorDB, std::vector<std::string>& secondGivenVectorDB, std::vector<std::string>& hashActions, std::vector<std::string>& fileOpAction, std::string firstGivenPath, std::string secondGivenPath);
 void echoCompareDirectories(std::vector<std::string>& firstGivenVectorDB, std::vector<std::string>& secondGivenVectorDB, std::vector<std::string>& hashActions, std::vector<std::string>& fileOpAction, std::string firstGivenPath, std::string secondGivenPath);
-std::string formatFilePath(std::string givenString, std::string givenDirectorySeparator = ""); //Used to change \\ to /
+std::string formatFilePath(std::string givenString); //Used to change \\ to /
 size_t nthOccurrence(std::string& givenString, std::string delimitingCharacter, size_t nth); //Provides character location of nthOccurrence of a given character in a given string.
 void performHashActionFile(std::vector<std::string>& hashActions, std::vector<std::string>& firstGivenVectorDB, std::vector<std::string>& secondGivenVectorDB, std::string firstGivenPath, std::string secondGivenPath); //
 void performFileOpActionFile(std::vector<std::string>& fileOpAction); //Goes through File Operation Actions vector. Interprets data and assigns task to thread pool.
@@ -114,6 +116,7 @@ int main(int argc, char* argv[])
 	//handling arguments.
 	handleArguments(argc, argv);
 	std::cout << argumentVariables.dump(4) << std::endl;
+	std::cout << directorySeparator << std::endl;
 	system("PAUSE");
 
 	//Creating vectors to hold directory maps.
@@ -217,16 +220,19 @@ int main(int argc, char* argv[])
 		writeConsoleMessagesPool.push_task(displayConsoleMessage, "Hash comparison finished!"); //
 	}
 
-
+	//argumentVariables["internalObject"]["No Files Operations"] = true; //DEBUGGING
 	//Performing file operations.
-	writeDebugThreadPool.push_task(writeToDebug, std::chrono::system_clock::now(), true, "----- FILE OPERATIONS -----");
-	writeConsoleMessagesPool.push_task(displayConsoleMessage, "Beginning File Operations...");
-	performFileOpActionFile(fileOpActions); //Regardless of the type of operation, a file operation check should occur.
-	writeDebugThreadPool.push_task(writeToDebug, std::chrono::system_clock::now(), true, "----- *COMPLETED* FILE OPERATIONS -----");
-	writeConsoleMessagesPool.push_task(displayConsoleMessage, "File Operations finished!");
+	if (!argumentVariables["internalObject"]["No Files Operations"].get<bool>())
+	{
+		writeDebugThreadPool.push_task(writeToDebug, std::chrono::system_clock::now(), true, "----- FILE OPERATIONS -----");
+		writeConsoleMessagesPool.push_task(displayConsoleMessage, "Beginning File Operations...");
+		performFileOpActionFile(fileOpActions); //Regardless of the type of operation, a file operation check should occur.
+		writeDebugThreadPool.push_task(writeToDebug, std::chrono::system_clock::now(), true, "----- *COMPLETED* FILE OPERATIONS -----");
+		writeConsoleMessagesPool.push_task(displayConsoleMessage, "File Operations finished!");
+	}
 
 	//Outputting files!
-	if (argumentVariables["internalObject"]["Output Files"].get<std::string>() != "")
+	if (argumentVariables["internalObject"]["Output Files"].is_string())
 	{
 		if (!std::filesystem::is_directory(argumentVariables["internalObject"]["Output Files"].get<std::string>()))
 		{
@@ -259,7 +265,7 @@ int main(int argc, char* argv[])
 		//Define log locations
 		//***** This needs work. The user should be able to specify where the log directory is located.
 		std::string firstDirectoryDB = argumentVariables["internalObject"]["Output Files"].get<std::string>() + "DirectoryOne.log";
-		std::string secondDirectoryDB = argumentVariables["internalObject"]["Output Files"].get<std::string>() + "DirectoryTWo.log";
+		std::string secondDirectoryDB = argumentVariables["internalObject"]["Output Files"].get<std::string>() + "DirectoryTwo.log";
 		
 
 		//Creating files themselves.
@@ -387,9 +393,9 @@ size_t nthOccurrence(std::string& givenString, std::string delimitingCharacter, 
 }
 
 //Uniformly sets directory separators.
-std::string formatFilePath(std::string givenString, std::string givenDirectorySeparator)
+std::string formatFilePath(std::string givenString)
 {
-	if (givenDirectorySeparator == "\\" || givenString.find("\\\\?\\") != std::string::npos) //If the windows max_path bypass is in the path, then all separators must be backslashes.
+	if (directorySeparator == '\\')
 	{
 		//Formatting givenFile to have the slashes ALL be \.
 		for (size_t i = 0; i < (size_t)givenString.length(); ++i)
@@ -407,7 +413,6 @@ std::string formatFilePath(std::string givenString, std::string givenDirectorySe
 				givenString[i] = '/';
 		}
 	}
-
 
 	return givenString;
 }
@@ -491,15 +496,12 @@ void performFileOpActionFile(std::vector<std::string>& fileOpAction)
 		if (requestedAction == "DELETE")
 		{
 			destination = currentReadLine.substr(nthOccurrence(currentReadLine, delimitingCharacter, 1) + 3, nthOccurrence(currentReadLine, delimitingCharacter, 2) - nthOccurrence(currentReadLine, delimitingCharacter, 1) - 3); //Reading destination. When deleting, it is after the second delimiter to end of string. We also remove the "\n" characters at the end.
-			writeDebugThreadPool.push_task(writeToDebug, std::chrono::system_clock::now(), true, "DELETING: " + destination);
 			fileOperationThreadPool.push_task(removeObject, destination, true); //Creating deletion task, assigning it to main pool.
 		}
-
 		else if (requestedAction == "COPY")
 		{
 			source = currentReadLine.substr(nthOccurrence(currentReadLine, delimitingCharacter, 1) + 3, nthOccurrence(currentReadLine, delimitingCharacter, 2) - nthOccurrence(currentReadLine, delimitingCharacter, 1) - 3); //Reading source. Between first and second delimiter.  
 			destination = currentReadLine.substr(nthOccurrence(currentReadLine, delimitingCharacter, 2) + 3, std::string::npos); //Reading destination. Second delimiter to end of string, removing the "\n" characters at the end.
-			writeDebugThreadPool.push_task(writeToDebug, std::chrono::system_clock::now(), true, "COPYING: " + source + " - " + destination); //Log.
 			fileOperationThreadPool.push_task(copyFile, source, destination); //Creating copying task, assigning it to main pool. Directory One file.
 		}
 		else if (requestedAction == "MOVE") //Future use for other sync methods. *****
@@ -514,7 +516,6 @@ void performFileOpActionFile(std::vector<std::string>& fileOpAction)
 		source = "";
 		destination = "";
 	}
-
 
 	writeConsoleMessagesPool.push_task(displayConsoleMessage, "Tasks assigned. Waiting for file operations to finish...");
 	fileOperationThreadPool.wait_for_tasks(); //Waiting for tasks to finish.

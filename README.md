@@ -1,13 +1,22 @@
 # Sync Application
 (No. The name is not finalized.)
 
+Sync Application is a command-line driven project created out of frustration with other free file backup tools. I found that other free tools wouldn't consistently copy files, or folders, and weren't byte-for-byte copies of the data I provided. I was also dissatisfied by the performance of these tools, with backups sometimes taking 12+ hours when dealing with only ~500GB of data.  
+Additionally, I found that some features that I desired simply did not exist.  
+&nbsp;&nbsp;&nbsp;&nbsp;I will eventually be adding those features to this application.  
+
+Ideally, you can run this program twice and see no changes occuring for the second run.
+
+# Table of Contents
 - [Sync Application](#sync-application)
-- [Description](#description)
+- [Table of Contents](#table-of-contents)
 - [Requirements](#requirements)
 - [Installation](#installation)
 - [What's New?](#whats-new)
+	- [Features](#features)
+	- [Bug Fixes](#bug-fixes)
 - [Options](#options)
-	- [List of Arguments (OUTDATED)](#list-of-arguments-outdated)
+	- [List of Arguments](#list-of-arguments)
 	- [Operations](#operations)
 		- [Contribute (Cont)](#contribute-cont)
 		- [Echo](#echo)
@@ -20,12 +29,6 @@
 	- [Other Used Software Licenses](#other-used-software-licenses)
 - [Contact](#contact)
 	- [Website](#website)
-
-# Description
-Sync Application is a command-line driven project created out of frustration with other free file backup tools. I found that other free tools wouldn't consistently copy files, or folders, and weren't byte-for-byte copies of the data I provided. I was also dissatisfied by the performance of these tools, with backups sometimes taking 12+ hours when dealing with only ~500GB of data.
-Additionally, I found that some features that I desired simply did not exist.
-	I will eventually be adding those features to this application.
-
 
 This is a passion project, and it's only a plus if others can find some use from it.  
 My main focus is making something that works for myself, and learning new stuff as I go about it.  
@@ -42,19 +45,34 @@ You can also compile your own binaries by downloading the source files, opening 
 (Eventually, I will provide a better in-depth walk-through.)
 
 # What's New?
-The newest version adds:
-* Configuration files.
+## Features
+* The synchronize operation was removed indefinitely.
+  * It could return some day, but the primary focus of this application is to make backups easier. There are other utilities for synchronizing folders.
+* [Configuration files](config.md).
   * Allows you to add, use, and export configurations from a JSON file.
-* Proper UTF-8 Support.
-* Changed how arguments are handled (twice).
-  * 
+  * You can also "clean" a configuration file and remove any properties that aren't in use using "--clean-config".
+* Proper UTF-8 Support. Woo!
+  * This may have also significantly decreased memory usage, but I can't confirm this.
+* Changed how arguments are handled (twice). 
+	* This mostly just effects the maintainability of the code.
+	* The JSON config data-type is now used internally.
+	* Single letter switches (when more are added) can now be specified like "-abc..." and work as intended.
+* You can now specify where the internal database files are output to.
+  * This is a small addition that moves the project closer to being able to output/input specific files.
+* Recursiveness can now be specified on a per-directory basis.
+  
+## Bug Fixes
+* If the program fails to remove a file/folder due to being read-only, it makes five attempts to change the permissions and remove the object.
+* When going between NTFS and ExFAT, Last modification times were often being different due to inplicit rounding (ExFAT rounds to the nearest 2 seconds sometimes). This has been remedied by adding the "--modify-window" argument, which allows you to specify how different the times can be before being marked as "different".
+  * If you find that running the program consecutively copies the same files repeatedly, look into utilizing this argument.
+* You can no longer provide a directory that is nested within the other specified directory.
+  * I'm not entirely sure how this would act, but it's not necessary.
+
 
 # Options
+## List of Arguments
 
-## List of Arguments (OUTDATED)
-(An asterisk indicates a required input)
-
-**NOTE**: *Paths should NOT end with a back slash ("\\") as quotation marks could be escaped. Usage of forward slashes ("/") is encouraged and what is used internally, when possible, to avoid conflicts.*
+**NOTE**: *Paths should NOT end with a back slash ("\\") as quotation marks could be escaped. Usage of forward slashes ("/") is encouraged and what is used internally, when possible, to avoid conflicts like this.*
 ```
 --add-to-config <PATH_TO_CONFIG_FILE>
 	This requires a fully functional set of arguments, as well as a --name <NAME> to identify the configuration.
@@ -97,6 +115,12 @@ The newest version adds:
 --no-warning
 	Disables the warning that explains the operation and outlines what files are potentially at risk. This should probably only be used when automating the run process.
 
+--modify-window <SECONDS>
+	Determines how different last modified times can be before being marked as different.
+	File systems store times differently, so transfering a file from NTFS to ExFAT typically results in the ExFAT time getting rounded up to the nearest 2 seconds (even number).
+	Use this setting if you find that consecutively running the program results in the copying of the same files.
+	(This works identically to rsync)
+
 --operation-mode <OPERATION_MODE>
 	Operation Mode specifies how the program decides which files go where. The available options being "contribute" or "cont", and "echo".
 
@@ -121,7 +145,7 @@ The newest version adds:
 * Echo will echo any changes made in directory one to directory two.  
 * Changes will only occur within directory two.  
 
-## Configuration File
+## [Configuration File](config.md)
 Multiple pre-made operations can be stored in a configuration file for easy access.  
 More information can be found in the [config.md](config.md)
 
@@ -139,8 +163,6 @@ More documentation for configuration files can be found in the [config.md](confi
 # Software Shout-outs
 This application uses several incredible open-source pieces of software and code.  
 I want to give thinks, and provide the resources for other people to utilize their tools and show appreciation to them. Without these libraries, this would never have been made.
-* [Boost](https://www.boost.org/) - Filesystem
-	* I initially used the Boost Filesystem library handle all filesystem interactions, but have since moved to the built-in filesystem utilities (which were taken from Boost!). I currently use Boost to obtain file metadata times (last modification and creation times). I find the data returned a little easier to work with.
 * [JSON by Niels Lohmann](https://github.com/nlohmann/json)
 	* The well known C++ JSON library by Niels Lohmann is being used to handle the internal keeping of arguments and anything related to the configuration files.  
 	It has been a pleasure to work with! 
@@ -172,10 +194,6 @@ This means that you must:
 
 ## Other Used Software Licenses
 Below is a breakdown of what licenses are applied, and what software they come from.
-
-* [Boost - Boost Software License](https://www.boost.org/users/license.html)
-	* Requires adding copyright notice and license. (These can be found under the LICENSES folder)
-	* All permissive.
 
 * [JSON by Niels Lohmann - MIT License](https://github.com/nlohmann/json/blob/develop/LICENSE.MIT)
 	* All permissive.
