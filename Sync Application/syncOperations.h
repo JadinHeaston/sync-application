@@ -13,11 +13,6 @@ void contributeCompareDirectories(std::vector<std::string>& firstGivenVectorDB, 
 
 	size_t DB2Line; //DB1Map searching in DB2Map provides the line of DB2Match.
 
-	//Holds 
-	std::string iter1;
-	std::string iter2;
-
-
 	//Column variables to avoid streamline calls on vectors.
 	std::string workingPath;
 	std::string workingPathTwo;
@@ -43,24 +38,22 @@ void contributeCompareDirectories(std::vector<std::string>& firstGivenVectorDB, 
 		{
 			DB2Line = DB2Map[workingPath]; //Save the value.
 
-			iter1 = std::to_string(iterator); //Convert the line of DB1 line to a string for saving.
-			iter2 = std::to_string(DB2Line); //Convert newly found DB2 line to a string for saving.
-			firstGivenVectorDB[iterator].insert(firstGivenVectorDB[iterator].length() - 1, "MATCHED" + delimitingCharacter + iter2); //Add match marker and line.
-			secondGivenVectorDB[DB2Line].insert(secondGivenVectorDB[DB2Line].length() - 1, "MATCHED" + delimitingCharacter + iter1); //Add match marker and line.
+			firstGivenVectorDB[iterator].insert(firstGivenVectorDB[iterator].length() - 1, "MATCHED" + delimitingCharacter + std::to_string(DB2Line)); //Add match marker and line.
+			secondGivenVectorDB[DB2Line].insert(secondGivenVectorDB[DB2Line].length() - 1, "MATCHED" + delimitingCharacter + std::to_string(iterator)); //Add match marker and line.
 
-			if (std::filesystem::is_directory(firstGivenVectorDB[iterator].substr(0, nthOccurrence(firstGivenVectorDB[iterator], delimitingCharacter, 1)))) //If the path not a directory, skip the iteration.
+			if (std::filesystem::is_directory(std::filesystem::u8path(firstGivenVectorDB[iterator].substr(0, nthOccurrence(firstGivenVectorDB[iterator], delimitingCharacter, 1))))) //If the path not a directory, skip the iteration.
 				continue;
 
-			workingDateMod = stoull(firstGivenVectorDB[iterator].substr(nthOccurrence(firstGivenVectorDB[iterator], delimitingCharacter, 2) + 1, nthOccurrence(firstGivenVectorDB[iterator], delimitingCharacter, 3) - nthOccurrence(firstGivenVectorDB[iterator], delimitingCharacter, 2) - 1)); //Third column
-			workingDateModTwo = stoull(secondGivenVectorDB[DB2Line].substr(nthOccurrence(secondGivenVectorDB[DB2Line], delimitingCharacter, 2) + 1, nthOccurrence(secondGivenVectorDB[DB2Line], delimitingCharacter, 3) - nthOccurrence(secondGivenVectorDB[DB2Line], delimitingCharacter, 2) - 1)); //Third column
+			workingDateMod = stoull(firstGivenVectorDB[iterator].substr(nthOccurrence(firstGivenVectorDB[iterator], delimitingCharacter, 2) + 3, nthOccurrence(firstGivenVectorDB[iterator], delimitingCharacter, 3) - nthOccurrence(firstGivenVectorDB[iterator], delimitingCharacter, 2) - 3)); //Third column
+			workingDateModTwo = stoull(secondGivenVectorDB[DB2Line].substr(nthOccurrence(secondGivenVectorDB[DB2Line], delimitingCharacter, 2) + 3, nthOccurrence(secondGivenVectorDB[DB2Line], delimitingCharacter, 3) - nthOccurrence(secondGivenVectorDB[DB2Line], delimitingCharacter, 2) - 3)); //Third column
 			if (workingDateMod % workingDateModTwo <= modifyWindow || workingDateModTwo % workingDateMod <= modifyWindow) //If the file paths match, check the last modified times.
 			{
-				workingSize = stoull(firstGivenVectorDB[iterator].substr(nthOccurrence(firstGivenVectorDB[iterator], delimitingCharacter, 1) + 1, nthOccurrence(firstGivenVectorDB[iterator], delimitingCharacter, 2) - nthOccurrence(firstGivenVectorDB[iterator], delimitingCharacter, 1) - 1)); //Second column
-				workingSizeTwo = stoull(secondGivenVectorDB[DB2Line].substr(nthOccurrence(secondGivenVectorDB[DB2Line], delimitingCharacter, 1) + 1, nthOccurrence(secondGivenVectorDB[DB2Line], delimitingCharacter, 2) - nthOccurrence(secondGivenVectorDB[DB2Line], delimitingCharacter, 1) - 1)); //Second column
+				workingSize = stoull(firstGivenVectorDB[iterator].substr(nthOccurrence(firstGivenVectorDB[iterator], delimitingCharacter, 1) + 3, nthOccurrence(firstGivenVectorDB[iterator], delimitingCharacter, 2) - nthOccurrence(firstGivenVectorDB[iterator], delimitingCharacter, 1) - 3)); //Second column
+				workingSizeTwo = stoull(secondGivenVectorDB[DB2Line].substr(nthOccurrence(secondGivenVectorDB[DB2Line], delimitingCharacter, 1) + 3, nthOccurrence(secondGivenVectorDB[DB2Line], delimitingCharacter, 2) - nthOccurrence(secondGivenVectorDB[DB2Line], delimitingCharacter, 1) - 3)); //Second column
 				if (workingSize == workingSizeTwo) //Check if the file sizes match.
 				{
 					if (argumentVariables["internalObject"]["Check File Contents"].get<bool>()) 
-						hashActions.push_back(workingPath + delimitingCharacter + iter1 + delimitingCharacter + iter2 + newLine); //If everything matches, these files need hashed and compared.
+						hashActions.push_back(workingPath + delimitingCharacter + std::to_string(iterator) + delimitingCharacter + std::to_string(DB2Line) + newLine); //If everything matches, these files need hashed and compared.
 				}
 				else
 					fileOpAction.push_back("COPY - Different file sizes" + delimitingCharacter + firstGivenPath + directorySeparator + workingPath + delimitingCharacter + secondGivenPath + directorySeparator + workingPath + newLine); //Copy directory one file to directory two.

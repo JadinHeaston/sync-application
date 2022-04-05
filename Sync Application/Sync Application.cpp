@@ -88,10 +88,11 @@ void moveFile(std::string givenSourcePath, std::string givenDestinationPath);
 //hashing.h
 std::string convertMD5ToHex(unsigned char* givenDigest);
 void MThashGivenFile(std::string givenFilePath, std::vector<std::string>& givenVector, std::string lineLocation);
-//main
-void compareHashes(std::vector<std::string>& firstGivenVectorDB, std::vector<std::string>& secondGivenVectorDB, std::vector<std::string>& fileOpAction, std::string firstGivenPath, std::string secondGivenPath);
+//syncOperations.h
 void contributeCompareDirectories(std::vector<std::string>& firstGivenVectorDB, std::vector<std::string>& secondGivenVectorDB, std::vector<std::string>& hashActions, std::vector<std::string>& fileOpAction, std::string firstGivenPath, std::string secondGivenPath);
 void echoCompareDirectories(std::vector<std::string>& firstGivenVectorDB, std::vector<std::string>& secondGivenVectorDB, std::vector<std::string>& hashActions, std::vector<std::string>& fileOpAction, std::string firstGivenPath, std::string secondGivenPath);
+//main
+void compareHashes(std::vector<std::string>& firstGivenVectorDB, std::vector<std::string>& secondGivenVectorDB, std::vector<std::string>& fileOpAction, std::string firstGivenPath, std::string secondGivenPath);
 std::string formatFilePath(std::string givenString); //Used to change \\ to /
 size_t nthOccurrence(std::string& givenString, std::string delimitingCharacter, size_t nth); //Provides character location of nthOccurrence of a given character in a given string.
 void performHashActionFile(std::vector<std::string>& hashActions, std::vector<std::string>& firstGivenVectorDB, std::vector<std::string>& secondGivenVectorDB, std::string firstGivenPath, std::string secondGivenPath); //
@@ -222,7 +223,7 @@ int main(int argc, char* argv[])
 
 	//argumentVariables["internalObject"]["No Files Operations"] = true; //DEBUGGING
 	//Performing file operations.
-	if (!argumentVariables["internalObject"]["No Files Operations"].get<bool>())
+	if (!argumentVariables["internalObject"]["No File Operations"].get<bool>())
 	{
 		writeDebugThreadPool.push_task(writeToDebug, std::chrono::system_clock::now(), true, "----- FILE OPERATIONS -----");
 		writeConsoleMessagesPool.push_task(displayConsoleMessage, "Beginning File Operations...");

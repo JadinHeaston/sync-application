@@ -82,7 +82,7 @@ void createDirectoryMapDB(std::vector<std::string>& givenVectorDB, std::string g
 		for (std::filesystem::directory_iterator itr(givenStartPath); itr != end_itr; ++itr)
 		{
 			//Setting current file equal to the full path of the file.
-			current_file = dir->path().u8string();
+			current_file = itr->path().u8string();
 
 			//Putting path into array.
 			testStream << formatFilePath(current_file) << delimitingCharacter;

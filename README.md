@@ -67,7 +67,7 @@ You can also compile your own binaries by downloading the source files, opening 
   * If you find that running the program consecutively copies the same files repeatedly, look into utilizing this argument.
 * You can no longer provide a directory that is nested within the other specified directory.
   * I'm not entirely sure how this would act, but it's not necessary.
-
+* Forward slashes were used internally when using the -l Windows Max Path Bypass. (So having "\\?\" at the start and forward slashes everywhere else). This caused issues and backslashes are now used internally, which seems to have fixed the issue.
 
 # Options
 ## List of Arguments
