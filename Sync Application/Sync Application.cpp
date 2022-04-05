@@ -45,12 +45,10 @@ const size_t hashBufferSize = 4096;
 //Creating threadpools.
 thread_pool threadPool(std::thread::hardware_concurrency()); //"Default" pool
 
-thread_pool hashingThreadPool(std::thread::hardware_concurrency());
-
 thread_pool fileOperationThreadPool(std::thread::hardware_concurrency()); //Specific to file operations.
 
 thread_pool writeDebugThreadPool(1); //Dedicated to writing to the debug file.
-thread_pool writeConsoleMessagesPool(1);
+thread_pool writeConsoleMessagesPool(1); //Dedicated to console messages.
 
 //Holds provided directory given from args. "Super Parents"
 std::string firstGivenDirectoryPath;
@@ -64,10 +62,10 @@ size_t debugFileCount = 1;
 
 //FUNCTION PROTOTYPES
 //arguments.h
-void handleArguments(int& argc, char* argv[]);
-void readArguments(int& argc, char* argv[], std::string& pathToConfigFile);
-void processArguments(int& argc, char* argv[], std::string& pathToConfigFile);
 bool checkArgumentValue(size_t& position, int& argc, char* argv[], bool failSafe = false);
+void readArguments(int& argc, char* argv[], std::string& pathToConfigFile);
+void handleArguments(int& argc, char* argv[]);
+void processArguments(int& argc, char* argv[], std::string& pathToConfigFile);
 //configFile.h
 void addToConfigurationFile(std::string pathToConfig, json& givenArguments, std::string configurationName);
 void change_key(json& object, const std::string& old_key, const std::string& new_key);
@@ -218,16 +216,17 @@ int main(int argc, char* argv[])
 		writeConsoleMessagesPool.push_task(displayConsoleMessage, "Hashing finished!");
 		writeConsoleMessagesPool.push_task(displayConsoleMessage, "Comparing file hashes...");
 		compareHashes(directoryOneDB, directoryTwoDB, fileOpActions, firstGivenDirectoryPath, secondGivenDirectoryPath);
-		writeConsoleMessagesPool.push_task(displayConsoleMessage, "Hash comparison finished!"); //
+		writeConsoleMessagesPool.push_task(displayConsoleMessage, "Hash comparison finished!");
 	}
 
-	//argumentVariables["internalObject"]["No Files Operations"] = true; //DEBUGGING
+	//argumentVariables["internalObject"]["No File Operations"] = true; //DEBUGGING
+	
 	//Performing file operations.
 	if (!argumentVariables["internalObject"]["No File Operations"].get<bool>())
 	{
 		writeDebugThreadPool.push_task(writeToDebug, std::chrono::system_clock::now(), true, "----- FILE OPERATIONS -----");
 		writeConsoleMessagesPool.push_task(displayConsoleMessage, "Beginning File Operations...");
-		performFileOpActionFile(fileOpActions); //Regardless of the type of operation, a file operation check should occur.
+		performFileOpActionFile(fileOpActions);
 		writeDebugThreadPool.push_task(writeToDebug, std::chrono::system_clock::now(), true, "----- *COMPLETED* FILE OPERATIONS -----");
 		writeConsoleMessagesPool.push_task(displayConsoleMessage, "File Operations finished!");
 	}
@@ -441,8 +440,8 @@ void performHashActionFile(std::vector<std::string>& hashActions, std::vector<st
 		directoryOneVectorLocation = currentReadLine.substr(nthOccurrence(currentReadLine, delimitingCharacter, 1) + 3, nthOccurrence(currentReadLine, delimitingCharacter, 2)); //Between first and second delimiter.
 		directoryTwoVectorLocation = currentReadLine.substr(nthOccurrence(currentReadLine, delimitingCharacter, 2) + 3, currentReadLine.length() - 1); //Going up until newline.
 
-		hashingThreadPool.push_task(MThashGivenFile, directoryOneFile, std::ref(firstGivenVectorDB), directoryOneVectorLocation); //Creating task, assigning it to main pool. Directory One file.
-		hashingThreadPool.push_task(MThashGivenFile, directoryTwoFile, std::ref(secondGivenVectorDB), directoryTwoVectorLocation); //Creating task, assigning it to main pool. Directory Two file.
+		threadPool.push_task(MThashGivenFile, directoryOneFile, std::ref(firstGivenVectorDB), directoryOneVectorLocation); //Creating task, assigning it to main pool. Directory One file.
+		threadPool.push_task(MThashGivenFile, directoryTwoFile, std::ref(secondGivenVectorDB), directoryTwoVectorLocation); //Creating task, assigning it to main pool. Directory Two file.
 	}
 	writeConsoleMessagesPool.push_task(displayConsoleMessage, "Tasks assigned. Waiting for hash tasks to finish...");
 
@@ -455,7 +454,7 @@ void performHashActionFile(std::vector<std::string>& hashActions, std::vector<st
 
 	bool readyForNext = true;
 
-	while (hashingThreadPool.get_tasks_total())
+	while (threadPool.get_tasks_total())
 	{
 		if (std::chrono::duration_cast<std::chrono::milliseconds>(std::chrono::steady_clock::now() - start).count() % 30000 == 0 && std::chrono::duration_cast<std::chrono::milliseconds>(std::chrono::steady_clock::now() - start).count() > 29999)
 		{
@@ -463,7 +462,7 @@ void performHashActionFile(std::vector<std::string>& hashActions, std::vector<st
 			{
 				if (readyForNext)
 				{
-					writeDebugThreadPool.push_task(writeToDebug, std::chrono::system_clock::now(), true, "HASHING TASK UPDATE - Total | Queued | Running - " + std::to_string(hashingThreadPool.get_tasks_total()) + " | " + std::to_string(hashingThreadPool.get_tasks_queued()) + " | " + std::to_string(hashingThreadPool.get_tasks_running()));
+					writeDebugThreadPool.push_task(writeToDebug, std::chrono::system_clock::now(), true, "HASHING TASK UPDATE - Total | Queued | Running - " + std::to_string(threadPool.get_tasks_total()) + " | " + std::to_string(threadPool.get_tasks_queued()) + " | " + std::to_string(threadPool.get_tasks_running()));
 					recordedTime = std::chrono::steady_clock::now();
 					readyForNext = false;
 				}
@@ -472,7 +471,7 @@ void performHashActionFile(std::vector<std::string>& hashActions, std::vector<st
 		else
 			readyForNext = true;
 	}
-	hashingThreadPool.wait_for_tasks(); //Waiting for tasks to finish.
+	threadPool.wait_for_tasks(); //Waiting for tasks to finish.
 }
 
 //Goes through file operation action file and assigns the appropriate tasks.
@@ -497,20 +496,20 @@ void performFileOpActionFile(std::vector<std::string>& fileOpAction)
 		if (requestedAction == "DELETE")
 		{
 			destination = currentReadLine.substr(nthOccurrence(currentReadLine, delimitingCharacter, 1) + 3, nthOccurrence(currentReadLine, delimitingCharacter, 2) - nthOccurrence(currentReadLine, delimitingCharacter, 1) - 3); //Reading destination. When deleting, it is after the second delimiter to end of string. We also remove the "\n" characters at the end.
-			fileOperationThreadPool.push_task(removeObject, destination, true); //Creating deletion task, assigning it to main pool.
+			threadPool.push_task(removeObject, destination, true); //Creating deletion task, assigning it to main pool.
 		}
 		else if (requestedAction == "COPY")
 		{
 			source = currentReadLine.substr(nthOccurrence(currentReadLine, delimitingCharacter, 1) + 3, nthOccurrence(currentReadLine, delimitingCharacter, 2) - nthOccurrence(currentReadLine, delimitingCharacter, 1) - 3); //Reading source. Between first and second delimiter.  
 			destination = currentReadLine.substr(nthOccurrence(currentReadLine, delimitingCharacter, 2) + 3, std::string::npos); //Reading destination. Second delimiter to end of string, removing the "\n" characters at the end.
-			fileOperationThreadPool.push_task(copyFile, source, destination); //Creating copying task, assigning it to main pool. Directory One file.
+			threadPool.push_task(copyFile, source, destination); //Creating copying task, assigning it to main pool. Directory One file.
 		}
 		else if (requestedAction == "MOVE") //Future use for other sync methods. *****
 		{
 			source = currentReadLine.substr(nthOccurrence(currentReadLine, delimitingCharacter, 1) + 3, nthOccurrence(currentReadLine, delimitingCharacter, 2) - nthOccurrence(currentReadLine, delimitingCharacter, 1) - 3); //Reading source. Between first and second delimiter.  
 			destination = currentReadLine.substr(nthOccurrence(currentReadLine, delimitingCharacter, 2) + 3, std::string::npos); //Reading destination. Second delimiter to end of string, removing the "\n" characters at the end.
 			writeDebugThreadPool.push_task(writeToDebug, std::chrono::system_clock::now(), true, "MOVE: " + source + " - " + destination); //Log.
-			fileOperationThreadPool.push_task(moveFile, source, destination); //Creating move task, assigning it to main pool. Directory one file is moved to directory two.
+			threadPool.push_task(moveFile, source, destination); //Creating move task, assigning it to main pool. Directory one file is moved to directory two.
 		}
 
 		//Initializing variables.
@@ -519,7 +518,7 @@ void performFileOpActionFile(std::vector<std::string>& fileOpAction)
 	}
 
 	writeConsoleMessagesPool.push_task(displayConsoleMessage, "Tasks assigned. Waiting for file operations to finish...");
-	fileOperationThreadPool.wait_for_tasks(); //Waiting for tasks to finish.
+	threadPool.wait_for_tasks(); //Waiting for tasks to finish.
 }
 
 //Iterates through vectors and compares hashes. Creates file operation entries when differences are found.

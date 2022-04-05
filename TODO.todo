@@ -44,6 +44,7 @@ Main tasks:
 		☐ Create basic usage.
 		☐ Create detailed overview of how the program works.
 		☐ Create detailed switch/argument explanation with examples.
+			☐ Document what all arguments/switches default to.
 		☐ Also, create the text for the "-h/--help" arguments.
 			✔ -h writing. @done (1/29/2022, 2:05:14 PM)
 			☐ --help writing. - Maybe just copy the readme.md?
@@ -102,6 +103,7 @@ Completed:
 			✔ Add a flag arg to hide console output. Show it by default @done (1/23/2022, 2:16:35 PM)
 				✔ This should probably pause the output at the end of running. - Maybe an arg mutation for this? - No mutation. If the console is shown, pause at the end. @done (1/23/2022, 2:16:35 PM)
 	Other Features:
+		✔ Allow for manual thread pool thread assignment. @done (4/5/2022, 5:13:03 PM)
 		✔ Allow configurations to be converted into a command string. @done (3/25/2022, 7:45:20 PM)
 		✔ Allow specifying where "internal" files get output to when using --output-files. @done (3/26/2022, 10:37:16 AM)
 			✔ It probably shouldn't be it's own argument as a bool, but instead changing --output-files into a string that stores the output directory. @done (3/26/2022, 2:07:50 PM)

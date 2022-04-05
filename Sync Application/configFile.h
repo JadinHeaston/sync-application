@@ -42,7 +42,7 @@ void addToConfigurationFile(std::string pathToConfig, json& givenArguments, std:
 	}
 
 	//Check if the file is empty or has invalid JSON.
-	if (configFileReading.peek() != std::ifstream::traits_type::eof() && !json::accept(configFileReading))
+	if (configFileReading.peek() != std::ifstream::traits_type::eof() && !json::accept(configFileReading, true))
 	{
 		//Error with JSON syntax. Notifying user.
 		std::cout << "JSON syntax error: \"" << pathToConfig << "\"" << std::endl;
@@ -135,7 +135,7 @@ void cleanConfigurationFile(std::string pathToConfig, json& givenArguments)
 	}
 
 	//Fail is the ifstream can't be parsed.
-	if (!json::accept(configFileReading))
+	if (!json::accept(configFileReading, true))
 	{
 		//Error with JSON syntax. Notifying user.
 		std::cout << "JSON syntax error: \"" << pathToConfig << "\"" << std::endl;

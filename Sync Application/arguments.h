@@ -54,7 +54,7 @@ void handleArguments(int& argc, char* argv[])
 			checkArgumentValue(i, argc, argv);
 			configurationName = argv[i + 1];
 		}
-		else if (strncmp(argv[i], "-", 1) == 0) //Check for single dash.
+		else if (strncmp(argv[i], "--", 2) != 0) //Check for single dash.
 		{
 			for (size_t iterator = 1; iterator < sizeof(argv[i]); ++iterator) //Iterating through all characters, after the slash. (Starting at 1 to skip the initial dash)
 				singleCharArguments[tolower(argv[i][iterator])] = 1; //Ensuring keys are lowercase for easy use later.
@@ -99,7 +99,8 @@ void handleArguments(int& argc, char* argv[])
 		argumentVariables["internalObject"]["Operation Mode"] = ""; //Holds operation mode to perform.
 	if (argumentVariables["internalObject"]["Windows Max Path Bypass"].is_null())
 		argumentVariables["internalObject"]["Windows Max Path Bypass"] = false;
-	//if (argumentVariables["internalObject"]["Thread Pool Assignment"].is_null())
+	if (argumentVariables["internalObject"]["Thread Assignment"].is_null())
+		argumentVariables["internalObject"]["Thread Assignment"] = std::thread::hardware_concurrency();
 	
 	//Reading for additional arguments.
 	readArguments(argc, argv, pathToConfigFile);
@@ -182,8 +183,13 @@ void readArguments(int& argc, char* argv[], std::string& pathToConfigFile)
 				argumentVariables["internalObject"]["Verbose Debugging"] = true; //Set global verbose debug variable to true.
 				argumentVariables["internalObject"]["Debug File Path"] = argv[i + 1]; //Get next argument.
 			}
+			else if (strcmp(argv[i], "--threads") == 0) //Defines manual thread assigment.
+			{
+				checkArgumentValue(i, argc, argv, true);
+				argumentVariables["internalObject"]["Thread Assignment"] = atoi(argv[i + 1]);
+			}
 		}
-		else if (strncmp(argv[i], "-", 1) == 0) //Check for single dash.
+		else if (strncmp(argv[i], "--", 2) != 0) //Check for single dash.
 		{
 			for (size_t iterator = 0; iterator < sizeof(argv[i]); ++iterator) //Iterating through all characters, after the slash. (Starting at 1 to skip the initial dash)
 				singleCharArguments[tolower(argv[i][iterator])] = true; //Ensuring keys are lowercase for easy use later.
@@ -204,15 +210,17 @@ void processArguments(int& argc, char* argv[], std::string& pathToConfigFile)
 {
 	// ----- //
 	//Thread assignments
-	//if (!argumentVariables["internalObject"]["Thread Pool Assignment"].is_null())
-	//{
-	//	if (argumentVariables["internalObject"]["Main"].is_number())
-	//		threadPool.reset(argumentVariables["internalObject"]["Main Pool"].get<size_t>());
-	//	if (argumentVariables["internalObject"]["Hashing Pool"].is_number())
-	//		threadPool.reset(argumentVariables["internalObject"]["Hashing Pool"].get<size_t>());
-	//	if (argumentVariables["internalObject"]["File Operations"].is_number())
-	//		threadPool.reset(argumentVariables["internalObject"]["File Operations"].get<size_t>());
-	//}
+	if (!argumentVariables["internalObject"]["Thread Assignment"].is_null())
+	{
+		if (argumentVariables["internalObject"]["Thread Assignment"].is_number())
+			threadPool.reset(argumentVariables["internalObject"]["Thread Assignment"].get<int>());
+		else
+		{
+			std::cout << "Invalid thread assignment. Please enter an integer, or remove the variable to use all system threads." << std::endl;
+			std::cout << "Continuing using all available threads..." << std::endl;
+			writeDebugThreadPool.push_task(writeToDebug, std::chrono::system_clock::now(), true, "ERROR: Invalid thread assignment. Continuing using all system threads.");
+		}
+	}
 	
 
 
@@ -457,6 +465,7 @@ bool checkArgumentValue(size_t& position, int& argc, char* argv[], bool failSafe
 	{
 		if (failSafe)
 			return true;
+
 		std::cout << "Error parsing arguments: " << argv[position] << " found another argument following it (" << argv[position + 1] << ")" << std::endl;
 		system("PAUSE");
 		exit(1);

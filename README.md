@@ -5,7 +5,7 @@ Sync Application is a command-line driven project created out of frustration wit
 Additionally, I found that some features that I desired simply did not exist.  
 &nbsp;&nbsp;&nbsp;&nbsp;I will eventually be adding those features to this application.  
 
-Ideally, you can run this program twice and see no changes occuring for the second run.
+Ideally, you can run this program twice and see no changes occurring for the second run.
 
 # Table of Contents
 - [Sync Application](#sync-application)
@@ -59,11 +59,11 @@ You can also compile your own binaries by downloading the source files, opening 
 	* Single letter switches (when more are added) can now be specified like "-abc..." and work as intended.
 * You can now specify where the internal database files are output to.
   * This is a small addition that moves the project closer to being able to output/input specific files.
-* Recursiveness can now be specified on a per-directory basis.
+* Recursive-ness can now be specified on a per-directory basis.
   
 ## Bug Fixes
 * If the program fails to remove a file/folder due to being read-only, it makes five attempts to change the permissions and remove the object.
-* When going between NTFS and ExFAT, Last modification times were often being different due to inplicit rounding (ExFAT rounds to the nearest 2 seconds sometimes). This has been remedied by adding the "--modify-window" argument, which allows you to specify how different the times can be before being marked as "different".
+* When going between NTFS and ExFAT, Last modification times were often being different due to implicit rounding (ExFAT rounds to the nearest 2 seconds sometimes). This has been remedied by adding the "--modify-window" argument, which allows you to specify how different the times can be before being marked as "different".
   * If you find that running the program consecutively copies the same files repeatedly, look into utilizing this argument.
 * You can no longer provide a directory that is nested within the other specified directory.
   * I'm not entirely sure how this would act, but it's not necessary.
@@ -117,7 +117,7 @@ You can also compile your own binaries by downloading the source files, opening 
 
 --modify-window <SECONDS>
 	Determines how different last modified times can be before being marked as different.
-	File systems store times differently, so transfering a file from NTFS to ExFAT typically results in the ExFAT time getting rounded up to the nearest 2 seconds (even number).
+	File systems store times differently, so transferring a file from NTFS to ExFAT typically results in the ExFAT time getting rounded up to the nearest 2 seconds (even number).
 	Use this setting if you find that consecutively running the program results in the copying of the same files.
 	(This works identically to rsync)
 
@@ -129,6 +129,13 @@ You can also compile your own binaries by downloading the source files, opening 
 
 --output-verbose-debug <OUTPUT_LOCATION>
 	Outputs log as the program runs to assist with debugging. If a log is present, new data is appended to prevent debugging data loss.
+
+--threads <THREAD_COUNT>
+	Manually sets how many threads the internal thread pool has to use. This will default to the system's thread count.
+	This is best used by someone who knows what they are doing and why they want to do it.
+	For example, I have personally found benefits in limiting the thread pool to 1 thread when using two older hard drives as it causes less random IO to happen on the disk.
+	It could also be used if you want to keep the program from taking all of your processing power, although I tend to find that there are other bottlenecks first. (Storage)
+	(No harm in playing around!)
 
 --use-config <PATH_TO_CONFIG_FILE>
 	If multiple configurations are within the same file, a --configuration-name <NAME> MUST be specified for the program to know which configuration to use.
