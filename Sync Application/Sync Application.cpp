@@ -45,8 +45,6 @@ const size_t hashBufferSize = 4096;
 //Creating threadpools.
 thread_pool threadPool(std::thread::hardware_concurrency()); //"Default" pool
 
-thread_pool fileOperationThreadPool(std::thread::hardware_concurrency()); //Specific to file operations.
-
 thread_pool writeDebugThreadPool(1); //Dedicated to writing to the debug file.
 thread_pool writeConsoleMessagesPool(1); //Dedicated to console messages.
 
@@ -114,9 +112,9 @@ int main(int argc, char* argv[])
 
 	//handling arguments.
 	handleArguments(argc, argv);
-	std::cout << argumentVariables.dump(4) << std::endl;
-	std::cout << directorySeparator << std::endl;
-	system("PAUSE");
+	//std::cout << argumentVariables.dump(4) << std::endl;
+	//std::cout << directorySeparator << std::endl;
+	//system("PAUSE");
 
 	//Creating vectors to hold directory maps.
 	std::vector<std::string> directoryOneDB;

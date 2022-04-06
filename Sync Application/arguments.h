@@ -41,6 +41,7 @@ void handleArguments(int& argc, char* argv[])
 	//Iterate through arguments for a help message, or a use configuration message.
 	for (size_t i = 0; i < argc; i++) // Cycle through all arguments.
 	{
+
 		if (strcmp(argv[1], "--help") == 0) //Checking second argument for if it is "-h" or "-help".
 			displayHelpMessage(true, argc, argv);
 		else if (strcmp(argv[i], "--use-config") == 0) //Use an external configuration
@@ -54,7 +55,7 @@ void handleArguments(int& argc, char* argv[])
 			checkArgumentValue(i, argc, argv);
 			configurationName = argv[i + 1];
 		}
-		else if (strncmp(argv[i], "--", 2) != 0) //Check for single dash.
+		else if (strncmp(argv[i], "--", 2) != 0 && strncmp(argv[i], "-", 1) == 0) //Check for single dash.
 		{
 			for (size_t iterator = 1; iterator < sizeof(argv[i]); ++iterator) //Iterating through all characters, after the slash. (Starting at 1 to skip the initial dash)
 				singleCharArguments[tolower(argv[i][iterator])] = 1; //Ensuring keys are lowercase for easy use later.
@@ -189,7 +190,7 @@ void readArguments(int& argc, char* argv[], std::string& pathToConfigFile)
 				argumentVariables["internalObject"]["Thread Assignment"] = atoi(argv[i + 1]);
 			}
 		}
-		else if (strncmp(argv[i], "--", 2) != 0) //Check for single dash.
+		else if (strncmp(argv[i], "--", 2) != 0 && strncmp(argv[i], "-", 1) == 0) //Check for single dash.
 		{
 			for (size_t iterator = 0; iterator < sizeof(argv[i]); ++iterator) //Iterating through all characters, after the slash. (Starting at 1 to skip the initial dash)
 				singleCharArguments[tolower(argv[i][iterator])] = true; //Ensuring keys are lowercase for easy use later.

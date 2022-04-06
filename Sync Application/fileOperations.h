@@ -217,7 +217,7 @@ void removeObject(std::string destinationFilePath, bool recursiveRemoval)
 
 	size_t count = 0;
 
-	while (count < 5) //give up after 5 attempts.
+	while (count < 10) //give up after 5 attempts.
 	{
 		if (recursiveRemoval) //Determine which remove method we are using.
 			std::filesystem::remove_all(std::filesystem::u8path(destinationFilePath), ec); //Attempt to remove the object.
@@ -227,7 +227,7 @@ void removeObject(std::string destinationFilePath, bool recursiveRemoval)
 
 		if (ec.value() == 5) //If access is denied, sleep for a short period, change the permissions to allow writing.
 		{
-			std::this_thread::sleep_for(std::chrono::milliseconds(250)); //Give a small pause to prevent actions overlapping.
+			std::this_thread::sleep_for(std::chrono::milliseconds(2500)); //Give a small pause to prevent actions overlapping.
 			std::filesystem::permissions(std::filesystem::u8path(destinationFilePath), std::filesystem::perms::owner_write);
 			count++;
 		}
