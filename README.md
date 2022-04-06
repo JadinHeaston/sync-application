@@ -15,6 +15,7 @@ Ideally, you can run this program twice and see no changes occurring for the sec
 - [What's New?](#whats-new)
 	- [Features](#features)
 	- [Bug Fixes](#bug-fixes)
+	- [Future Plan](#future-plan)
 - [Options](#options)
 	- [List of Arguments](#list-of-arguments)
 	- [Operations](#operations)
@@ -60,7 +61,8 @@ You can also compile your own binaries by downloading the source files, opening 
 * You can now specify where the internal database files are output to.
   * This is a small addition that moves the project closer to being able to output/input specific files.
 * Recursive-ness can now be specified on a per-directory basis.
-  
+* Thread pool size can now be manually determined using "--threads"
+
 ## Bug Fixes
 * If the program fails to remove a file/folder due to being read-only, it makes five attempts to change the permissions and remove the object.
 * When going between NTFS and ExFAT, Last modification times were often being different due to implicit rounding (ExFAT rounds to the nearest 2 seconds sometimes). This has been remedied by adding the "--modify-window" argument, which allows you to specify how different the times can be before being marked as "different".
@@ -68,6 +70,14 @@ You can also compile your own binaries by downloading the source files, opening 
 * You can no longer provide a directory that is nested within the other specified directory.
   * I'm not entirely sure how this would act, but it's not necessary.
 * Forward slashes were used internally when using the -l Windows Max Path Bypass. (So having "\\?\" at the start and forward slashes everywhere else). This caused issues and backslashes are now used internally, which seems to have fixed the issue.
+
+## Future Plan
+* Add individual file exporting/importing.
+* Implement other protocols using libcurl (SFTP being one of the first.)
+* Add other hashing algorithms.
+  * I view MD5 as the best for this use-case and it will continue being the default. Despite that, I believe it would be easy to add a few others.
+
+The [TODO](TODO.todo) file is what I use to track what needs to be done.
 
 # Options
 ## List of Arguments

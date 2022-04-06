@@ -281,6 +281,7 @@ std::string convertJSONtoCommand(json& givenArguments)
 	JSONArguments["Show Warning"] = "--no-warning"; //T|F
 	JSONArguments["Verbose Debugging"] = ""; //T|F - This is created when --output-verbose-debug is used.
 	JSONArguments["Windows Max Path Bypass"] = "-l";
+	JSONArguments["Thread Pool"] = "--threads"; //Integer (int)
 
 	//Iterating through the current argument JSON.
 	for (json::iterator iterator = givenArguments["internalObject"].begin(); iterator != givenArguments["internalObject"].end(); ++iterator)
@@ -314,6 +315,15 @@ std::string convertJSONtoCommand(json& givenArguments)
 			{
 				finalString.append(" " + JSONArguments[iterator.key()].get<size_t>()); //Get the argument.
 				finalString.append(" \"" + iterator.value().get<size_t>()); //Get the value.
+				finalString.append("\"");
+			}
+		}
+		else if (givenArguments["internalObject"][iterator.key()].is_number())
+		{
+			if (JSONArguments[iterator.key()].get<size_t>() != 0)
+			{
+				finalString.append(" " + JSONArguments[iterator.key()].get<int>()); //Get the argument.
+				finalString.append(" \"" + iterator.value().get<int>()); //Get the value.
 				finalString.append("\"");
 			}
 		}

@@ -1,9 +1,4 @@
 Main tasks:
-	☐ Revamp arguments again.
-		The arguments are handled as they are found. They should be changed to read everything into their appropriate variables and then have a dedicated function that handles the validation of each variable.
-			The process needs split into distinct parts.
-			This problem came up when working on adding configuration file functionality. It was often hard to get arguments from another location while having the validation necessary, especially without repeating code everywhere.
-		Since the last revamp, I have fixed the UTF-8 support issue. This means that normal strings can be used, which simplifies everything.
 	☐ Alternative operation modes: @high
 		✔ Echo @done (1/22/2022, 8:43:37 AM)
 			✔ Completely mirror one directory to another. @done (1/29/2022, 5:43:03 PM)
@@ -102,6 +97,11 @@ Completed:
 				✔ Also allow a flag arg to disable this warning. @done (1/23/2022, 3:04:05 PM)
 			✔ Add a flag arg to hide console output. Show it by default @done (1/23/2022, 2:16:35 PM)
 				✔ This should probably pause the output at the end of running. - Maybe an arg mutation for this? - No mutation. If the console is shown, pause at the end. @done (1/23/2022, 2:16:35 PM)
+			✔ Revamp arguments again. @done (4/5/2022, 8:24:35 PM)
+				The arguments are handled as they are found. They should be changed to read everything into their appropriate variables and then have a dedicated function that handles the validation of each variable.
+				The process needs split into distinct parts.
+				This problem came up when working on adding configuration file functionality. It was often hard to get arguments from another location while having the validation necessary, especially without repeating code everywhere.
+			Since the last revamp, I have fixed the UTF-8 support issue. This means that normal strings can be used, which simplifies everything.
 	Other Features:
 		✔ Allow for manual thread pool thread assignment. @done (4/5/2022, 5:13:03 PM)
 		✔ Allow configurations to be converted into a command string. @done (3/25/2022, 7:45:20 PM)
