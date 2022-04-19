@@ -69,6 +69,8 @@ void addToConfigurationFile(std::string pathToConfig, json& givenArguments, std:
 void change_key(json& object, const std::string& old_key, const std::string& new_key);
 void cleanConfigurationFile(std::string pathToConfig, json& givenArguments);
 void readFromConfigurationFile(std::string pathToConfig, json& givenArguments, std::string configurationName);
+std::string convertJSONtoCommand(json& givenArguments);
+void listConfigs(std::string pathToConfig, std::string configurationName = "");
 //debugging.h
 void displayConsoleMessage(std::string givenMessage);
 void displayHelpMessage(bool longHelpMessage, int& argc, char* argv[]);

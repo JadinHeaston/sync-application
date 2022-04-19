@@ -6,6 +6,7 @@ bool cleanConfig = false;
 void handleArguments(int& argc, char* argv[])
 {
 	//Default arguments that don't need stored in a configuration.
+	bool listConfigurations = false;
 	bool useConfigurationFile = false;
 	bool showHelpMessage = false;
 	std::string configurationName; // --configuration-name
@@ -41,13 +42,18 @@ void handleArguments(int& argc, char* argv[])
 	//Iterate through arguments for a help message, or a use configuration message.
 	for (size_t i = 0; i < argc; i++) // Cycle through all arguments.
 	{
-
 		if (strcmp(argv[1], "--help") == 0) //Checking second argument for if it is "-h" or "-help".
 			displayHelpMessage(true, argc, argv);
 		else if (strcmp(argv[i], "--use-config") == 0) //Use an external configuration
 		{
 			checkArgumentValue(i, argc, argv);
 			useConfigurationFile = true;
+			pathToConfigFile = formatFilePath(argv[i + 1]); //Getting provided configuration file location.
+		}
+		else if (strcmp(argv[i], "--list-config") == 0) //Use an external configuration
+		{
+			checkArgumentValue(i, argc, argv);
+			listConfigurations = true;
 			pathToConfigFile = formatFilePath(argv[i + 1]); //Getting provided configuration file location.
 		}
 		else if ((strcmp(argv[i], "--configuration-name") == 0)) //Gets the provided configuration name.
@@ -66,7 +72,9 @@ void handleArguments(int& argc, char* argv[])
 	}
 
 	//Determining whether we are getting arguments from a configuration file.
-	if (useConfigurationFile)
+	if (listConfigurations)
+		listConfigs(pathToConfigFile, configurationName);
+	else if (useConfigurationFile)
 		readFromConfigurationFile(pathToConfigFile, argumentVariables, configurationName);
 
 	//Setting default arguments, if they are not provided:
@@ -209,6 +217,12 @@ void readArguments(int& argc, char* argv[], std::string& pathToConfigFile)
 
 void processArguments(int& argc, char* argv[], std::string& pathToConfigFile)
 {
+	if (argumentVariables["internalObject"]["Directory One"]["Directory Path"].is_null() || argumentVariables["internalObject"]["Directory Two"]["Directory Path"].is_null())
+	{
+		std::cout << "A directory has not been provided. Using --directory-one and --directory-two to provide paths." << std::endl;
+		exit(1);
+	}
+
 	// ----- //
 	//Thread assignments
 	if (!argumentVariables["internalObject"]["Thread Assignment"].is_null())
@@ -222,10 +236,8 @@ void processArguments(int& argc, char* argv[], std::string& pathToConfigFile)
 			writeDebugThreadPool.push_task(writeToDebug, std::chrono::system_clock::now(), true, "ERROR: Invalid thread assignment. Continuing using all system threads.");
 		}
 	}
-	
 
-
-
+	// ----- //
 	//MAX_PATH bypass. Setting directory separator.
 	if (argumentVariables["internalObject"]["Windows Max Path Bypass"].get<bool>())
 		directorySeparator = '\\'; //Set directory separator appropriately.
@@ -257,6 +269,12 @@ void processArguments(int& argc, char* argv[], std::string& pathToConfigFile)
 	//Directory One
 	firstGivenDirectoryPath = argumentVariables["internalObject"]["Directory One"]["Directory Path"].get<std::string>();
 	firstGivenDirectoryPath = formatFilePath(firstGivenDirectoryPath);
+
+	if (firstGivenDirectoryPath == "")
+	{
+		std::cout << "Empty directory one provided. Please provide a path after --directory-one." << std::endl;
+		exit(1);
+	}
 
 	if (firstGivenDirectoryPath.back() == directorySeparator)
 		firstGivenDirectoryPath.pop_back(); //Remove trailing slash.
@@ -303,6 +321,12 @@ void processArguments(int& argc, char* argv[], std::string& pathToConfigFile)
 	//Directory Two
 	secondGivenDirectoryPath = argumentVariables["internalObject"]["Directory Two"]["Directory Path"].get<std::string>();
 	secondGivenDirectoryPath = formatFilePath(secondGivenDirectoryPath);
+	
+	if (secondGivenDirectoryPath == "")
+	{
+		std::cout << "Empty directory two provided. Please provide a path after --directory-two." << std::endl;
+		exit(1);
+	}
 
 	if (secondGivenDirectoryPath.back() == directorySeparator)
 		secondGivenDirectoryPath.pop_back(); //Remove trailing slash

@@ -342,3 +342,80 @@ std::string convertJSONtoCommand(json& givenArguments)
 
 	return finalString;
 }
+
+void listConfigs(std::string pathToConfig, std::string configurationName)
+{
+	//Open configuration file for reading.
+	std::ifstream configFileReading(std::filesystem::u8path(pathToConfig));
+
+	//Check that the file got opened properly.
+	if (!configFileReading.good())
+	{
+		std::cout << "Configuration file failed to open: \"" << pathToConfig << "\"" << std::endl;
+		std::cout << "Please specify a new path to a configuration file to use, or enter nothing to terminate the program." << std::endl;
+		std::getline(std::cin, pathToConfig); //Getting user input.
+		if (pathToConfig == "")
+			exit(1);
+
+		//Trying to open configuration file for reading again.
+		std::ifstream configFileReading(std::filesystem::u8path(pathToConfig));
+
+		if (!configFileReading.good())
+		{
+			std::cout << "File failed to open again: " << std::endl;
+			std::cout << "Please try again. Program terminating." << std::endl;
+			exit(1);
+		}
+	}
+	
+	//Fail is the ifstream can't be parsed.
+	if (!json::accept(configFileReading))
+	{
+		//Error with JSON syntax. Notifying user.
+		std::cout << "JSON syntax error: \"" << pathToConfig << "\"" << std::endl;
+		std::cout << "Check your configuration to ensure it is valid JSON." << std::endl;
+		std::cout << "Please resolve the issue and try again. Program terminating." << std::endl;
+		system("PAUSE");
+		exit(1);
+	}
+	else
+	{
+		//Resetting file seek head for the next parsing.
+		configFileReading.clear();
+		configFileReading.seekg(0);
+	}
+
+	json configurationFileJSON = json::parse(configFileReading); //Parsing JSON from the file.
+
+	configFileReading.close(); //Closing input file.
+
+
+
+	if (configurationName != "")
+	{
+		//Iterating through configuration JSON and displaying configuration names.
+		for (json::iterator iterator = configurationFileJSON.begin(); iterator != configurationFileJSON.end(); ++iterator)
+		{
+			if (iterator.key() != configurationName) //Configuration not found right now. Try again!
+				continue;
+
+			//Configuration match! Output the result!
+			std::cout << "Configuration \"" << iterator.key() << "\" found:" << std::endl;
+			std::cout << configurationFileJSON[iterator.key()].dump(4) << std::endl;
+		}
+	}
+	else
+	{
+		std::cout << "Configurations found:" << std::endl;
+		//Iterating through configuration JSON and displaying configuration names.
+		for (json::iterator iterator = configurationFileJSON.begin(); iterator != configurationFileJSON.end(); ++iterator)
+		{
+			std::cout << iterator.key() << std::endl;
+		}
+	}
+
+	//Wait for debug, then terminate program.
+	writeDebugThreadPool.wait_for_tasks();
+	system("PAUSE");
+	exit(0);
+}

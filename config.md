@@ -14,6 +14,7 @@ The topics below will help document the system and how to utilize built-in comma
 	- [--add-to-config <PATH_TO_CONFIG_FILE>](#--add-to-config-path_to_config_file)
 	- [--clean-config <PATH_TO_CONFIG_FILE>](#--clean-config-path_to_config_file)
 	- [--export-config-to-command <PATH_TO_CONFIG_FILE>](#--export-config-to-command-path_to_config_file)
+	- [--list-config <PATH_TO_CONFIG_FILE>](#--list-config-path_to_config_file)
 	- [--use-config <PATH_TO_CONFIG_FILE>](#--use-config-path_to_config_file)
 
 # Formatting
@@ -78,5 +79,8 @@ Note: I highly encourage creating a backup of the file before using this since i
 ## --export-config-to-command <PATH_TO_CONFIG_FILE> 
 This will convert your configuration to a command that can be run. 
 Note: The resulting command might need some tweaking, especially in regards to file path formatting.
+## --list-config <PATH_TO_CONFIG_FILE>
+Lists all configurations present in the provided configuration file.
+A configuration name can be provided with this to output the configuration requested.
 ## --use-config <PATH_TO_CONFIG_FILE>  
 As stated, it will use a configuration from the file.

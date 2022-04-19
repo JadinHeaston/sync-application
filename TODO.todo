@@ -68,6 +68,7 @@ Other features:
 			The alternative is to just notify the user of what went wrong and terminate the program immediately.
 		This may not be necessary, but might be nice for automated runnings.
 	☐ Add an argument that specifies a description for a configuration. This is displayed when using the configuration.
+	☐ Add argument that displays all valid configuration names from a given config file, with their descriptions (If present).
 General Bugs/Fixes:
 	☐ Better input validation for the configuration section.
 	☐ Windows Max Path Bypass should be able to get applied to each directory independently.
