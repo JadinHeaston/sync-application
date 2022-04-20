@@ -44,27 +44,27 @@ For simplicity and consistency, this way of handling arguments is also used inte
 	Windows Max Path Bypass - [true] | [false]
 
 ## Default Template
-    "CONFIGURATION_NAME": {
-        "Check File Contents": false,
-        "Debug File Path": "",
-        "Directory One": {
-            "Directory Path": "",
-            "Recursive Search": true
-        },
-        "Directory Two": {
-            "Directory Path": "",
-            "Recursive Search": true
-        },
-        "Modify Window": 0,
-        "No File Operations": false,
-        "Operation Mode": "",
-        "Output Files": "",
-        "Show Console": true,
-        "Show Warning": true,
-        "Thread Assignment": "",
+	"CONFIGURATION_NAME": {
+		"Check File Contents": false,
+		"Debug File Path": "",
+		"Directory One": {
+			"Directory Path": "",
+			"Recursive Search": true
+		},
+		"Directory Two": {
+			"Directory Path": "",
+			"Recursive Search": true
+		},
+		"Modify Window": 0,
+		"No File Operations": false,
+		"Operation Mode": "",
+		"Output Files": "",
+		"Show Console": true,
+		"Show Warning": true,
+		"Thread Assignment": "",
 		"Verbose Debugging": false,
-        "Windows Max Path Bypass": false
-    }
+		"Windows Max Path Bypass": false
+	}
 
 # Utilizing Built-In Commands
 Note: Each command shown below requires "--configuration-name <NAME>" to be used as an identifier for which config to utilize in the file.
