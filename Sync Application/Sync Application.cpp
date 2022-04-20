@@ -435,8 +435,8 @@ void performHashActionFile(std::vector<std::string>& hashActions, std::vector<st
 	{
 		//Grab item...
 		currentReadLine = hashActions[iterator]; //Reading the full line.
-		directoryOneFile = firstGivenPath + directorySeparator + currentReadLine.substr(0, nthOccurrence(currentReadLine, delimitingCharacter, 1) - 1); //Up until first delimiter, adding first dir path.
-		directoryTwoFile = secondGivenPath + directorySeparator + currentReadLine.substr(0, nthOccurrence(currentReadLine, delimitingCharacter, 1) - 1); //Up until first delimiter, adding second dir path.
+		directoryOneFile = firstGivenPath + directorySeparator + currentReadLine.substr(0, nthOccurrence(currentReadLine, delimitingCharacter, 1)); //Up until first delimiter, adding first dir path.
+		directoryTwoFile = secondGivenPath + directorySeparator + currentReadLine.substr(0, nthOccurrence(currentReadLine, delimitingCharacter, 1)); //Up until first delimiter, adding second dir path.
 		directoryOneVectorLocation = currentReadLine.substr(nthOccurrence(currentReadLine, delimitingCharacter, 1) + 3, nthOccurrence(currentReadLine, delimitingCharacter, 2)); //Between first and second delimiter.
 		directoryTwoVectorLocation = currentReadLine.substr(nthOccurrence(currentReadLine, delimitingCharacter, 2) + 3, currentReadLine.length() - 1); //Going up until newline.
 

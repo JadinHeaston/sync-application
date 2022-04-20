@@ -19,8 +19,8 @@ The topics below will help document the system and how to utilize built-in comma
 
 # Formatting
 The configuration file uses the [JSON standard](https://www.json.org/json-en.html).  
-For simplicity and consistency, this way of handling arguments is also used internally by using [JSON by Niels Lohmann](https://github.com/nlohmann/json).
-
+For simplicity and consistency, this way of handling arguments is also used internally by using [JSON by Niels Lohmann](https://github.com/nlohmann/json).  
+**NOTE:** The entire configuration file must be treated as a JSON object, not an array.
 # Available Properties
 **NOTE:** Any omitted properties will have their default values used. The program will notify you and terminate if a required property is missing.
 
@@ -44,26 +44,28 @@ For simplicity and consistency, this way of handling arguments is also used inte
 	Windows Max Path Bypass - [true] | [false]
 
 ## Default Template
-	"CONFIGURATION_NAME": {
-		"Check File Contents": false,
-		"Debug File Path": "",
-		"Directory One": {
-			"Directory Path": "",
-			"Recursive Search": true
-		},
-		"Directory Two": {
-			"Directory Path": "",
-			"Recursive Search": true
-		},
-		"Modify Window": 0,
-		"No File Operations": false,
-		"Operation Mode": "",
-		"Output Files": "",
-		"Show Console": true,
-		"Show Warning": true,
-		"Thread Assignment": "",
-		"Verbose Debugging": false,
-		"Windows Max Path Bypass": false
+	{
+		"CONFIGURATION_NAME": {
+			"Check File Contents": false,
+			"Debug File Path": "",
+			"Directory One": {
+				"Directory Path": "",
+				"Recursive Search": true
+			},
+			"Directory Two": {
+				"Directory Path": "",
+				"Recursive Search": true
+			},
+			"Modify Window": 0,
+			"No File Operations": false,
+			"Operation Mode": "",
+			"Output Files": "",
+			"Show Console": true,
+			"Show Warning": true,
+			"Thread Assignment": "",
+			"Verbose Debugging": false,
+			"Windows Max Path Bypass": false
+		}
 	}
 
 # Utilizing Built-In Commands
