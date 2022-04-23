@@ -9,7 +9,7 @@
 
 //LIBRARIES
 #include <iostream> //Yeah.
-#include <boost/filesystem.hpp> //Used for getting file date metadata (date modified and date created). Struggled to switch to the built in C++ filesystem for this.
+//#include <boost/filesystem.hpp> //Used for getting file date metadata (date modified and date created). Struggled to switch to the built in C++ filesystem for this.
 #include <fstream> //File input/output.
 #include <string> //Strings!
 #include <sstream> //Stringstream
