@@ -40,6 +40,9 @@ std::string newLine = "\n";
 //Buffer size for hashing
 const size_t hashBufferSize = 4096;
 
+//Stores what files have been gotten.
+std::map<std::string, bool> fileTracker{ {"DirectoryOneDB", false}, {"DirectoryTwoDB", false}, {"HashAction", false}, {"FileOperations", false}, };
+
 //Creating threadpools.
 thread_pool threadPool(std::thread::hardware_concurrency()); //"Default" pool
 
@@ -81,6 +84,8 @@ size_t countDir(std::string pathToDir, bool recursiveLookup);
 void removeObject(std::string destinationFilePath, bool recursiveRemoval);
 void copyFile(std::string givenSourcePath, std::string givenDestinationPath);
 void moveFile(std::string givenSourcePath, std::string givenDestinationPath);
+void importExternalFile(std::string sourceFilePath, std::vector<std::string>& destinationVector);
+void exportVectorFile(std::vector<std::string>& givenVector, std::string destinationFilePath);
 //hashing.h
 std::string convertMD5ToHex(unsigned char* givenDigest);
 void MThashGivenFile(std::string givenFilePath, std::vector<std::string>& givenVector, std::string lineLocation);
@@ -164,10 +169,24 @@ int main(int argc, char* argv[])
 	writeDebugThreadPool.push_task(writeToDebug, std::chrono::system_clock::now(), true, "----- DIRECTORY CRAWLING -----");
 	writeConsoleMessagesPool.push_task(displayConsoleMessage, "Creating directory maps...");
 
-	//Creating initial directory map.
-	threadPool.push_task(createDirectoryMapDB, std::ref(directoryOneDB), std::ref(firstGivenDirectoryPath), argumentVariables["internalObject"]["Directory One"]["Recursive Search"].get<bool>());
-	threadPool.push_task(createDirectoryMapDB, std::ref(directoryTwoDB), std::ref(secondGivenDirectoryPath), argumentVariables["internalObject"]["Directory Two"]["Recursive Search"].get<bool>());
-	threadPool.wait_for_tasks();
+	
+	if (!fileTracker["DirectoryOneDB"])
+		threadPool.push_task(createDirectoryMapDB, std::ref(directoryOneDB), std::ref(firstGivenDirectoryPath), argumentVariables["internalObject"]["Directory One"]["Recursive Search"].get<bool>()); //Creating initial directory map.
+	else
+	{
+		//Importing file
+
+	}
+
+	if (!fileTracker["DirectoryTwoDB"])
+		threadPool.push_task(createDirectoryMapDB, std::ref(directoryTwoDB), std::ref(secondGivenDirectoryPath), argumentVariables["internalObject"]["Directory Two"]["Recursive Search"].get<bool>()); //Creating initial directory map.
+	else
+	{
+		//Importing file
+
+	}
+
+	threadPool.wait_for_tasks(); //Waiting for DB maps to be prepared.
 
 	writeDebugThreadPool.push_task(writeToDebug, std::chrono::system_clock::now(), true, "----- *COMPLETED* DIRECTORY CRAWLING -----");
 	writeConsoleMessagesPool.push_task(displayConsoleMessage, "Directory maps created...");
@@ -237,9 +256,6 @@ int main(int argc, char* argv[])
 
 		writeDebugThreadPool.push_task(writeToDebug, std::chrono::system_clock::now(), true, "----- OUTPUTING INTERNAL FILES -----");
 		
-		//Holds output of hashAction reading, allows for manipulation.
-		std::string currentReadLine;
-
 		writeConsoleMessagesPool.push_task(displayConsoleMessage, "Shifting arrays to show headers...");
 
 		//Add headers to both directory files.
@@ -257,58 +273,11 @@ int main(int argc, char* argv[])
 		std::rotate(directoryOneDB.rbegin(), directoryOneDB.rbegin() + 2, directoryOneDB.rend());
 		std::rotate(directoryTwoDB.rbegin(), directoryTwoDB.rbegin() + 2, directoryTwoDB.rend());
 
-		//Define log locations
-		//***** This needs work. The user should be able to specify where the log directory is located.
-		std::string firstDirectoryDB = argumentVariables["internalObject"]["Output Files"].get<std::string>() + "DirectoryOne.log";
-		std::string secondDirectoryDB = argumentVariables["internalObject"]["Output Files"].get<std::string>() + "DirectoryTwo.log";
-		
-
-		//Creating files themselves.
-		std::ofstream firstFileStream(firstDirectoryDB, std::ios::out | std::ios::binary);
-		std::ofstream secondFileStream(secondDirectoryDB, std::ios::out | std::ios::binary);
-
-		//Creating hash action file
-		//Contains a list of file paths of files that need to be hashed.
-		std::string hashActionFileCreationPath = argumentVariables["internalObject"]["Output Files"].get<std::string>() + "hashActionFile.log";
-		std::ofstream hashActionFile(hashActionFileCreationPath, std::ios::out | std::ios::binary);
-
-		//Creating file operations action file.
-		//Contains a list of operations, and paths to do so, of files.
-		//Such as "Copy this file here". "delete this file".
-		std::string fileOpActionFileCreationPath = argumentVariables["internalObject"]["Output Files"].get<std::string>() + "fileOpActionFile.log";
-		std::ofstream fileOpActionFile(fileOpActionFileCreationPath, std::ios::out | std::ios::binary);
-
-
-		//Directory one.
-		for (size_t testIter = 0; testIter < directoryOneDB.size(); ++testIter)
-		{
-			currentReadLine = directoryOneDB[testIter]; //Grab item
-			writeToFile(firstFileStream, currentReadLine); //Write it
-		}
-		//Directory two.
-		for (size_t testIter = 0; testIter < directoryTwoDB.size(); ++testIter)
-		{
-			currentReadLine = directoryTwoDB[testIter]; //Grab item
-			writeToFile(secondFileStream, currentReadLine); //Write it
-		}
-		//Hash actions.
-		for (size_t testIter = 0; testIter < hashActions.size(); ++testIter)
-		{
-			currentReadLine = hashActions[testIter]; //Grab item
-			writeToFile(hashActionFile, currentReadLine); //Write it
-		}
-		//File operation actions.
-		for (size_t testIter = 0; testIter < fileOpActions.size(); ++testIter)
-		{
-			currentReadLine = fileOpActions[testIter]; //Grab item
-			writeToFile(fileOpActionFile, currentReadLine); //Write it
-		}
-
-		//Closing files.
-		firstFileStream.close();
-		secondFileStream.close();
-		hashActionFile.close();
-		fileOpActionFile.close();
+		//Outputting files.
+		threadPool.push_task(exportVectorFile, directoryOneDB, argumentVariables["internalObject"]["Output Files"].get<std::string>() + "DirectoryOneDB.log");
+		threadPool.push_task(exportVectorFile, directoryTwoDB, argumentVariables["internalObject"]["Output Files"].get<std::string>() + "DirectoryTwoDB.log");
+		threadPool.push_task(exportVectorFile, hashActions, argumentVariables["internalObject"]["Output Files"].get<std::string>() + "hashAction.log");
+		threadPool.push_task(exportVectorFile, fileOpActions, argumentVariables["internalObject"]["Output Files"].get<std::string>() + "fileOperations.log");
 	}
 
 	std::chrono::time_point end = std::chrono::steady_clock::now(); // Stop the clock!

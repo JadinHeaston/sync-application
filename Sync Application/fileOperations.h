@@ -245,3 +245,29 @@ void moveFile(std::string givenSourcePath, std::string givenDestinationPath)
 
 
 }
+
+
+void importExternalFile(std::string sourceFilePath, std::vector<std::string>& destinationVector)
+{
+	//Check if path to the file is legitimate.
+	//Check that the file can be read.
+
+	//Wipe the destination vector, just to be safe.
+	
+	//Iterate through file lines and write it to the vector.
+}
+
+void exportVectorFile(std::vector<std::string>& givenVector, std::string destinationFilePath)
+{
+	std::string currentReadLine;
+	size_t vectorSize = givenVector.size(); //Pre-calculating size.
+	std::ofstream outputFileStream(destinationFilePath, std::ios::out | std::ios::binary);
+
+	for (size_t iterator = 0; iterator < vectorSize; ++iterator)
+	{
+		currentReadLine = givenVector[iterator]; //Grab item
+		writeToFile(outputFileStream, currentReadLine); //Write it
+	}
+
+	outputFileStream.close();
+}
