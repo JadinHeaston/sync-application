@@ -15,8 +15,6 @@ void createDirectoryMapDB(std::vector<std::string>& givenVectorDB, std::string g
 	std::stringstream testStream;
 
 	std::filesystem::file_time_type lastModifiedTime;
-	//std::filesystem::file_time_type dateCreatedTime;
-	//time_t lastModifiedTime;
 
 
 	//Checking whether to search recursively or not
@@ -34,36 +32,13 @@ void createDirectoryMapDB(std::vector<std::string>& givenVectorDB, std::string g
 			// If it's not a directory, list it. If you want to list directories too, just remove this check.
 			if (std::filesystem::is_regular_file(std::filesystem::u8path(current_file)))
 			{
-				//writeDebugThreadPool.push_task(writeToDebug, std::chrono::system_clock::now(), true, L"2 Is not a directory: " + formatFilePath(current_file));
 				testStream << std::filesystem::file_size(std::filesystem::u8path(current_file)) << delimitingCharacter;
-				//writeDebugThreadPool.push_task(writeToDebug, std::chrono::system_clock::now(), true, L"3 Got File Size: " + formatFilePath(current_file));
 				
 				//Getting last modified time. In 'seconds from 1970 EPOCH' format.
 				lastModifiedTime = std::filesystem::last_write_time(std::filesystem::u8path(current_file));
 				testStream << std::chrono::duration_cast<std::chrono::seconds>(lastModifiedTime.time_since_epoch()).count() << delimitingCharacter;
-				//lastModifiedTime = boost::filesystem::last_write_time(std::filesystem::u8path(current_file));
-				//testStream << std::chrono::duration_cast<std::chrono::seconds>(lastModifiedTime.time_since_epoch()).count() << delimitingCharacter;
-
-				//writeDebugThreadPool.push_task(writeToDebug, std::chrono::system_clock::now(), true, L"4 Got last write time: " + formatFilePath(current_file));
-				//Getting date created time. In 'seconds from 1970 EPOCH' format.
-				//dateCreatedTime = std::filesystem::(current_file);
-				//writeDebugThreadPool.push_task(writeToDebug, std::chrono::system_clock::now(), true, L"5 Got creation time: " + formatFilePath(current_file));
-				//testStream << dateCreatedTime.time_since_epoch().count() << delimitingCharacter + delimitingCharacter + newLine; //Adding an additional delimiter, since the hash is not added yet but the matching stuff will be.
+				
 				testStream << delimitingCharacter + delimitingCharacter + newLine;
-				//writeDebugThreadPool.push_task(writeToDebug, std::chrono::system_clock::now(), true, L"6 Data stored for file: " + formatFilePath(current_file));
-
-				//if (current_file == "\\\\?\\C:\\Users\\Jadin-PC\\source\\repos\\JadinHeaston\\sync-application\\Sync Application\\TEST DIRECTORY\\ここにいる (I'm Here) ft. rionos (Stephen Walking Remix) - Aiobahn.mp3")
-				//{
-				//	std::cout << testStream.str() << std::endl;
-				//	//system("PAUSE");
-				//}
-
-				//writeDebugThreadPool.push_task(writeToDebug, std::chrono::system_clock::now(), true, L"7 Pushing data back: " + formatFilePath(current_file));
-
-				//writeDebugThreadPool.push_task(writeToDebug, std::chrono::system_clock::now(), true, L"8 Reseting streamstring: " + formatFilePath(current_file));
-
-
-				//writeDebugThreadPool.push_task(writeToDebug, std::chrono::system_clock::now(), true, "9 finished streamstring: " + formatFilePath(current_file));
 			}
 			else
 				testStream << delimitingCharacter + delimitingCharacter + delimitingCharacter + delimitingCharacter + newLine;
@@ -90,36 +65,13 @@ void createDirectoryMapDB(std::vector<std::string>& givenVectorDB, std::string g
 			// If it's not a directory, list it. If you want to list directories too, just remove this check.
 			if (std::filesystem::is_regular_file(std::filesystem::u8path(current_file)))
 			{
-				//writeDebugThreadPool.push_task(writeToDebug, std::chrono::system_clock::now(), true, L"2 Is not a directory: " + formatFilePath(current_file));
 				testStream << std::filesystem::file_size(std::filesystem::u8path(current_file)) << delimitingCharacter;
-				//writeDebugThreadPool.push_task(writeToDebug, std::chrono::system_clock::now(), true, L"3 Got File Size: " + formatFilePath(current_file));
-
+				
 				//Getting last modified time. In 'seconds from 1970 EPOCH' format.
 				lastModifiedTime = std::filesystem::last_write_time(std::filesystem::u8path(current_file));
 				testStream << std::chrono::duration_cast<std::chrono::seconds>(lastModifiedTime.time_since_epoch()).count() << delimitingCharacter;
-				//lastModifiedTime = boost::filesystem::last_write_time(std::filesystem::u8path(current_file));
-				//testStream << std::chrono::duration_cast<std::chrono::seconds>(lastModifiedTime.time_since_epoch()).count() << delimitingCharacter;
-
-				//writeDebugThreadPool.push_task(writeToDebug, std::chrono::system_clock::now(), true, L"4 Got last write time: " + formatFilePath(current_file));
-				//Getting date created time. In 'seconds from 1970 EPOCH' format.
-				//dateCreatedTime = std::filesystem::(current_file);
-				//writeDebugThreadPool.push_task(writeToDebug, std::chrono::system_clock::now(), true, L"5 Got creation time: " + formatFilePath(current_file));
-				//testStream << dateCreatedTime.time_since_epoch().count() << delimitingCharacter + delimitingCharacter + newLine; //Adding an additional delimiter, since the hash is not added yet but the matching stuff will be.
+				
 				testStream << delimitingCharacter + delimitingCharacter + newLine;
-				//writeDebugThreadPool.push_task(writeToDebug, std::chrono::system_clock::now(), true, L"6 Data stored for file: " + formatFilePath(current_file));
-
-				//if (current_file == "\\\\?\\C:\\Users\\Jadin-PC\\source\\repos\\JadinHeaston\\sync-application\\Sync Application\\TEST DIRECTORY\\ここにいる (I'm Here) ft. rionos (Stephen Walking Remix) - Aiobahn.mp3")
-				//{
-				//	std::cout << testStream.str() << std::endl;
-				//	//system("PAUSE");
-				//}
-
-				//writeDebugThreadPool.push_task(writeToDebug, std::chrono::system_clock::now(), true, L"7 Pushing data back: " + formatFilePath(current_file));
-
-				//writeDebugThreadPool.push_task(writeToDebug, std::chrono::system_clock::now(), true, L"8 Reseting streamstring: " + formatFilePath(current_file));
-
-
-				//writeDebugThreadPool.push_task(writeToDebug, std::chrono::system_clock::now(), true, "9 finished streamstring: " + formatFilePath(current_file));
 			}
 			else
 				testStream << delimitingCharacter + delimitingCharacter + delimitingCharacter + delimitingCharacter + newLine;
@@ -212,9 +164,6 @@ void removeObject(std::string destinationFilePath, bool recursiveRemoval)
 
 	std::error_code ec; //Create error handler.
 
-	//if (std::filesystem::is_directory(destinationFilePath))
-	//    return; //do nothing
-
 	size_t count = 0;
 
 	while (count < 10) //give up after 5 attempts.
@@ -245,9 +194,6 @@ void removeObject(std::string destinationFilePath, bool recursiveRemoval)
 //Copying file.
 void copyFile(std::string givenSourcePath, std::string givenDestinationPath)
 {
-	//if (std::filesystem::is_directory(std::filesystem::u8path(givenSourcePath)))
-	//	return;
-
 	writeDebugThreadPool.push_task(writeToDebug, std::chrono::system_clock::now(), true, "COPYING: " + givenSourcePath + " - " + givenDestinationPath); //Log.
 
 	//Creating files themselves.
@@ -268,16 +214,7 @@ void copyFile(std::string givenSourcePath, std::string givenDestinationPath)
 	std::filesystem::copy(std::filesystem::u8path(givenSourcePath), std::filesystem::u8path(givenDestinationPath), std::filesystem::copy_options::overwrite_existing, ec); //Copying the file. - If a directory is being looked at, it would have already been made above. This will do nothing.
 	
 	if (ec.value() == 5) //If error value is 5, it is access denied.
-	{
 		writeDebugThreadPool.push_task(writeToDebug, std::chrono::system_clock::now(), true, "ERROR. ACCESS DENIED: " + givenSourcePath + " - " + givenDestinationPath); //Log.
-		//std::filesystem::last_write_time(std::filesystem::u8path(givenSourcePath), std::chrono::system_clock::now());
-	}
-
-	//if (!std::filesystem::exists(std::filesystem::u8path(givenDestinationPath)))
-	//{
-	//	std::cout << std::filesystem::u8path(givenDestinationPath) << std::endl;
-	//	system("PAUSE");
-	//}
 }
 
 //Moving file.

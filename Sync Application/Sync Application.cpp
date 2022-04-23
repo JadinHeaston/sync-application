@@ -40,8 +40,6 @@ std::string newLine = "\n";
 //Buffer size for hashing
 const size_t hashBufferSize = 4096;
 
-//argumentVariables["internalObject"]["Thread Pools"]["Main Pool"] = std::thread::hardware_concurrency();
-
 //Creating threadpools.
 thread_pool threadPool(std::thread::hardware_concurrency()); //"Default" pool
 
@@ -114,9 +112,6 @@ int main(int argc, char* argv[])
 
 	//handling arguments.
 	handleArguments(argc, argv);
-	//std::cout << argumentVariables.dump(4) << std::endl;
-	//std::cout << directorySeparator << std::endl;
-	//system("PAUSE");
 
 	//Creating vectors to hold directory maps.
 	std::vector<std::string> directoryOneDB;
