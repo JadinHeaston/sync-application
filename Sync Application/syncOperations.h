@@ -24,15 +24,28 @@ void contributeCompareDirectories(std::vector<std::string>& firstGivenVectorDB, 
 	std::string workingHash;
 	std::string workingHashTwo;
 
+	std::string copyPath;
+
+	//Creating path of copy string.
+	if (firstGivenPath.back() != directorySeparator)
+		firstGivenPath.push_back(directorySeparator);
+
+	//Creating path of copy string.
+	if (secondGivenPath.back() != directorySeparator)
+		secondGivenPath.push_back(directorySeparator);
+
+
 	//Iterating through directory two vector and inserting the file path and line location into the unordered map.
 	//Key: path | Value: line location
 	for (size_t iteratorTwo = 0; iteratorTwo < secondDBSize; ++iteratorTwo)
 		DB2Map.insert(std::make_pair(secondGivenVectorDB[iteratorTwo].substr(secondGivenPath.length() + 1, nthOccurrence(secondGivenVectorDB[iteratorTwo], delimitingCharacter, 1) - secondGivenPath.length() - 1), iteratorTwo));
 
-	//Iterate through firstDB.
+	//Iterate through DirectoryOneDB.
 	for (size_t iterator = 0; iterator < firstDBSize; ++iterator)
 	{
 		workingPath = firstGivenVectorDB[iterator].substr(firstGivenPath.length() + 1, nthOccurrence(firstGivenVectorDB[iterator], delimitingCharacter, 1) - firstGivenPath.length() - 1); //Get path of object.
+
+		copyPath = firstGivenPath + workingPath + delimitingCharacter + secondGivenPath + workingPath + newLine;
 
 		if (DB2Map.count(workingPath)) //Search for match in DB2. This value can only return 0 or 1 as unordered maps cannot hold duplicate keys.
 		{
@@ -56,17 +69,17 @@ void contributeCompareDirectories(std::vector<std::string>& firstGivenVectorDB, 
 						hashActions.push_back(workingPath + delimitingCharacter + std::to_string(iterator) + delimitingCharacter + std::to_string(DB2Line) + newLine); //If everything matches, these files need hashed and compared.
 				}
 				else
-					fileOpAction.push_back("COPY - Different file sizes" + delimitingCharacter + firstGivenPath + directorySeparator + workingPath + delimitingCharacter + secondGivenPath + directorySeparator + workingPath + newLine); //Copy directory one file to directory two.
+					fileOpAction.push_back("COPY - Different file sizes" + delimitingCharacter + copyPath); //Copy directory one file to directory two.
 			}
 			else //A matching file has been found, with differing last modified times.
-				fileOpAction.push_back("COPY - Different last modified time" + delimitingCharacter + firstGivenPath + directorySeparator + workingPath + delimitingCharacter + secondGivenPath + directorySeparator + workingPath + newLine); //Copy directory one file to directory two.
+				fileOpAction.push_back("COPY - Different last modified time" + delimitingCharacter + copyPath); //Copy directory one file to directory two.
 		}
 		else
 		{
 			if (std::filesystem::is_directory(firstGivenVectorDB[iterator].substr(0, nthOccurrence(firstGivenVectorDB[iterator], delimitingCharacter, 1))) && std::filesystem::is_empty(firstGivenVectorDB[iterator].substr(0, nthOccurrence(firstGivenVectorDB[iterator], delimitingCharacter, 1))))
-				fileOpAction.push_back("COPY - Empty directory present on source" + delimitingCharacter + firstGivenPath + directorySeparator + workingPath + delimitingCharacter + secondGivenPath + directorySeparator + workingPath + newLine); //Copy directory one file to directory two.
+				fileOpAction.push_back("COPY - Empty directory present on source" + delimitingCharacter + copyPath); //Copy directory one file to directory two.
 			else
-				fileOpAction.push_back("COPY - No destination found" + delimitingCharacter + firstGivenPath + directorySeparator + workingPath + delimitingCharacter + secondGivenPath + directorySeparator + workingPath + newLine); //Copy directory one file to directory two.
+				fileOpAction.push_back("COPY - No destination found" + delimitingCharacter + copyPath); //Copy directory one file to directory two.
 		}
 	}
 
@@ -96,15 +109,27 @@ void echoCompareDirectories(std::vector<std::string>& firstGivenVectorDB, std::v
 	std::string workingHash;
 	std::string workingHashTwo;
 
+	std::string copyPath;
+
+	//Creating path of copy string.
+	if (firstGivenPath.back() != directorySeparator)
+		firstGivenPath.push_back(directorySeparator);
+
+	//Creating path of copy string.
+	if (secondGivenPath.back() != directorySeparator)
+		secondGivenPath.push_back(directorySeparator);
+
 	//Iterating through directory two vector and inserting the relative/working file path and line location into the unordered map.
 	//Key: path | Value: line location
 	for (size_t iteratorTwo = 0; iteratorTwo < secondDBSize; ++iteratorTwo)
-		DB2Map.insert(std::make_pair(secondGivenVectorDB[iteratorTwo].substr(secondGivenPath.length() + 1, nthOccurrence(secondGivenVectorDB[iteratorTwo], delimitingCharacter, 1) - secondGivenPath.length() - 1), iteratorTwo));
+		DB2Map.insert(std::make_pair(secondGivenVectorDB[iteratorTwo].substr(secondGivenPath.length(), nthOccurrence(secondGivenVectorDB[iteratorTwo], delimitingCharacter, 1) - secondGivenPath.length()), iteratorTwo));
 
 	//Iterate through firstDB.
 	for (size_t iterator = 0; iterator < firstDBSize; ++iterator)
 	{
-		workingPath = firstGivenVectorDB[iterator].substr(firstGivenPath.length() + 1, nthOccurrence(firstGivenVectorDB[iterator], delimitingCharacter, 1) - firstGivenPath.length() - 1); //Get path of object.
+		workingPath = firstGivenVectorDB[iterator].substr(firstGivenPath.length(), nthOccurrence(firstGivenVectorDB[iterator], delimitingCharacter, 1) - firstGivenPath.length()); //Get path of object.
+
+		copyPath = firstGivenPath + workingPath + delimitingCharacter + secondGivenPath + workingPath + newLine;
 
 		if (DB2Map.count(workingPath)) //Search for match in DB2. This value can only return 0 or 1 as unordered maps cannot hold duplicate keys.
 		{
@@ -120,6 +145,9 @@ void echoCompareDirectories(std::vector<std::string>& firstGivenVectorDB, std::v
 
 			workingDateMod = stoull(firstGivenVectorDB[iterator].substr(nthOccurrence(firstGivenVectorDB[iterator], delimitingCharacter, 2) + 3, nthOccurrence(firstGivenVectorDB[iterator], delimitingCharacter, 3) - nthOccurrence(firstGivenVectorDB[iterator], delimitingCharacter, 2) - 3)); //Third column
 			workingDateModTwo = stoull(secondGivenVectorDB[DB2Line].substr(nthOccurrence(secondGivenVectorDB[DB2Line], delimitingCharacter, 2) + 3, nthOccurrence(secondGivenVectorDB[DB2Line], delimitingCharacter, 3) - nthOccurrence(secondGivenVectorDB[DB2Line], delimitingCharacter, 2) - 3)); //Third column
+			//writeDebugThreadPool.push_task(writeToDebug, std::chrono::system_clock::now(), false, "Size,\"" + workingPath + "\"," + firstGivenVectorDB[iterator].substr(nthOccurrence(firstGivenVectorDB[iterator], delimitingCharacter, 1) + 3, nthOccurrence(firstGivenVectorDB[iterator], delimitingCharacter, 2) - nthOccurrence(firstGivenVectorDB[iterator], delimitingCharacter, 1) - 3) + "," + secondGivenVectorDB[DB2Line].substr(nthOccurrence(secondGivenVectorDB[DB2Line], delimitingCharacter, 1) + 3, nthOccurrence(secondGivenVectorDB[DB2Line], delimitingCharacter, 2) - nthOccurrence(secondGivenVectorDB[DB2Line], delimitingCharacter, 1) - 3));
+			//writeDebugThreadPool.push_task(writeToDebug, std::chrono::system_clock::now(), false, "Time,\"" + workingPath + "\"," + firstGivenVectorDB[iterator].substr(nthOccurrence(firstGivenVectorDB[iterator], delimitingCharacter, 2) + 3, nthOccurrence(firstGivenVectorDB[iterator], delimitingCharacter, 3) - nthOccurrence(firstGivenVectorDB[iterator], delimitingCharacter, 2) - 3) + "," + secondGivenVectorDB[DB2Line].substr(nthOccurrence(secondGivenVectorDB[DB2Line], delimitingCharacter, 2) + 3, nthOccurrence(secondGivenVectorDB[DB2Line], delimitingCharacter, 3) - nthOccurrence(secondGivenVectorDB[DB2Line], delimitingCharacter, 2) - 3));
+
 			if (workingDateMod % workingDateModTwo <= modifyWindow || workingDateModTwo % workingDateMod <= modifyWindow)
 			{
 				workingSize = stoull(firstGivenVectorDB[iterator].substr(nthOccurrence(firstGivenVectorDB[iterator], delimitingCharacter, 1) + 3, nthOccurrence(firstGivenVectorDB[iterator], delimitingCharacter, 2) - nthOccurrence(firstGivenVectorDB[iterator], delimitingCharacter, 1) - 3)); //Second column
@@ -130,17 +158,17 @@ void echoCompareDirectories(std::vector<std::string>& firstGivenVectorDB, std::v
 						hashActions.push_back(workingPath + delimitingCharacter + std::to_string(iterator) + delimitingCharacter + std::to_string(DB2Line) + newLine); //If everything matches, these files need hashed and compared.
 				}
 				else
-					fileOpAction.push_back("COPY - Different file sizes" + delimitingCharacter + firstGivenPath + directorySeparator + workingPath + delimitingCharacter + secondGivenPath + directorySeparator + workingPath + newLine); //Copy directory one file to directory two.
+					fileOpAction.push_back("COPY - Different file sizes" + delimitingCharacter + copyPath); //Copy directory one file to directory two.
 			}
 			else //A matching file has been found, with differing last modified times.
-				fileOpAction.push_back("COPY - Different last modified time" + delimitingCharacter + firstGivenPath + directorySeparator + workingPath + delimitingCharacter + secondGivenPath + directorySeparator + workingPath + newLine); //Copy directory one file to directory two.
+				fileOpAction.push_back("COPY - Different last modified time" + delimitingCharacter + copyPath); //Copy directory one file to directory two.
 		}
 		else
 		{
 			if (std::filesystem::is_directory(firstGivenVectorDB[iterator].substr(0, nthOccurrence(firstGivenVectorDB[iterator], delimitingCharacter, 1))) && std::filesystem::is_empty(firstGivenVectorDB[iterator].substr(0, nthOccurrence(firstGivenVectorDB[iterator], delimitingCharacter, 1))))
-				fileOpAction.push_back("COPY - Empty directory present on source" + delimitingCharacter + firstGivenPath + directorySeparator + workingPath + delimitingCharacter + secondGivenPath + directorySeparator + workingPath + newLine); //Copy directory one file to directory two.
+				fileOpAction.push_back("COPY - Empty directory present on source" + delimitingCharacter + copyPath); //Copy directory one file to directory two.
 			else
-				fileOpAction.push_back("COPY - No destination found" + delimitingCharacter + firstGivenPath + directorySeparator + workingPath + delimitingCharacter + secondGivenPath + directorySeparator + workingPath + newLine); //Copy directory one file to directory two.
+				fileOpAction.push_back("COPY - No destination found" + delimitingCharacter + copyPath); //Copy directory one file to directory two.
 		}
 	}
 

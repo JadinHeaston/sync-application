@@ -15,7 +15,7 @@ void createDirectoryMapDB(std::vector<std::string>& givenVectorDB, std::string g
 	std::stringstream testStream;
 
 	std::filesystem::file_time_type lastModifiedTime;
-
+	uintmax_t fileSize;
 
 	//Checking whether to search recursively or not
 	if (recursiveSearch)
@@ -25,14 +25,18 @@ void createDirectoryMapDB(std::vector<std::string>& givenVectorDB, std::string g
 		{
 			//Setting current file equal to the full path of the file.
 			current_file = dir->path().u8string();
-
+			
 			//Putting path into array.
 			testStream << formatFilePath(current_file) << delimitingCharacter;
 
 			// If it's not a directory, list it. If you want to list directories too, just remove this check.
 			if (std::filesystem::is_regular_file(std::filesystem::u8path(current_file)))
 			{
-				testStream << std::filesystem::file_size(std::filesystem::u8path(current_file)) << delimitingCharacter;
+				fileSize = std::filesystem::file_size(std::filesystem::u8path(current_file));
+				if (fileSize == NULL)
+					fileSize = 0;
+
+				testStream << fileSize << delimitingCharacter;
 				
 				//Getting last modified time. In 'seconds from 1970 EPOCH' format.
 				lastModifiedTime = std::filesystem::last_write_time(std::filesystem::u8path(current_file));
@@ -201,14 +205,11 @@ void copyFile(std::string givenSourcePath, std::string givenDestinationPath)
 
 	if (!std::filesystem::exists(std::filesystem::u8path(destinationDirectoriesPath))) //If the directory does not exist, then create it.
 		std::filesystem::create_directories(std::filesystem::u8path(destinationDirectoriesPath));
-
-
-
+	
 	while (!std::filesystem::exists(std::filesystem::u8path(destinationDirectoriesPath))) //Wait for directories to be created.
 	{
 		//V O I D
 	}
-
 
 	std::error_code ec; //Create error handler.
 	std::filesystem::copy(std::filesystem::u8path(givenSourcePath), std::filesystem::u8path(givenDestinationPath), std::filesystem::copy_options::overwrite_existing, ec); //Copying the file. - If a directory is being looked at, it would have already been made above. This will do nothing.

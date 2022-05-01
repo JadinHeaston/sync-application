@@ -121,6 +121,9 @@ The [TODO](TODO.todo) file is what I use to track what needs to be done.
 	Lists all configurations present in the provided configuration file.
 	A configuration name can be provided with this to output the configuration requested.
 
+--no-file-operations
+	Skips the file operation stage.
+
 --no-recursive-one/two
 	Defines where a recursive process should NOT be used for the respective directory.
 	Add either "one" or "two" at the end, to correspond with which directory shouldn't be recursive.

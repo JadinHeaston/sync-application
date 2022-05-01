@@ -24,6 +24,10 @@
 
 #include "json.hpp"
 
+// #include <stdexcept>      // std::out_of_range
+
+
+
 std::mutex coutMutex; //Lock for cout to prevent errors when displaying console messages.
 
 using json = nlohmann::json; //Setting json namespace to a simgler term.
@@ -117,6 +121,8 @@ int main(int argc, char* argv[])
 
 	//handling arguments.
 	handleArguments(argc, argv);
+	// std::cout << argumentVariables.dump(4) << std::endl;
+	// system("PAUSE");
 
 	//Creating vectors to hold directory maps.
 	std::vector<std::string> directoryOneDB;
@@ -136,15 +142,6 @@ int main(int argc, char* argv[])
 		std::transform(temporaryConversionString.begin(), temporaryConversionString.end(), temporaryConversionString.begin(), tolower); //Convert to lowercase for easy comparison.
 		argumentVariables["internalObject"]["Operation Mode"] = temporaryConversionString;
 		std::string().swap(temporaryConversionString); //Reclaiming strings memory.
-		
-		//Check that it is a legitimate value.
-		if (argumentVariables["internalObject"]["Operation Mode"].get<std::string>() != "echo" && (argumentVariables["internalObject"]["Operation Mode"].get<std::string>() != "contribute" && argumentVariables["internalObject"]["Operation Mode"].get<std::string>() != "cont"))
-		{
-			writeDebugThreadPool.push_task(writeToDebug, std::chrono::system_clock::now(), true, "Error-----");
-			std::cout << "Invalid Operation Mode: " << argumentVariables["internalObject"]["Operation Mode"].get<std::string>() << std::endl;
-			writeDebugThreadPool.wait_for_tasks();
-			return 1;
-		}
 	}
 	else
 	{
@@ -162,7 +159,6 @@ int main(int argc, char* argv[])
 	//Displaying file locations.
 	writeConsoleMessagesPool.push_task(displayConsoleMessage, "First Directory: " + firstGivenDirectoryPath);
 	writeConsoleMessagesPool.push_task(displayConsoleMessage, "Second Directory: " + secondGivenDirectoryPath);
-
 	
 	writeDebugThreadPool.push_task(writeToDebug, std::chrono::system_clock::now(), false, argumentVariables.dump(4));
 	
@@ -233,8 +229,6 @@ int main(int argc, char* argv[])
 		writeConsoleMessagesPool.push_task(displayConsoleMessage, "Hash comparison finished!");
 	}
 
-	//argumentVariables["internalObject"]["No File Operations"] = true; //DEBUGGING
-	
 	//Performing file operations.
 	if (!argumentVariables["internalObject"]["No File Operations"].get<bool>())
 	{
@@ -274,10 +268,10 @@ int main(int argc, char* argv[])
 		std::rotate(directoryTwoDB.rbegin(), directoryTwoDB.rbegin() + 2, directoryTwoDB.rend());
 
 		//Outputting files.
-		threadPool.push_task(exportVectorFile, directoryOneDB, argumentVariables["internalObject"]["Output Files"].get<std::string>() + "DirectoryOneDB.log");
-		threadPool.push_task(exportVectorFile, directoryTwoDB, argumentVariables["internalObject"]["Output Files"].get<std::string>() + "DirectoryTwoDB.log");
-		threadPool.push_task(exportVectorFile, hashActions, argumentVariables["internalObject"]["Output Files"].get<std::string>() + "hashAction.log");
-		threadPool.push_task(exportVectorFile, fileOpActions, argumentVariables["internalObject"]["Output Files"].get<std::string>() + "fileOperations.log");
+		threadPool.push_task(exportVectorFile, std::ref(directoryOneDB), argumentVariables["internalObject"]["Output Files"].get<std::string>() + "DirectoryOneDB.log");
+		threadPool.push_task(exportVectorFile, std::ref(directoryTwoDB), argumentVariables["internalObject"]["Output Files"].get<std::string>() + "DirectoryTwoDB.log");
+		threadPool.push_task(exportVectorFile, std::ref(hashActions), argumentVariables["internalObject"]["Output Files"].get<std::string>() + "hashAction.log");
+		threadPool.push_task(exportVectorFile, std::ref(fileOpActions), argumentVariables["internalObject"]["Output Files"].get<std::string>() + "fileOperations.log");
 	}
 
 	std::chrono::time_point end = std::chrono::steady_clock::now(); // Stop the clock!
@@ -291,7 +285,7 @@ int main(int argc, char* argv[])
 	writeDebugThreadPool.push_task(writeToDebug, std::chrono::system_clock::now(), true, "Total Time Taken: " + std::to_string(std::chrono::duration_cast<std::chrono::milliseconds>(end - start).count()) + "ms");
 
 
-	//Vector information.
+	//Displaying vector information in the console.
 	writeDebugThreadPool.push_task(writeToDebug, std::chrono::system_clock::now(), true, "DB1 Vector Size - " + std::to_string(directoryOneDB.size()));
 	writeDebugThreadPool.push_task(writeToDebug, std::chrono::system_clock::now(), true, "DB1 Vector Capacity - " + std::to_string(directoryOneDB.capacity()));
 	writeDebugThreadPool.push_task(writeToDebug, std::chrono::system_clock::now(), true, "DB2 Vector Size - " + std::to_string(directoryTwoDB.size()));

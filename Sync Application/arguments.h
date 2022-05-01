@@ -275,10 +275,7 @@ void processArguments(int& argc, char* argv[], std::string& pathToConfigFile)
 		std::cout << "Empty directory one provided. Please provide a path after --directory-one." << std::endl;
 		exit(1);
 	}
-
-	if (firstGivenDirectoryPath.back() == directorySeparator)
-		firstGivenDirectoryPath.pop_back(); //Remove trailing slash.
-
+	
 	if (!std::filesystem::is_directory(firstGivenDirectoryPath)) //Verify path is real and valid.
 	{
 		if (std::filesystem::exists(firstGivenDirectoryPath))
@@ -309,11 +306,6 @@ void processArguments(int& argc, char* argv[], std::string& pathToConfigFile)
 	//Getting absolute path.
 	firstGivenDirectoryPath = formatFilePath(std::filesystem::absolute(firstGivenDirectoryPath).string());
 
-	//Double check that there is no slash.
-	//This was added because running a drive letter ( such as "D:") through absolute adds a slash..
-	if (firstGivenDirectoryPath.back() == directorySeparator)
-		firstGivenDirectoryPath.pop_back(); //Remove the slash.
-
 	//Adding path to JSON.
 	argumentVariables["internalObject"]["Directory One"]["Directory Path"] = firstGivenDirectoryPath;
 
@@ -327,9 +319,6 @@ void processArguments(int& argc, char* argv[], std::string& pathToConfigFile)
 		std::cout << "Empty directory two provided. Please provide a path after --directory-two." << std::endl;
 		exit(1);
 	}
-
-	if (secondGivenDirectoryPath.back() == directorySeparator)
-		secondGivenDirectoryPath.pop_back(); //Remove trailing slash
 
 	if (!std::filesystem::is_directory(secondGivenDirectoryPath)) //Verify path is real and valid.
 	{
@@ -357,13 +346,9 @@ void processArguments(int& argc, char* argv[], std::string& pathToConfigFile)
 			exit(1);
 		}
 	}
+
 	//Getting absolute path.
 	secondGivenDirectoryPath = formatFilePath(std::filesystem::absolute(secondGivenDirectoryPath).string());
-
-	//Double check that there is no slash.
-	//This was added because running a drive letter ( such as "D:") through absolute adds a slash..
-	if (secondGivenDirectoryPath.back() == directorySeparator)
-		secondGivenDirectoryPath.pop_back(); //Remove the slash.
 
 	//Adding path to JSON.
 	argumentVariables["internalObject"]["Directory Two"]["Directory Path"] = secondGivenDirectoryPath;
@@ -378,18 +363,12 @@ void processArguments(int& argc, char* argv[], std::string& pathToConfigFile)
 		{
 			firstGivenDirectoryPath = formatFilePath("\\\\?\\" + std::filesystem::absolute(argumentVariables["internalObject"]["Directory One"]["Directory Path"].get<std::string>()).string());
 
-			if (firstGivenDirectoryPath.back() == directorySeparator)
-				firstGivenDirectoryPath.pop_back(); //Remove the slash.
-
 			argumentVariables["internalObject"]["Directory One"]["Directory Path"] = firstGivenDirectoryPath;
 		}
 		
 		if (argumentVariables["internalObject"]["Directory Two"]["Directory Path"].get<std::string>().find("\\\\?\\") == std::string::npos)
 		{
 			secondGivenDirectoryPath = formatFilePath("\\\\?\\" + std::filesystem::absolute(argumentVariables["internalObject"]["Directory Two"]["Directory Path"].get<std::string>()).string());
-
-			if (secondGivenDirectoryPath.back() == directorySeparator)
-				secondGivenDirectoryPath.pop_back(); //Remove the slash.
 
 			argumentVariables["internalObject"]["Directory Two"]["Directory Path"] = secondGivenDirectoryPath;
 		}
@@ -401,18 +380,12 @@ void processArguments(int& argc, char* argv[], std::string& pathToConfigFile)
 		{
 			firstGivenDirectoryPath = formatFilePath(std::filesystem::absolute(argumentVariables["internalObject"]["Directory One"]["Directory Path"].get<std::string>().erase(argumentVariables["internalObject"]["Directory One"]["Directory Path"].get<std::string>().find("\\\\?\\"), std::string("\\\\?\\").length())).string());
 
-			if (firstGivenDirectoryPath.back() == directorySeparator)
-				firstGivenDirectoryPath.pop_back(); //Remove the slash.
-			
 			argumentVariables["internalObject"]["Directory One"]["Directory Path"] = firstGivenDirectoryPath;
 		}
 		
 		if (argumentVariables["internalObject"]["Directory Two"]["Directory Path"].get<std::string>().find("\\\\?\\") != -1) //Removing prefix.
 		{
 			secondGivenDirectoryPath = formatFilePath(std::filesystem::absolute(argumentVariables["internalObject"]["Directory Two"]["Directory Path"].get<std::string>().erase(argumentVariables["internalObject"]["Directory Two"]["Directory Path"].get<std::string>().find("\\\\?\\"), std::string("\\\\?\\").length())).string());
-			
-			if (secondGivenDirectoryPath.back() == directorySeparator)
-				secondGivenDirectoryPath.pop_back(); //Remove the slash.
 
 			argumentVariables["internalObject"]["Directory Two"]["Directory Path"] = secondGivenDirectoryPath;
 		}

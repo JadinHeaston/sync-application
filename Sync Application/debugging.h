@@ -14,6 +14,7 @@ void writeToDebug(std::chrono::system_clock::time_point givenTime, bool writeTim
 	size_t fileSize = temporaryDebugHandle.tellg(); //Get the file size in bytes.
 	temporaryDebugHandle.close(); //Close temporary handle reading 
 
+	//Check if the file is at it's threshhold.
 	if (fileSize >= 102857600) //100 MB
 	{
 		//Change the file name.
@@ -26,8 +27,6 @@ void writeToDebug(std::chrono::system_clock::time_point givenTime, bool writeTim
 
 	verboseDebugOutput.open(debugFilePath + debugFileName, std::ios::out | std::ios::binary | std::ios::app); //Open the debug file for writing.
 
-	//Get the size.
-	//If that size is larger than 
 	if (writeTime) //Check if we are writing time.
 	{
 		char buff[20]; //Create buffer.
@@ -125,9 +124,9 @@ void displayHelpMessage(bool longHelpMessage, int& argc, char* argv[])
 		//{
 		//	if (argumentHelp[argv[i]])
 		//}
-
-		//std::cout << "\nUse \"--help\" to view the full help list. You can also visit https://github.com/JadinHeaston/sync-application/ for more information." << std::endl;
 	}
+
+	std::cout << "You can also visit https://github.com/JadinHeaston/sync-application/ for more information." << std::endl;
 
 	writeDebugThreadPool.wait_for_tasks();
 	system("PAUSE");
