@@ -1,55 +1,87 @@
 use config::Config;
-use hex_literal::hex;
 use md5::{Digest, Md5};
+use std::collections::HashMap;
 use std::{fmt, path::PathBuf};
+// use threadpool::ThreadPool;
+
+// const THREAD_COUNT: usize = 4;
+const DIRECTORY_KEYS: [&str; 2] = ["Directory One", "Directory Two"];
 
 mod config_options;
 
 fn main() {
-    println!("Loading configuration...");
+    println!("Started - Loading configuration");
     let config = Config::builder()
         .add_source(config::File::with_name("config"))
         .build()
         .unwrap()
         .get_table("TEST_CONFIG")
         .unwrap();
-    println!("{:?}", config);
-    println!("Configuration loaded!");
+    let mut directory_configs: HashMap<&str, HashMap<String, config::Value>> = HashMap::new();
 
-    let directory_one_config = config
-        .get_key_value("Directory One")
-        .unwrap()
-        .1
-        .clone()
-        .into_table()
-        .unwrap();
+    for directory_key in DIRECTORY_KEYS {
+        directory_configs.insert(
+            directory_key,
+            config
+                .get_key_value(directory_key)
+                .unwrap()
+                .1
+                .clone()
+                .into_table()
+                .unwrap(),
+        );
+    }
+    println!("Finished - Loading configuration");
 
-    println!("{:#?}", directory_one_config);
-    let directory_one_files = get_files_in_directory(
-        &directory_one_config
-            .get_key_value("Path")
-            .unwrap()
-            .1
-            .clone()
-            .into_string()
+    println!("Reading directories...");
+    // let thread_pool = ThreadPool::new(THREAD_COUNT);
+    let mut directory_files: HashMap<&str, Vec<std::path::PathBuf>> = HashMap::new();
+    // let directory_files = {directory_keys[0]}
+    for directory_key in DIRECTORY_KEYS {
+        directory_files.insert(
+            directory_key,
+            get_files_in_directory(
+                &directory_configs
+                    .get_key_value(directory_key)
+                    .unwrap()
+                    .1
+                    .get_key_value("Path")
+                    .unwrap()
+                    .1
+                    .clone()
+                    .into_string()
+                    .unwrap(),
+                &directory_configs
+                    .get_key_value(&directory_key)
+                    .unwrap()
+                    .1
+                    .get_key_value("Recursive")
+                    .unwrap()
+                    .1
+                    .clone()
+                    .into_bool()
+                    .unwrap(),
+            )
             .unwrap(),
-        &directory_one_config
-            .get_key_value("Recursive")
-            .unwrap()
-            .1
-            .clone()
-            .into_bool()
-            .unwrap(),
-    );
-    println!("Files in directory: {:#?}", directory_one_files);
+        );
+    }
+    println!("Files in directory: {:#?}", directory_files);
 
-    for file in directory_one_files {
-        let hash = hash_file(&file);
-        println!("{:#?}", hash);
+    // println!("Starting - Performing initial comparison");
+    // println!("Finished - Performing initial comparison");
+
+    for (directory, files) in directory_files.into_iter() {
+        for file in files {
+            let hash = hash_file(&file);
+            println!("{:#?}", hash);
+        }
     }
 }
 
-fn get_files_in_directory(directory: &str, subdirectories: &bool) -> Vec<std::path::PathBuf> {
+fn get_files_in_directory(
+    directory: &str,
+    subdirectories: &bool,
+) -> Result<Vec<std::path::PathBuf>, std::io::Error> {
     let mut file_list: Vec<std::path::PathBuf> = Vec::new();
     if subdirectories.clone() == true {
         for entry in walkdir::WalkDir::new(directory)
@@ -69,7 +101,7 @@ fn get_files_in_directory(directory: &str, subdirectories: &bool) -> Vec<std::pa
             }
         }
     }
-    return file_list;
+    return Ok(file_list);
 }
 
 fn hash_file(file_path: &PathBuf) -> String {
