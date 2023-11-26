@@ -1,0 +1,42 @@
+{
+    "version": "0.2.0",
+    "configurations": [
+        {
+            "type": "lldb",
+            "request": "launch",
+            "name": "Debug executable 'sync_application'",
+            "cargo": {
+                "args": [
+                    "build",
+                    "--bin=sync_application",
+                    "--package=sync_application"
+                ],
+                "filter": {
+                    "name": "sync_application",
+                    "kind": "bin"
+                }
+            },
+            "args": [],
+            "cwd": "${workspaceFolder}"
+        },
+        {
+            "type": "lldb",
+            "request": "launch",
+            "name": "Debug unit tests in executable 'sync_application'",
+            "cargo": {
+                "args": [
+                    "test",
+                    "--no-run",
+                    "--bin=sync_application",
+                    "--package=sync_application"
+                ],
+                "filter": {
+                    "name": "sync_application",
+                    "kind": "bin"
+                }
+            },
+            "args": [],
+            "cwd": "${workspaceFolder}"
+        }
+    ]
+}

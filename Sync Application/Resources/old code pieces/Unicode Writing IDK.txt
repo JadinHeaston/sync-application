@@ -1,0 +1,33 @@
+//This seems necessary for some reason. I'm not entirely sure why.
+//void writeUnicodeToFile(std::ofstream& outputFile, std::string inputString)
+//{
+//    outputFile.write((char*)inputString.c_str(), inputString.length() * sizeof(wchar_t));
+//    //std::cout << "CUM" << std::endl;
+//}
+
+//void writeNonUnicodeToFile(std::ofstream& outputFile, std::string inputString)
+//{
+//    //I stole this from: https://stackoverflow.com/questions/6693010/how-do-i-use-multibytetowidechar
+//    //65001 = CP_UTF8
+//    int wchars_num = MultiByteToWideChar(65001, 0, inputString.c_str(), -1, NULL, 0);
+//    wchar_t* wstr = new wchar_t[wchars_num];
+//    MultiByteToWideChar(65001, 0, inputString.c_str(), -1, wstr, wchars_num);
+//    writeUnicodeToFile(outputFile, wstr);
+//    // do whatever with wstr
+//    delete[] wstr;
+//}
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+

@@ -1,0 +1,17 @@
+
+            //Great way to print to console for troubleshooting wstring shit. //***
+            //wprintf(L"%s", secondGivenVectorDB[iteratorTwo].c_str());
+            //wprintf(L"%s \n", workingPathTwo.c_str());
+            
+            //workingPath.append(workingPathTwo);
+
+
+            ////Comparing contents of the work strings.
+            //std::wcout << workingPath.c_str() << std::endl;
+            //std::wcout << workingPathTwo.c_str() << std::endl;
+            //std::wcout << (workingPath >= workingPathTwo) << std::endl;
+            //system("PAUSE");
+
+            //std::wcout << secondGivenVectorDB[iteratorTwo].substr(nthOccurrence(secondGivenVectorDB[iteratorTwo], delimitingCharacter, 5) + 1, 7) << std::endl;
+            //system("PAUSE");
+            

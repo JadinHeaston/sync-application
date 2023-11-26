@@ -1,0 +1,117 @@
+{
+	"512Gb": {
+		"Check File Contents": false,
+		"Debug File Path": "debug.log",
+		"Directory One": {
+			"Path": "D:",
+			"Recursive": true
+		},
+		"Directory Two": {
+			"Path": "T:/Archives/512Gb SSD",
+			"Recursive": true
+		},
+		"Operation Mode": "echo",
+		"Output Files": "",
+		"Show Console": true,
+		"Show Warning": true,
+		"Verbose Debugging": true,
+		"Windows Max Path Bypass": true
+	},
+	"Repos Archive": {
+		"Check File Contents": false,
+		"Debug File Path": "debug.log",
+		"Directory One": {
+			"Path": "C:/Users/Jadin-PC/source/repos",
+			"Recursive": true
+		},
+		"Directory Two": {
+			"Path": "T:/Archives/repos",
+			"Recursive": true
+		},
+		"Modify Window": 0,
+		"No File Operations": false,
+		"Operation Mode": "echo",
+		"Output Files": "",
+		"Show Console": true,
+		"Show Warning": true,
+		"Verbose Debugging": true,
+		"Windows Max Path Bypass": false
+	},
+	"T-External": {
+		"Check File Contents": false,
+		"Debug File Path": "debug.log",
+		"Directory One": {
+			"Path": "T:/Share - IN USE",
+			"Recursive": true
+		},
+		"Directory Two": {
+			"Path": "E:/Share - IN USE",
+			"Recursive": true
+		},
+		"Modify Window": 2,
+		"No File Operations": false,
+		"Operation Mode": "echo",
+		"Output Files": "",
+		"Show Console": true,
+		"Show Warning": true,
+		"Verbose Debugging": true,
+		"Windows Max Path Bypass": true
+	},
+	"T-M Archives": {
+		"Check File Contents": false,
+		"Debug File Path": "debug.log",
+		"Directory One": {
+			"Path": "T:/Archives",
+			"Recursive": true
+		},
+		"Directory Two": {
+			"Path": "M:/Archival Backup Storage",
+			"Recursive": true
+		},
+		"No File Operations": false,
+		"Operation Mode": "echo",
+		"Output Files": "",
+		"Show Console": true,
+		"Show Warning": true,
+		"Verbose Debugging": true,
+		"Windows Max Path Bypass": true
+	},
+	"T-M Share - IN USE": {
+		"Check File Contents": false,
+		"Debug File Path": "debug.log",
+		"Directory One": {
+			"Path": "T:/Share - IN USE",
+			"Recursive": true
+		},
+		"Directory Two": {
+			"Path": "M:/Share - IN USE",
+			"Recursive": true
+		},
+		"No File Operations": false,
+		"Operation Mode": "echo",
+		"Output Files": "",
+		"Show Console": true,
+		"Show Warning": true,
+		"Verbose Debugging": true,
+		"Windows Max Path Bypass": true
+	},
+	"TEST_CONFIG": {
+		"Check File Contents": false,
+		"Debug File Path": "debug.log",
+		"Directory One": {
+			"Path": "T:\\Share - IN USE\\SORTED\\IN-USE ITEMS\\Projects\\sync-application\\TEST DIRECTORY",
+			"Recursive": false
+		},
+		"Directory Two": {
+			"Path": "T:\\Share - IN USE\\SORTED\\IN-USE ITEMS\\Projects\\sync-application\\TEST DIRECTORY2",
+			"Recursive": true
+		},
+		"No File Operations": false,
+		"Operation Mode": "echo",
+		"Output Files": "",
+		"Show Console": true,
+		"Show Warning": true,
+		"Verbose Debugging": true,
+		"Windows Max Path Bypass": true
+	}
+}

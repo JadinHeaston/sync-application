@@ -1,0 +1,28 @@
+    ////std::wstring testFile = formatFilePath(L"TEST DIRECTORY/Focusrite Control - 3.6.0.1822.exe");
+    //std::wstring testFile = formatFilePath(L"TEST DIRECTORY\\ここにいる (I'm Here) ft. rionos (Stephen Walking Remix) - Aiobahn.mp3");
+    ////std::wstring testFile = formatFilePath(L"C:\\Users\\Jadin-PC\\source\\repos\\copyingFileToMem\\copyingFileToMem\\RockYou.txt");
+    ////writeUnicodeToFile(firstFileStream, testFile);
+    //std::cout << "CUM HERE" << std::endl;
+    ////Show file.
+    //std::cout << testFile.c_str() << std::endl;
+
+    ////Getting filesize (in bytes).
+    //std::cout << "File Size (Bytes): " << boost::filesystem::file_size(testFile) << std::endl;
+
+    ////Getting last modified time. In seconds from 1970 EPOCH format.
+    //time_t firstDirectoryModifiedTime = boost::filesystem::last_write_time(testFile);
+    //std::cout << "Last Modified: " << firstDirectoryModifiedTime << std::endl;
+
+    ////Getting date created time. In seconds from 1970 EPOCH format.
+    //time_t firstDirectorydateCreatedTime = boost::filesystem::creation_time(testFile);
+    //std::cout << "Date Created: " << firstDirectorydateCreatedTime << std::endl;
+
+    ////Get and show hash
+    ////firstDirectoryTemporaryFileHash = hashGivenFile(testFile);
+    //std::cout << "CUM HERE" << std::endl;
+
+    //std::wstring_convert<std::codecvt_utf8_utf16<wchar_t>> converter;
+    ////std::string narrow = converter.to_bytes(wide_utf16_source_string);
+    ////std::wstring wide = converter.from_bytes(narrow_utf8_source_string);
+
+    ////std::cout << hashGivenFile(testFile) << std::endl;

@@ -1,0 +1,3 @@
+Under Config > C++ > Linker > Command Line
+
+-mtune=pentium3

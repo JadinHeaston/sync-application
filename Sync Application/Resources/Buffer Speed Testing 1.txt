@@ -1,0 +1,19 @@
+Single thread. Generally no other disk activity (2TB HDD)
+Purely testing how large the buffer is when reading files, measured in bytes.
+
+Hypothesis: On extremely large files, a larger buffer size should increase performance by removing wasted time on MD5 updates and stuff.
+A 4096 could be more efficient for a use cases with a large quantity very small files as it is close to a HDD block size.
+
+This test is done on T:\temp transfers\
+	Totally 104GB
+	This contains RockYou, RockYou2021, and RockYou2021 (Compressed)
+
+
+Exact File: 1018 (16:58)
+ 
+Jadin Testing:
+	4096: 1001 seconds (16:41)
+	65536: 1001 seconds (16:41)
+
+Results: More testing is needed, but it seems like with big files the small buffer size is not a bottleneck.
+	Another test will be done on my SSD where the bottleneck could shift to memory/CPU.

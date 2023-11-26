@@ -1,0 +1,19 @@
+cd "C:\Users\Jadin-PC\source\repos\Sync Application\x64\Debug"
+
+
+"Sync Application.exe" -s "C:\Users\Jadin-PC\source\repos\Sync Application\Sync Application\TEST DIRECTORY" -d "C:\Users\Jadin-PC\source\repos\Sync Application\Sync Application\TEST DIRECTORY2"
+
+"Sync Application.exe" -o echo -s "C:\Users\Jadin-PC\source\repos\JadinHeaston\sync-application\Sync Application\TEST DIRECTORY" -d "C:\Users\Jadin-PC\source\repos\JadinHeaston\sync-application\Sync Application\TEST DIRECTORY2" --output-files --check-contents --output-verbose-debug "debug.log"
+
+
+
+"Sync Application.exe" -s "T:\Share - IN USE" -d "C:\Users\Jadin-PC\source\repos\Sync Application\Sync Application\TEST DIRECTORY2"
+
+
+"Sync Application.exe" -s "T:\Share - IN USE\USEFUL PROGRAMS" -d "O:\testingDir"
+
+
+"Sync Application.exe" -s "T:\Share - IN USE\Backups\Archives\512Gb SSD Sync" -d "O:\testingDir\Backups\Archives\512Gb SSD Sync"
+
+
+"Sync Application.exe" -s "T:\Share - IN USE" -d "M:\Share - IN USE"

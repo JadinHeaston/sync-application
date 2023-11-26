@@ -1,2 +1,6 @@
 ﻿TEST DIRECTORY/**
 TEST DIRECTORY2/**
+
+# Added by cargo
+
+/target

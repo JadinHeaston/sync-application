@@ -1,0 +1,21 @@
+        if (std::filesystem::is_regular_file(secondGivenPath + L"\\" + workingPath))
+        {
+            for (size_t iteratorTwo = 0; iteratorTwo < secondDBSize; ++iteratorTwo)
+            {
+                if (workingPath == secondGivenVectorDB[iteratorTwo].substr(secondGivenPath.length() + 1, nthOccurrence(secondGivenVectorDB[iteratorTwo], delimitingCharacter, 1) - secondGivenPath.length() - 1))
+                {
+                    notFound = false; //Keeping track that the file has been found.
+                    iter1 = std::to_wstring(iterator);
+                    iter2 = std::to_wstring(iteratorTwo);
+                    firstGivenVectorDB[iterator].insert(firstGivenVectorDB[iterator].length() - 1, L"MATCHED" + delimitingCharacter + iter2); //Add match marker and line.
+                    secondGivenVectorDB[iteratorTwo].insert(secondGivenVectorDB[iteratorTwo].length() - 1, L"MATCHED" + delimitingCharacter + iter1); //Add match marker and line.
+                    hashActions.push_back(workingPath + delimitingCharacter + iter1 + delimitingCharacter + iter2 + newLine);//Matched. Real. Hash.
+                }
+            }
+            
+        }
+        else
+        {
+            notFound = true;
+            //Not real. File operation.
+        }

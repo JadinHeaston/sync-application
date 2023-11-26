@@ -1,0 +1,1 @@
+b2 -j8 --toolset=msvc-14.1 address-model=64 architecture=ia64 link=static threading=multi runtime-link=shared --build-type=complete stage

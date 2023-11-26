@@ -1,0 +1,17 @@
+    ////Hash actions. - Single threaded.
+    //for (int iterator = 0; iterator < hashActionSize; ++iterator)
+    //{
+
+    //    //Grab item...
+    //    currentReadLine = hashActions[iterator]; //Reading the full line.
+    //    directoryOneFile = firstGivenPath + L"\\" + currentReadLine.substr(0, nthOccurrence(currentReadLine, delimitingCharacter, 1)); //Up until first delimiter, adding first dir path.
+    //    directoryTwoFile = secondGivenPath + L"\\" + currentReadLine.substr(0,nthOccurrence(currentReadLine, delimitingCharacter, 1)); //Up until first delimiter, adding second dir path.
+    //    directoryOneVectorLocation = currentReadLine.substr(nthOccurrence(currentReadLine, delimitingCharacter, 1) + 1, nthOccurrence(currentReadLine, delimitingCharacter, 2)); //Between first and second delimiter.
+    //    directoryTwoVectorLocation = currentReadLine.substr(nthOccurrence(currentReadLine, delimitingCharacter, 2) + 1, currentReadLine.length()-1); //Going up until newline.
+    //    
+    //    //hashGivenFile(directoryOneFile, dirOneHash);
+    //    //hashGivenFile(directoryTwoFile, dirTwoHash);
+
+    //    firstGivenVectorDB[_wtoi(directoryOneVectorLocation.c_str())].insert(nthOccurrence(firstGivenVectorDB[_wtoi(directoryOneVectorLocation.c_str())], delimitingCharacter, 4) + 1, dirOneHash);
+    //    secondGivenVectorDB[_wtoi(directoryTwoVectorLocation.c_str())].insert(nthOccurrence(secondGivenVectorDB[_wtoi(directoryTwoVectorLocation.c_str())], delimitingCharacter, 4) + 1, dirTwoHash);
+    //}

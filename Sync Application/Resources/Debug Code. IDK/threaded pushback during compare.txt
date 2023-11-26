@@ -1,0 +1,30 @@
+echoCompare threaded pushing
+
+                                //processingThreads[2] = std::thread(pushBackToVector, std::ref(hashActions), workingPath + delimitingCharacter + iter1 + delimitingCharacter + iter2 + newLine); //If everything matches, these files need hashed and compared.
+                                //processingThreads[2].join();
+
+                                //std::wcout << secondGivenVectorDB[iteratorTwo].substr(secondGivenVectorDB[iteratorTwo].length() - 8, 7) << std::endl; //***
+                                //if(processingThreads[1].joinable())
+                                    //processingThreads[1].join();
+                                //processingThreads[1] = std::thread(pushBackToVector, std::ref(hashActions), workingPath + delimitingCharacter + iter1 + delimitingCharacter + iter2 + newLine); //If everything matches, these files need hashed and compared.
+
+
+//processingThreads[1] = std::thread(pushBackToVector, std::ref(fileOpAction), L"COPY - Different file sizes" + delimitingCharacter + firstGivenVectorDB[iterator].substr(0, nthOccurrence(firstGivenVectorDB[iterator], delimitingCharacter, 1)) + delimitingCharacter + secondGivenPath + L"\\" + workingPath + newLine); //Copy first directory file to second directory.
+                                
+
+//processingThreads[1] = std::thread(pushBackToVector, std::ref(fileOpAction), L"COPY - Different last modified time" + delimitingCharacter + firstGivenVectorDB[iterator].substr(0, nthOccurrence(firstGivenVectorDB[iterator], delimitingCharacter, 1)) + delimitingCharacter + secondGivenPath + L"\\" + workingPath + newLine); //Copy first directory file to second directory.
+                            
+
+
+
+
+
+
+
+
+
+
+
+
+
+
