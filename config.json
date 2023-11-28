@@ -99,11 +99,11 @@
 		"Check File Contents": false,
 		"Debug File Path": "debug.log",
 		"Directory One": {
-			"Path": "T:\\Share - IN USE\\SORTED\\IN-USE ITEMS\\Projects\\sync-application\\TEST DIRECTORY",
-			"Recursive": false
+			"Path": "T:/Share - IN USE",
+			"Recursive": true
 		},
 		"Directory Two": {
-			"Path": "T:\\Share - IN USE\\SORTED\\IN-USE ITEMS\\Projects\\sync-application\\TEST DIRECTORY2",
+			"Path": "T:/Share - IN USE/SORTED/IN-USE ITEMS/Projects/sync-application/TEST DIRECTORY2",
 			"Recursive": true
 		},
 		"No File Operations": false,

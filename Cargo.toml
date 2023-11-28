@@ -5,6 +5,7 @@ edition = "2021"
 
 [dependencies]
 config = {version = "0.13.3", default-features = false, features = ["json"]}
+hex = "0.4.3"
 hex-literal = "0.4.1" # Debugging
 md-5 = "0.10.6"
 rayon = "1.8.0"
