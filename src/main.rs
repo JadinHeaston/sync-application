@@ -1,7 +1,6 @@
 use config::Config;
 use md5::{Digest, Md5};
 use rayon::prelude::*;
-use std::borrow::BorrowMut;
 use std::collections::HashMap;
 use std::sync::Mutex;
 use std::{fmt, path::PathBuf};
@@ -9,6 +8,7 @@ use std::{fmt, path::PathBuf};
 // const THREAD_COUNT: usize = 4;
 const DIRECTORY_KEYS: [&str; 2] = ["Directory One", "Directory Two"];
 
+#[derive(Clone, Debug)]
 struct File {
     path: PathBuf,
     hash: Option<[u8; 16]>,
@@ -20,7 +20,7 @@ mod config_options;
 fn main() {
     use std::time::Instant;
     let now = Instant::now();
-
+	
     println!("{:.2?} Started - Loading configuration", now.elapsed());
     let config = Config::builder()
         .add_source(config::File::with_name("config"))
@@ -45,7 +45,6 @@ fn main() {
     println!("{:.2?} Finished - Loading configuration", now.elapsed());
 
     println!("{:.2?} Started - Reading directories", now.elapsed());
-
     let directory_files: Mutex<HashMap<&str, Vec<File>>> = Mutex::new(HashMap::new());
 
     //Reading directories.
@@ -76,29 +75,26 @@ fn main() {
     });
     println!("{:.2?} Finished - Reading directories", now.elapsed());
 
-    // println!(
-    //     "Files in directory: {:#?}",
-    //     directory_files.lock().unwrap().clone()
-    // );
-
     // println!("Starting - Performing initial comparison");
+	
     // println!("Finished - Performing initial comparison");
-
+	
     println!("{:.2?} Starting - Hashing", now.elapsed());
     directory_files
         .lock()
         .unwrap()
-        .par_iter()
+        .par_iter_mut()
         .for_each(|(_, files)| {
             for file in files {
-                let hash = Some(hash_file(&file.path));
-                // println!("{:#?}", hex::encode(hash));
+				file.hash = Some(hash_file(&file.path));
+				
             }
         });
-    println!("{:.2?} Finished - Hashing", now.elapsed());
+	println!("{:.2?} Finished - Hashing", now.elapsed());
+	println!("{:#?}", directory_files);
 
     let elapsed = now.elapsed();
-    println!("Ttoal elapsed: {:.2?}", elapsed);
+    println!("Total elapsed: {:.2?}", elapsed);
 }
 
 fn get_files_in_directory(
