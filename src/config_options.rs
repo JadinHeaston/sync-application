@@ -36,6 +36,12 @@ struct DirectoryConfiguration {
     recursive_two_search: bool, //true
 }
 
+struct ThreadConfiguration {
+    directory_parsing: u128,
+    directory_comparison: u128,
+    file_operations: u128,
+}
+
 fn build_configuration(config: Config) -> Configuration {
     Configuration {
         check_file_contents: config.get_bool("check_file_contents").unwrap_or(false),

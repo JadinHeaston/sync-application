@@ -2,11 +2,7 @@
 	"512Gb": {
 		"Check File Contents": false,
 		"Debug File Path": "debug.log",
-		"Directory One": {
-			"Path": "D:",
-			"Recursive": true
-		},
-		"Directory Two": {
+		"Destination": {
 			"Path": "T:/Archives/512Gb SSD",
 			"Recursive": true
 		},
@@ -14,104 +10,115 @@
 		"Output Files": "",
 		"Show Console": true,
 		"Show Warning": true,
-		"Verbose Debugging": true,
-		"Windows Max Path Bypass": true
+		"Source": {
+			"Path": "D:",
+			"Recursive": true
+		},
+		"Verbose Debugging": true
 	},
 	"Repos Archive": {
 		"Check File Contents": false,
 		"Debug File Path": "debug.log",
-		"Directory One": {
+		"Source": {
 			"Path": "C:/Users/Jadin-PC/source/repos",
 			"Recursive": true
 		},
-		"Directory Two": {
+		"Destination": {
 			"Path": "T:/Archives/repos",
 			"Recursive": true
 		},
-		"Modify Window": 0,
-		"No File Operations": false,
-		"Operation Mode": "echo",
-		"Output Files": "",
 		"Show Console": true,
 		"Show Warning": true,
+		"Skip File Operations": false,
 		"Verbose Debugging": true,
 		"Windows Max Path Bypass": false
 	},
 	"T-External": {
 		"Check File Contents": false,
 		"Debug File Path": "debug.log",
-		"Directory One": {
+		"Source": {
 			"Path": "T:/Share - IN USE",
 			"Recursive": true
 		},
-		"Directory Two": {
-			"Path": "E:/Share - IN USE",
+		"Destination": {
+			"Path": "D:/Share - IN USE",
 			"Recursive": true
 		},
-		"Modify Window": 2,
-		"No File Operations": false,
-		"Operation Mode": "echo",
-		"Output Files": "",
 		"Show Console": true,
 		"Show Warning": true,
-		"Verbose Debugging": true,
-		"Windows Max Path Bypass": true
+		"Skip File Operations": false,
+		"Threads": {
+			"Directory Comparison": 0,
+			"Directory Parsing": 0,
+			"File Operations": 1
+		},
+		"Verbose Debugging": true
 	},
 	"T-M Archives": {
 		"Check File Contents": false,
 		"Debug File Path": "debug.log",
-		"Directory One": {
+		"Source": {
 			"Path": "T:/Archives",
 			"Recursive": true
 		},
-		"Directory Two": {
+		"Destination": {
 			"Path": "M:/Archival Backup Storage",
 			"Recursive": true
 		},
-		"No File Operations": false,
-		"Operation Mode": "echo",
-		"Output Files": "",
-		"Show Console": true,
-		"Show Warning": true,
-		"Verbose Debugging": true,
-		"Windows Max Path Bypass": true
+		"Skip File Operations": false,
+		"Verbose Debugging": true
 	},
 	"T-M Share - IN USE": {
 		"Check File Contents": false,
 		"Debug File Path": "debug.log",
-		"Directory One": {
-			"Path": "T:/Share - IN USE",
-			"Recursive": true
-		},
-		"Directory Two": {
+		"Destination": {
 			"Path": "M:/Share - IN USE",
 			"Recursive": true
 		},
-		"No File Operations": false,
-		"Operation Mode": "echo",
-		"Output Files": "",
 		"Show Console": true,
 		"Show Warning": true,
-		"Verbose Debugging": true,
-		"Windows Max Path Bypass": true
-	},
-	"TEST_CONFIG": {
-		"Check File Contents": false,
-		"Debug File Path": "debug.log",
-		"Directory One": {
+		"Skip File Operations": false,
+		"Source": {
 			"Path": "T:/Share - IN USE",
 			"Recursive": true
 		},
-		"Directory Two": {
+		"Verbose Debugging": true
+	},
+	"TEST_CONFIG": {
+		"Check File Contents": true,
+		"Debug File Path": "debug.log",
+		"Destination": {
 			"Path": "T:/Share - IN USE/SORTED/IN-USE ITEMS/Projects/sync-application/TEST DIRECTORY2",
 			"Recursive": true
 		},
-		"No File Operations": false,
-		"Operation Mode": "echo",
-		"Output Files": "",
 		"Show Console": true,
 		"Show Warning": true,
-		"Verbose Debugging": true,
-		"Windows Max Path Bypass": true
+		"Skip File Operations": false,
+		"Source": {
+			"Path": "T:/Share - IN USE/SORTED/IN-USE ITEMS/Projects/sync-application/TEST DIRECTORY",
+			"Recursive": true
+		},
+		"Verbose Debugging": true
+	},
+	"BIG_REAL_TEST_CONFIG": {
+		"Check File Contents": false,
+		"Debug File Path": "debug.log",
+		"Source": {
+			"Path": "D:/",
+			"Recursive": true
+		},
+		"Destination": {
+			"Path": "T:/Archives/512Gb SSD",
+			"Recursive": true
+		},
+		"Threads": {
+			"Directory Comparison": 0,
+			"Directory Parsing": 0,
+			"File Operations": 1
+		},
+		"Show Console": true,
+		"Show Warning": true,
+		"Skip File Operations": false,
+		"Verbose Debugging": true
 	}
 }
