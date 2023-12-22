@@ -87,6 +87,10 @@
 	"TEST_CONFIG": {
 		"Check File Contents": true,
 		"Debug File Path": "debug.log",
+		"Source": {
+			"Path": "T:/Share - IN USE/SORTED/IN-USE ITEMS/Projects/sync-application/TEST DIRECTORY",
+			"Recursive": true
+		},
 		"Destination": {
 			"Path": "T:/Share - IN USE/SORTED/IN-USE ITEMS/Projects/sync-application/TEST DIRECTORY2",
 			"Recursive": true
@@ -94,10 +98,6 @@
 		"Show Console": true,
 		"Show Warning": true,
 		"Skip File Operations": false,
-		"Source": {
-			"Path": "T:/Share - IN USE/SORTED/IN-USE ITEMS/Projects/sync-application/TEST DIRECTORY",
-			"Recursive": true
-		},
 		"Verbose Debugging": true
 	},
 	"BIG_REAL_TEST_CONFIG": {

@@ -8,14 +8,15 @@ use std::io::Write;
 use std::os::windows::fs::MetadataExt;
 use std::path::Path;
 use std::path::PathBuf;
-use std::process::exit;
+// use std::process::exit;
 use std::sync::Mutex;
 
 // const THREAD_COUNT: usize = 4;
 const DIRECTORY_KEYS: [&str; 2] = ["Source", "Destination"];
 const CHECK_FILE_CONTENTS_KEY: &str = "Check File Contents";
 const SKIP_FILE_OPERATIONS_KEY: &str = "Skip File Operations";
-const CONFIGURATION_SELECTION: &str = "T-M Share - IN USE";
+const CONFIGURATION_SELECTION: &str = "TEST_CONFIG";
+
 // const CONFIG_KEY_THREAD_COUNT: &str = "Threads";
 
 #[derive(Clone, Debug, PartialEq, Eq)]
@@ -274,44 +275,72 @@ fn compare_directories(
 }
 
 fn perform_file_operations(
-    directory_files: &HashMap<&str, HashMap<PathBuf, File>>,
+    directory_items: &HashMap<&str, HashMap<PathBuf, File>>,
     destination_root_path: PathBuf,
 ) {
-    let source_directory = directory_files.get("Source").unwrap();
-    let destination_directory = directory_files.get("Destination").unwrap();
+    let source_directory = directory_items.get("Source").unwrap();
+    let destination_directory = directory_items.get("Destination").unwrap();
 
-    //Iterating through destination and performing deletions first to ensure space is available for future copies.
-
-    for (_key, file) in destination_directory.iter() {
-        if file.action.is_some() && file.action == Some(Action::Delete) {
-            let remove_file_result = fs::remove_file(
-                &file
-                    .root_path
-                    .join(&file.relative_path)
-                    .canonicalize()
-                    .unwrap(),
-            );
-
-            if remove_file_result.is_err() {
-                println!(
-                    "Error removing file ({}) - {}",
-                    &remove_file_result.unwrap_err(),
-                    &file
+    //Iterating through destination and performing deletions first to ensure space is available for future items.
+    for (_key, object) in destination_directory.iter() {
+        if object.action.is_some() && object.action == Some(Action::Delete) {
+            if object.metadata.is_file() {
+                let removal_result = fs::remove_file(
+                    &object
                         .root_path
-                        .join(&file.relative_path)
+                        .join(&object.relative_path)
                         .canonicalize()
-                        .unwrap()
-                        .display()
+                        .unwrap(),
                 );
-            };
+
+                if removal_result.is_err() {
+                    println!(
+                        "Error removing file ({}) - {}",
+                        &removal_result.unwrap_err(),
+                        &object
+                            .root_path
+                            .join(&object.relative_path)
+                            .canonicalize()
+                            .unwrap()
+                            .display()
+                    );
+                };
+            } else if object.metadata.is_dir() {
+                let removal_result = fs::remove_dir_all(
+                    &object
+                        .root_path
+                        .join(&object.relative_path)
+                        .canonicalize()
+                        .unwrap(),
+                );
+
+                if removal_result.is_err() {
+                    println!(
+                        "Error removing directory ({}) - {}",
+                        &removal_result.unwrap_err(),
+                        &object
+                            .root_path
+                            .join(&object.relative_path)
+                            .canonicalize()
+                            .unwrap()
+                            .display()
+                    );
+                };
+            }
         }
     }
-    for (_key, file) in source_directory.iter() {
-        if file.action.is_some() && file.action == Some(Action::Copy) {
-            let destination_file_path = destination_root_path
+    //Copying items.
+    for (_key, object) in source_directory.iter() {
+        if object.action.is_some() && object.action == Some(Action::Copy) {
+            let source_path = object
+                .root_path
+                .join(&object.relative_path)
+                .canonicalize()
+                .unwrap();
+            let destination_path = destination_root_path
                 .canonicalize()
                 .unwrap()
-                .join(&file.relative_path);
+                .join(&object.relative_path);
             // println!(
             //     "Copying file: {} --> {}",
             //     &file
@@ -320,31 +349,39 @@ fn perform_file_operations(
             //         .canonicalize()
             //         .unwrap()
             //         .display(),
-            //     &destination_file_path.display()
+            //     &destination_path.display()
             // );
             //Creating directories, if needed.
-            fs::create_dir_all(&destination_file_path.parent().unwrap()).unwrap();
+            fs::create_dir_all(&destination_path.parent().unwrap()).unwrap();
 
-            //Copying file.
-            let copy_result = fs::copy(
-                &file
-                    .root_path
-                    .join(&file.relative_path)
-                    .canonicalize()
-                    .unwrap(),
-                &destination_file_path,
-            );
+            //Removing readonly flag.
+            source_path
+                .metadata()
+                .unwrap()
+                .permissions()
+                .set_readonly(false);
+            if destination_path.is_dir() || destination_path.is_file() {
+                destination_path
+                    .metadata()
+                    .unwrap()
+                    .permissions()
+                    .set_readonly(false);
+            }
+
+            //Copying object.
+            let copy_result = fs::copy(&source_path, &destination_path);
+
             if copy_result.is_err() {
                 println!(
                     "Error copying file ({}) - {} --> {}",
                     &copy_result.unwrap_err(),
-                    &file
+                    &object
                         .root_path
-                        .join(&file.relative_path)
+                        .join(&object.relative_path)
                         .canonicalize()
                         .unwrap()
                         .display(),
-                    &destination_file_path.display()
+                    &destination_path.display()
                 );
             }
         }
